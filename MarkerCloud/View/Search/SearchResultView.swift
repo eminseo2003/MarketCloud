@@ -1,0 +1,273 @@
+//
+//  SearchResultView.swift
+//  MarkerCloud
+//
+//  Created by 이민서 on 8/15/25.
+//
+
+import SwiftUI
+
+struct SearchResultView: View {
+    let keyword: String
+    
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    @State private var route: Route? = nil
+    var filteredStores: [Store] {
+        return dummyStores.filter { (store: Store) -> Bool in
+            store.storeName.contains(keyword)
+        }
+    }
+    var filteredProducts: [Feed] {
+        dummyFeed
+            .filter { $0.promoKind == .product }
+            .filter { $0.product?.productName.localizedCaseInsensitiveContains(keyword) ?? false }
+    }
+
+    var filteredEvents: [Feed] {
+        dummyFeed
+            .filter { $0.promoKind == .event }
+            .filter { $0.event?.eventName.localizedCaseInsensitiveContains(keyword) ?? false }
+    }
+
+    @State private var selectedStore: Store? = nil
+    @State private var selectedProduct: Feed? = nil
+    @State private var selectedEvent: Feed? = nil
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading) {
+                
+                SectionHeader(title: "점포", route: $route)
+                if filteredStores.isEmpty {
+                    HStack {
+                        Spacer()
+                        Text("검색 결과가 없습니다.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(filteredStores) { store in
+                                VStack {
+                                    Button {
+                                        selectedStore = store
+                                        route = .storeDetail
+                                    } label: {
+                                        AsyncImage(url: store.profileImageURL) { image in
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 56, height: 56)
+                                                .clipShape(Circle())
+                                                .background(Circle().fill(Color(.systemGray5)))
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                    }
+                                    
+                                    Text(store.storeName)
+                                        .font(.caption2)
+                                        .lineLimit(1)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                
+                
+                SectionHeader(title: "상품", route: $route)
+                if !filteredProducts.isEmpty {
+                    LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
+                        ForEach(filteredProducts.prefix(2)) { product in
+                            ProductCard(product: product, selectedProduct: $selectedProduct)
+                        }
+                    }
+                    .padding(.horizontal)
+                } else {
+                    HStack {
+                        Spacer()
+                        Text("검색 결과가 없습니다.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                }
+                
+                SectionHeader(title: "이벤트", route: $route)
+                if !filteredEvents.isEmpty {
+                    LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
+                        ForEach(filteredEvents.prefix(2)) { event in
+                            EventCard(event: event, selectedEvent: $selectedEvent)
+                        }
+                    }
+                    .padding(.horizontal)
+                } else {
+                    HStack {
+                        Spacer()
+                        Text("검색 결과가 없습니다.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    
+                }
+            }
+        }
+        .navigationTitle("검색 결과")
+        .navigationDestination(item: $route) { route in
+            if route == .moreStore {
+                MoreStoreView(filteredStores: filteredStores)
+            } else if route == .moreProduct {
+                MoreProductView(filteredProducts: filteredProducts)
+            } else if route == .moreEvent {
+                MoreEventView(filteredEvents: filteredEvents)
+            } else if route == .storeDetail {
+                if let store = selectedStore {
+                    StoreProfileView(store: store)
+                }
+            }
+        }
+        .navigationDestination(item: $selectedProduct) { product in
+            ProductPostView(feed: product)
+        }
+        .navigationDestination(item: $selectedEvent) { event in
+            EventPostView(feed: event)
+        }
+        
+    }
+}
+
+struct SectionHeader: View {
+    let title: String
+    @Binding var route: Route?
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.headline)
+            Spacer()
+            Button("더보기") {
+                switch title {
+                case "점포":
+                    route = .moreStore
+                case "상품":
+                    route = .moreProduct
+                case "이벤트":
+                    route = .moreEvent
+                default:
+                    break
+                }
+                
+            }
+            .font(.caption)
+            .foregroundColor(.gray)
+            
+        }
+        .padding(.horizontal)
+        .padding(.top)
+    }
+}
+
+struct ProductCard: View {
+    let product: Feed
+    @Binding var selectedProduct: Feed?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                selectedProduct = product
+            } label: {
+                AsyncImage(url: product.mediaUrl) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 180, height: 180)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .clipped()
+                    case .failure(_):
+                        Image(systemName: "photo")
+                            .resizable().scaledToFit().padding(24)
+                            .frame(width: 180, height: 180)
+                            .foregroundStyle(.secondary)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    default:
+                        ProgressView()
+                            .frame(width: 180, height: 180)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+            
+            
+            HStack {
+                Image(systemName: "heart")
+                    .foregroundColor(.primary)
+                Text("16")
+                    .font(.caption)
+                Spacer()
+                Text(product.title)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+        }
+    }
+}
+
+struct EventCard: View {
+    let event: Feed
+    @Binding var selectedEvent: Feed?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                selectedEvent = event
+            } label: {
+                AsyncImage(url: event.mediaUrl) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 180, height: 180)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .clipped()
+                    case .failure(_):
+                        Image(systemName: "photo")
+                            .resizable().scaledToFit().padding(24)
+                            .frame(width: 180, height: 180)
+                            .foregroundStyle(.secondary)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    default:
+                        ProgressView()
+                            .frame(width: 180, height: 180)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+            
+            
+            HStack {
+                Image(systemName: "heart")
+                    .foregroundColor(.primary)
+                Text("16")
+                    .font(.caption)
+                Spacer()
+                Text(event.title)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+            
+        }
+    }
+}
