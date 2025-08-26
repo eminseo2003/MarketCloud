@@ -82,7 +82,7 @@ struct SearchResultView: View {
                 if !filteredProducts.isEmpty {
                     LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                         ForEach(filteredProducts.prefix(2)) { product in
-                            ProductCard(product: product, selectedProduct: $selectedProduct)
+                            FeedCard(feed: product, selectedFeed: $selectedProduct)
                         }
                     }
                     .padding(.horizontal)
@@ -100,7 +100,7 @@ struct SearchResultView: View {
                 if !filteredEvents.isEmpty {
                     LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                         ForEach(filteredEvents.prefix(2)) { event in
-                            EventCard(event: event, selectedEvent: $selectedEvent)
+                            FeedCard(feed: event, selectedFeed: $selectedEvent)
                         }
                     }
                     .padding(.horizontal)
@@ -171,16 +171,16 @@ struct SectionHeader: View {
     }
 }
 
-struct ProductCard: View {
-    let product: Feed
-    @Binding var selectedProduct: Feed?
+struct FeedCard: View {
+    let feed: Feed
+    @Binding var selectedFeed: Feed?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
-                selectedProduct = product
+                selectedFeed = feed
             } label: {
-                AsyncImage(url: product.mediaUrl) { phase in
+                AsyncImage(url: feed.mediaUrl) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -213,7 +213,7 @@ struct ProductCard: View {
                 Text("16")
                     .font(.caption)
                 Spacer()
-                Text(product.title)
+                Text(feed.title)
                     .font(.caption)
                     .lineLimit(1)
             }
@@ -221,53 +221,3 @@ struct ProductCard: View {
     }
 }
 
-struct EventCard: View {
-    let event: Feed
-    @Binding var selectedEvent: Feed?
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                selectedEvent = event
-            } label: {
-                AsyncImage(url: event.mediaUrl) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 180, height: 180)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .clipped()
-                    case .failure(_):
-                        Image(systemName: "photo")
-                            .resizable().scaledToFit().padding(24)
-                            .frame(width: 180, height: 180)
-                            .foregroundStyle(.secondary)
-                            .background(Color(uiColor: .systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    default:
-                        ProgressView()
-                            .frame(width: 180, height: 180)
-                            .frame(maxWidth: .infinity)
-                            .background(Color(uiColor: .systemGray5))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    }
-                }
-            }
-            
-            
-            HStack {
-                Image(systemName: "heart")
-                    .foregroundColor(.primary)
-                Text("16")
-                    .font(.caption)
-                Spacer()
-                Text(event.title)
-                    .font(.caption)
-                    .lineLimit(1)
-            }
-            
-        }
-    }
-}

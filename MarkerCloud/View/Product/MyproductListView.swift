@@ -73,7 +73,7 @@ struct MyproductListView: View {
                 } else {
                     LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                         ForEach(filteredProducts) { product in
-                            ProductCard(product: product, selectedProduct: $selectedProduct)
+                            FeedCard(feed: product, selectedFeed: $selectedProduct)
                         }
                     }
                     .padding(.horizontal)

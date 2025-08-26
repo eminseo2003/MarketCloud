@@ -26,7 +26,7 @@ struct MoreEventView: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                     ForEach(filteredEvents) { event in
-                        EventCard(event: event, selectedEvent: $selectedEvent)
+                        FeedCard(feed: event, selectedFeed: $selectedEvent)
                     }
                 }
                 .padding(.horizontal)

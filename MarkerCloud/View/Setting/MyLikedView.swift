@@ -81,7 +81,7 @@ struct MyLikedView: View {
                     } else {
                         LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                             ForEach(filteredFeeds) { feed in
-                                ProductCard(product: feed, selectedProduct: $selectedFeed)
+                                FeedCard(feed: feed, selectedFeed: $selectedFeed)
                             }
                         }
                         .padding(.horizontal)

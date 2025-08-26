@@ -24,14 +24,10 @@ struct SearchView: View {
     private var firstStore: Store? {
         dummyStores.first
     }
-    private var storeFeeds: [Feed] { dummyStores.flatMap(\.feeds) }
     private var firstProducts: [Feed] { dummyFeed }
     private var firstEvents: [Feed] { dummyFeed }
     @State private var pushStore: Store? = nil
-    @State private var selectedProductFeed: Feed? = nil
-    @State private var selectedEventFeed: Feed? = nil
-    
-    
+    @State private var selectedFeed: Feed? = nil
     @State private var selectedSectionTitle: String? = nil
     @FocusState private var isTextFieldFocused: Bool
     @State private var searchText: String = ""
@@ -123,7 +119,7 @@ struct SearchView: View {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
                                         ForEach(firstProducts.prefix(10)) { feed in
-                                            ProductCard(product: feed, selectedProduct: $selectedProductFeed)
+                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
                                         }
                                     }
                                     
@@ -145,7 +141,7 @@ struct SearchView: View {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
                                         ForEach(firstEvents.prefix(10)) { feed in
-                                            EventCard(event: feed, selectedEvent: $selectedEventFeed)
+                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
                                         }
                                     }
                                     
@@ -164,20 +160,8 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .navigationDestination(item: $route) { route in
-                        if route == .moreStore {
-                            MoreStoreView(filteredStores: firstStore.map { [$0] } ?? [])
-                        } else if route == .moreProduct {
-                            MoreProductView(filteredProducts: firstProducts)
-                        } else if route == .moreEvent {
-                            MoreEventView(filteredEvents: firstEvents)
-                        }
-                    }
-                    .navigationDestination(item: $selectedProductFeed) { product in
-                        FeedView(feed: product)
-                    }
-                    .navigationDestination(item: $selectedEventFeed) { event in
-                        FeedView(feed: event)
+                    .navigationDestination(item: $selectedFeed) { feed in
+                        FeedView(feed: feed)
                     }
                     .navigationDestination(item: $pushStore) { store in
                         StoreProfileView(store: store)
