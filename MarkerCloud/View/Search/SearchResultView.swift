@@ -20,13 +20,13 @@ struct SearchResultView: View {
     var filteredProducts: [Feed] {
         dummyFeed
             .filter { $0.promoKind == .product }
-            .filter { $0.product?.productName.localizedCaseInsensitiveContains(keyword) ?? false }
+            .filter { $0.title.localizedCaseInsensitiveContains(keyword)}
     }
 
     var filteredEvents: [Feed] {
         dummyFeed
             .filter { $0.promoKind == .event }
-            .filter { $0.event?.eventName.localizedCaseInsensitiveContains(keyword) ?? false }
+            .filter { $0.title.localizedCaseInsensitiveContains(keyword)}
     }
 
     @State private var selectedStore: Store? = nil
@@ -49,7 +49,7 @@ struct SearchResultView: View {
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(filteredStores) { store in
+                            ForEach(filteredStores.prefix(10)) { store in
                                 VStack {
                                     Button {
                                         selectedStore = store
@@ -80,12 +80,15 @@ struct SearchResultView: View {
                 
                 SectionHeader(title: "상품", route: $route)
                 if !filteredProducts.isEmpty {
-                    LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
-                        ForEach(filteredProducts.prefix(2)) { product in
-                            FeedCard(feed: product, selectedFeed: $selectedProduct)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(filteredProducts.prefix(10)) { product in
+                                FeedCard(feed: product, selectedFeed: $selectedProduct)
+                            }
                         }
+                        
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 } else {
                     HStack {
                         Spacer()
@@ -98,12 +101,15 @@ struct SearchResultView: View {
                 
                 SectionHeader(title: "이벤트", route: $route)
                 if !filteredEvents.isEmpty {
-                    LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
-                        ForEach(filteredEvents.prefix(2)) { event in
-                            FeedCard(feed: event, selectedFeed: $selectedEvent)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(filteredEvents.prefix(10)) { event in
+                                FeedCard(feed: event, selectedFeed: $selectedEvent)
+                            }
                         }
+                        .padding(.horizontal)
+                        
                     }
-                    .padding(.horizontal)
                 } else {
                     HStack {
                         Spacer()
