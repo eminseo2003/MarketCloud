@@ -14,7 +14,7 @@ struct StoreProfileView: View {
     private let grid = Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .top), count: 3)
     @State private var isInfoExpanded = false
     @State private var route: Route? = nil
-    @State private var isMyStore: Bool = false
+    @State private var isMyStore: Bool = true
     @State private var isFollowed: Bool = true
     @State private var selectedFeed: Feed? = nil
     
@@ -157,7 +157,7 @@ struct StoreProfileView: View {
                 .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
                 .navigationDestination(item: $route) { route in
                     if route == .changeStoreInfo {
-                        //ChangeStoreInfoView(store: store)
+                        ChangeStoreInfoView(store: store)
                     }
                 }
                 VStack(alignment: .leading, spacing: 12) {

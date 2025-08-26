@@ -26,14 +26,14 @@ struct ChangeName: View {
                 TextField("점포 이름", text: $name)
                     .textInputAutocapitalization(.never)
                     .focused($isTextFieldFocused)
-                //                    .toolbar {
-                //                        ToolbarItemGroup(placement: .keyboard) {
-                //                            Spacer()
-                //                            Button("완료") {
-                //                                isTextFieldFocused = false
-                //                            }
-                //                        }
-                //                    }
+//                                    .toolbar {
+//                                        ToolbarItemGroup(placement: .keyboard) {
+//                                            Spacer()
+//                                            Button("완료") {
+//                                                isTextFieldFocused = false
+//                                            }
+//                                        }
+//                                    }
             }
             VStack {
                 Spacer()
@@ -54,45 +54,54 @@ struct ChangeName: View {
 // MARK: - 2) 업종 구분
 struct ChangeCategory: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var category: StoreCategory?
-    var onSave: (StoreCategory?) -> Void
+    @State private var selected: StoreCategory?
+    var onSave: (Int?) -> Void
     
-    init(category: StoreCategory?, onSave: ((StoreCategory?) -> Void)? = nil) {
-        _category = State(initialValue: category)
-        self.onSave = onSave ?? { _ in }
+    init(category: Int?, onSave: @escaping (Int?) -> Void = { _ in }) {
+        _selected = State(initialValue: category.flatMap(StoreCategory.init(rawValue:)))
+        self.onSave = onSave
     }
     
     var body: some View {
         ZStack {
-            List {
-                ForEach(StoreCategory.allCases) { c in
-                    HStack {
-                        Text(c.displayName)
-                        Spacer()
-                        if c == category { Image(systemName: "checkmark") }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture { category = c }
-                }
-                Section {
-                    Button("지우기(없음)") { category = nil }
-                        .foregroundStyle(.red)
-                }
-            }
+            Color(.systemGray6)
+                .edgesIgnoringSafeArea(.all)
             VStack {
-                Spacer()
-                Button(action: {
-                    onSave(category)
+                List {
+                    Section {
+                        ForEach(StoreCategory.allCases) { c in
+                            HStack {
+                                Text(c.displayName)
+                                Spacer()
+                                if c == selected { Image(systemName: "checkmark") }
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture { selected = c }
+                        }
+                    }
+                    
+                    Section {
+                        Button("지우기(없음)") { selected = nil }
+                            .foregroundStyle(.red)
+                    }
+                }
+                Button {
+                    onSave(selected?.rawValue)
                     dismiss()
-                }) {
+                } label: {
                     Text("완료")
-                }.buttonStyle(FilledCTA())
-                    .padding()
+                }
+                .buttonStyle(FilledCTA())
+                .padding()
+                .background(Color(.systemGray6))
+                
+                
             }
-            .padding(.bottom, 10)
         }
         
+        
         .navigationTitle("업종 구분")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -367,8 +376,8 @@ struct ChangeAbout: View {
                 }) {
                     Text("완료")
                 }.buttonStyle(FilledCTA())
-                    .padding()
-            }.padding(.bottom, 10)
+                    .padding().background(Color(.systemGray6))
+            }
         }
         .navigationTitle("점포 소개")
         .toolbar {

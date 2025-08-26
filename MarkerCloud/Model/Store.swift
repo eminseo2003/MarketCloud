@@ -93,5 +93,31 @@ struct Store: Hashable, Identifiable {
     var feeds: [Feed] = []
 }
 
+extension Set where Element == PaymentMethod {
+    var summary: String {
+        if self.isEmpty { return "없음" }
+        return self
+            .sorted { $0.rawValue < $1.rawValue }
+            .map { $0.displayName }
+            .joined(separator: ", ")
+    }
+
+    /// 최대 N개만 보여주고 나머지는 “외 n개”로 처리하고 싶을 때 사용
+    func summary(limit: Int) -> String {
+        if self.isEmpty { return "없음" }
+        let sorted = self.sorted { $0.rawValue < $1.rawValue }
+        if sorted.count <= limit {
+            return sorted.map { $0.displayName }.joined(separator: ", ")
+        } else {
+            let head = sorted.prefix(limit).map { $0.displayName }.joined(separator: ", ")
+            return "\(head) 외 \(sorted.count - limit)개"
+        }
+    }
+
+    /// 선택 토글 편의 함수 (UI 바인딩용)
+    mutating func toggle(_ method: PaymentMethod) {
+        if contains(method) { remove(method) } else { insert(method) }
+    }
+}
 
 
