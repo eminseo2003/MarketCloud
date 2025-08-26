@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct LoginView: View {
+    @Binding var currentUserID: String
+    
     @FocusState private var focus: Field?
     @State private var email: String = ""
     @State private var password: String = ""
@@ -61,7 +63,8 @@ struct LoginView: View {
             // 로그인 버튼
             VStack(spacing: 12) {
                 Button {
-                    
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    currentUserID = DummyUserIDs.user1
                 } label: {
                     HStack {
                         Text("로그인")

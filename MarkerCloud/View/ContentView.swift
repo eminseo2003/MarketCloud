@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Binding var selectedMarketID: String
+    @Binding var currentUserID: String
     @State private var selectedTab: Int = 0
     
     var videoFeeds: [Feed] {
@@ -33,7 +34,7 @@ struct ContentView: View {
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
             
-            SettingsView(selectedMarketID: $selectedMarketID)
+            SettingsView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("마이페이지", systemImage: "person.crop.circle") }
                 .tag(4)
         }

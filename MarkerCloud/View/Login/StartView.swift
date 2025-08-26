@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct StartView: View {
+    @Binding var currentUserID: String
+    
     @State private var route: Route? = nil
     var body: some View {
         NavigationStack {
@@ -54,7 +56,7 @@ struct StartView: View {
             }
             .navigationDestination(item: $route) { route in
                 if route == .login {
-                    LoginView()
+                    LoginView(currentUserID: $currentUserID)
                 } else if route == .join {
                     JoinView()
                 }

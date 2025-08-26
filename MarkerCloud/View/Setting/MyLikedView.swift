@@ -17,7 +17,6 @@ struct MyLikedView: View {
     
     @FocusState private var isTextFieldFocused: Bool
     @State private var searchText: String = ""
-    @StateObject private var keyboard = KeyboardResponder()
     private var filteredFeeds: [Feed] {
         let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return feedList }
@@ -62,14 +61,12 @@ struct MyLikedView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .padding(.horizontal)
-//                .toolbar {
-//                    ToolbarItemGroup(placement: .keyboard) {
-//                        Spacer()
-//                        Button("완료") {
-//                            isTextFieldFocused = false
-//                        }
-//                    }
-//                }
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("완료") { hideKeyboard() }
+                    }
+                }
                 ScrollView {
                     if filteredFeeds.isEmpty {
                         VStack(spacing: 8) {
@@ -100,5 +97,8 @@ struct MyLikedView: View {
             .navigationTitle("좋아요")
         }
         
+    }
+    private func hideKeyboard() {
+        isTextFieldFocused = false
     }
 }

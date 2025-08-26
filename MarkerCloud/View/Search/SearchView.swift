@@ -36,7 +36,6 @@ struct SearchView: View {
     @State private var selectedSectionTitle: String? = nil
     @FocusState private var isTextFieldFocused: Bool
     @State private var searchText: String = ""
-    @StateObject private var keyboard = KeyboardResponder()
     
     var body: some View {
         NavigationStack {

@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct SettingsView: View {
-
+    @Binding var selectedMarketID: String
+    @Binding var currentUserID: String
+    
+    var currentUser: User? {
+            dummyUsers.first { $0.id == currentUserID }
+        }
     var videoFeeds: [Feed] {
         dummyFeed.filter { $0.mediaType == .video }
     }
@@ -18,7 +23,7 @@ struct SettingsView: View {
     }
 
     @State private var route: Route? = nil
-    @Binding var selectedMarketID: String
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -37,10 +42,10 @@ struct SettingsView: View {
                                         .frame(width: 60, height: 60)
                                         .foregroundColor(.gray)
                                     VStack(alignment: .leading) {
-                                        Text("사용자 이름")
+                                        Text(currentUser?.name ?? "사용자 이름")
                                             .font(.headline)
                                             .foregroundColor(.primary.opacity(0.8))
-                                        Text("로그인 방식")
+                                        Text(currentUser?.email ?? "사용자 이메일")
                                             .font(.subheadline)
                                             .foregroundColor(.primary.opacity(0.6))
                                     }

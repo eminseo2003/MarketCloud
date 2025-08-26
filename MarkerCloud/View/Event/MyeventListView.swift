@@ -17,7 +17,6 @@ struct MyeventListView: View {
     @State private var selectedEvent: Feed? = nil
     @FocusState private var isTextFieldFocused: Bool
     @State private var searchText: String = ""
-    @StateObject private var keyboard = KeyboardResponder()
     private let eventPromotion = Promotion(name: "이벤트", imageName: "loginBackground")
     @State private var pushPromotion: Promotion? = nil
     
@@ -54,12 +53,12 @@ struct MyeventListView: View {
             .background(Color(.systemGray6))
             .cornerRadius(12)
             .padding(.horizontal)
-//            .toolbar {
-//                ToolbarItemGroup(placement: .keyboard) {
-//                    Spacer()
-//                    Button("완료") { isTextFieldFocused = false }
-//                }
-//            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") { hideKeyboard() }
+                }
+            }
             ScrollView {
                 if filteredEvents.isEmpty {
                     VStack(spacing: 8) {
@@ -103,5 +102,8 @@ struct MyeventListView: View {
             PromotionMethodSelectView(promotion: promo)
         }
         
+    }
+    private func hideKeyboard() {
+        isTextFieldFocused = false
     }
 }

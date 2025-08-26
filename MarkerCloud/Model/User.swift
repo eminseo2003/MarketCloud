@@ -16,7 +16,7 @@ struct User: Identifiable {
     let createdAt: Date
     let imgUrl: URL
 
-    init(id: String = UUID().uuidString,
+    init(id: String,
          password: String,
          name: String,
          email: String?,

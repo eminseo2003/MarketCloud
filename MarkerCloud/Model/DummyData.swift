@@ -14,11 +14,11 @@ let kDummyVideoURL = URL(string:
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
 )!
 enum DummyUserIDs {
-    static let user1 = "U-00000000-0000-0000-0000-000000000001"
-    static let user2 = "U-00000000-0000-0000-0000-000000000002"
-    static let user3 = "U-00000000-0000-0000-0000-000000000003"
-    static let user4 = "U-00000000-0000-0000-0000-000000000004"
-    static let user5 = "U-00000000-0000-0000-0000-000000000005"
+    static let user1 = "123"
+    static let user2 = "234"
+    static let user3 = "345"
+    static let user4 = "456"
+    static let user5 = "567"
 
     static let all = [user1, user2, user3, user4, user5]
 }
