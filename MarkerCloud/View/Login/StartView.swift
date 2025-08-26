@@ -8,49 +8,57 @@
 import SwiftUI
 
 struct StartView: View {
-    
+    @State private var route: Route? = nil
     var body: some View {
-        VStack {
-            ZStack {
-                Image("loginBackground")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                Text("동대문구 전통시장을 한 눈에")
-                    .foregroundColor(Color(hex: "#4A4A4A"))
-                    .font(.title2)
-                    .bold()
-                    .padding(.bottom, 50)
-                VStack(spacing: 16) {
-                    Spacer()
-                    Button(action: {
-                        //로그인 뷰
-                    }) {
-                        ZStack {
-                            Text("로그인")
-                            HStack {
-                                Image(systemName: "lock.fill")
-                                Spacer()
-                            }.padding()
-                        }
-                    }.buttonStyle(FilledCTA())
-                    Button(action: {
-                        //회원가입 뷰
-                    }) {
-                        ZStack {
-                            Text("회원가입")
-                            HStack {
-                                
-                                Image(systemName: "person.badge.plus.fill")
-                                Spacer()
-                            }.padding()
-                        }
-                    }.buttonStyle(OutlineCTA())
+        NavigationStack {
+            VStack {
+                ZStack {
+                    Image("loginBackground")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                    Text("동대문구 전통시장을 한 눈에")
+                        .foregroundColor(Color(hex: "#4A4A4A"))
+                        .font(.title2)
+                        .bold()
+                        .padding(.bottom, 50)
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Button(action: {
+                            route = .login
+                        }) {
+                            ZStack {
+                                Text("로그인")
+                                HStack {
+                                    Image(systemName: "lock.fill")
+                                    Spacer()
+                                }.padding()
+                            }
+                        }.buttonStyle(FilledCTA())
+                        Button(action: {
+                            route = .join
+                        }) {
+                            ZStack {
+                                Text("회원가입")
+                                HStack {
+                                    
+                                    Image(systemName: "person.badge.plus.fill")
+                                    Spacer()
+                                }.padding()
+                            }
+                        }.buttonStyle(OutlineCTA())
+                    }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 100)
                 }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 100)
+            }
+            .navigationDestination(item: $route) { route in
+                if route == .login {
+                    LoginView()
+                }
             }
         }
+        
     }
 }
 

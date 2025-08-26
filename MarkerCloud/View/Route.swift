@@ -8,6 +8,8 @@
 import Foundation
 
 enum Route: Hashable, Identifiable {
+    case login
+    case join
     case recommendMarket //시장 추천
     case selectComplete //선택 완료
     case selextMarket //시장 선택
