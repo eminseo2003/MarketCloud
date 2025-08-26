@@ -17,13 +17,15 @@ struct ProductPostView: View {
         GridItem(.flexible())
     ]
     @State private var pushFeed: Feed? = nil
+    @State private var selectedStore: Store? = nil
+    @State private var route: Route? = nil
     var body: some View {
         VStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 8) {
                     VStack(spacing: 16) {
                         if let store = firstStore {
-                            ProductCardView(feed: feed, store: store)
+                            ProductCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
                         }
                         
                     }

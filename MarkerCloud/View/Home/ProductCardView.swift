@@ -11,29 +11,36 @@ struct ProductCardView: View {
     let feed: Feed
     let store: Store
     @State private var isCommentSheetPresented = false
-    
+    @Binding var route: Route?
+    @Binding var selectedStore: Store?
     var body: some View {
         VStack {
-            HStack {
-                AsyncImage(url: store.profileImageURL) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 30, height: 30)
-                        .clipShape(Circle())
-                } placeholder: {
-                    ProgressView()
-                }
+            Button {
+                selectedStore = store
+                route = .storeDetail
+            } label: {
+                HStack {
+                    AsyncImage(url: store.profileImageURL) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 30, height: 30)
+                            .clipShape(Circle())
+                    } placeholder: {
+                        ProgressView()
+                    }
+                        
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(store.storeName)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(formatDate(feed.createdAt))
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(store.storeName)
-                        .font(.headline)
-                    Text(formatDate(feed.createdAt))
-                        .font(.caption)
-                        .foregroundColor(.gray)
+                    Spacer()
                 }
-                
-                Spacer()
             }
             AsyncImage(url: feed.mediaUrl) { image in
                 image

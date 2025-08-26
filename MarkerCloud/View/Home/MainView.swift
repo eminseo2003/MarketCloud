@@ -18,7 +18,7 @@ struct MainView: View {
     var imageFeeds: [Feed] {
         dummyFeed.filter { $0.mediaType == .image }
     }
-    @State private var selectedStore: Store? = nil
+    
     @Binding var selectedMarketID: String
     
     @State private var selectedTab: StoreTab = .all
@@ -29,77 +29,93 @@ struct MainView: View {
         guard let id = selectedMarketUUID else { return [] }
         return dummyStores.filter { $0.marketId == id }
     }
+    @State private var selectedStore: Store? = nil
+    @State private var route: Route? = nil
     let columns = [
         GridItem(.flexible())
     ]
     var body: some View {
-        VStack {
-            HStack {
-                Image("screentoplogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                Text("Market Cloud")
-                    .foregroundColor(.black)
-                    .frame(height: 30)
-                    .font(.title)
-                    .bold(true)
+        NavigationStack {
+            VStack {
+                HStack {
+                    Image("screentoplogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
+                    Text("Market Cloud")
+                        .foregroundColor(.black)
+                        .frame(height: 30)
+                        .font(.title)
+                        .bold(true)
+                    Spacer()
+                    Menu {
+                        ForEach(dummyMarkets) { market in
+                            Button(market.marketName) {
+                                selectedMarketID = market.id.uuidString
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text({
+                                if let id = selectedMarketUUID,
+                                   let m = dummyMarkets.first(where: { $0.id == id }) {
+                                    return m.marketName
+                                } else {
+                                    return "시장 선택"
+                                }
+                            }())
+                            Image(systemName: "chevron.down")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.black)
+                    }
+                    
+                }
+                .padding(.horizontal)
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    Picker("필터 선택", selection: $selectedTab) {
+                        ForEach(StoreTab.allCases) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding()
+                    //여기 맨위에서 스크롤하면 새로고침하는 기능을 넣고싶어
+                    LazyVGrid(columns: columns, spacing: 8) {
+                        VStack(spacing: 16) {
+                            ForEach(storesInSelectedMarket) { store in
+                                ForEach(imageFeeds) { feed in
+                                    ProductCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
+                                }
+                                
+                                
+                            }
+                            
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                }
+                .refreshable {
+                    
+                }
                 Spacer()
-                Menu {
-                    ForEach(dummyMarkets) { market in
-                        Button(market.marketName) {
-                            selectedMarketID = market.id.uuidString
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text({
-                            if let id = selectedMarketUUID,
-                               let m = dummyMarkets.first(where: { $0.id == id }) {
-                                return m.marketName
-                            } else {
-                                return "시장 선택"
-                            }
-                        }())
-                        Image(systemName: "chevron.down")
-                    }
-                    .font(.caption)
-                    .foregroundColor(.black)
-                }
                 
             }
-            .padding(.horizontal)
-            
-            ScrollView(.vertical, showsIndicators: false) {
-                Picker("필터 선택", selection: $selectedTab) {
-                    ForEach(StoreTab.allCases) { tab in
-                        Text(tab.rawValue).tag(tab)
+            .navigationDestination(item: $route) { route in
+                if route == .storeDetail {
+                    if let store = selectedStore {
+                        StoreProfileView(store: store)
                     }
+                } else if route == .moreProduct {
+                    //MoreProductView(filteredProducts: firstProducts)
+                } else if route == .moreEvent {
+                    //MoreEventView(filteredEvents: firstEvents)
                 }
-                .pickerStyle(.segmented)
-                .padding()
-                //여기 맨위에서 스크롤하면 새로고침하는 기능을 넣고싶어
-                LazyVGrid(columns: columns, spacing: 8) {
-                    VStack(spacing: 16) {
-                        ForEach(storesInSelectedMarket) { store in
-                            ForEach(imageFeeds) { feed in
-                                ProductCardView(feed: feed, store: store)
-                            }
-                            
-                            
-                        }
-                        
-                    }
-                    .padding(.horizontal)
-                }
-                
             }
-            .refreshable {
-                
-            }
-            Spacer()
-            
         }
+        
     }
     
 }
