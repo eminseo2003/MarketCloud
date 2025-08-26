@@ -55,6 +55,8 @@ struct StartView: View {
             .navigationDestination(item: $route) { route in
                 if route == .login {
                     LoginView()
+                } else if route == .join {
+                    JoinView()
                 }
             }
         }
