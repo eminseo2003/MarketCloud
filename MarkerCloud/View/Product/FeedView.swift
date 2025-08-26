@@ -49,6 +49,5 @@ struct FeedView: View {
                 EventDetailView(event: feed)
             }
         }
-        
     }
 }

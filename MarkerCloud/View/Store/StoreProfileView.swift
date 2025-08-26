@@ -18,6 +18,21 @@ struct StoreProfileView: View {
     @State private var isFollowed: Bool = true
     @State private var selectedFeed: Feed? = nil
     
+    private func feeds(for store: Store) -> [Feed] {
+        let storeFeeds = dummyFeed.filter { $0.storeId == store.id }
+        
+        switch selectedTab {
+        case .all:
+            return storeFeeds
+        case .store:
+            return storeFeeds.filter { $0.promoKind == .store }
+        case .product:
+            return storeFeeds.filter { $0.promoKind == .product }
+        case .event:
+            return storeFeeds.filter { $0.promoKind == .event }
+        }
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -48,7 +63,6 @@ struct StoreProfileView: View {
                                     Text("좋아요")
                                         .font(.subheadline).foregroundColor(.secondary)
                                 }
-                                //Spacer()
                             }
 
                             if isMyStore == true {
@@ -154,28 +168,9 @@ struct StoreProfileView: View {
                     }
                     .pickerStyle(.segmented)
                     LazyVGrid(columns: grid, spacing: 12) {
-                        if selectedTab == .all {
-                            ForEach(store.feeds) { feed in
-                                SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
-                            }
-
-                        } else if selectedTab == .store {
-                            ForEach(store.feeds) { feed in
-                                SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
-                            }
-
-                        } else if selectedTab == .product {
-                            ForEach(store.feeds) { feed in
-                                SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
-                            }
-
-                        } else if selectedTab == .event {
-                            ForEach(store.feeds) { feed in
-                                SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
-                            }
+                        ForEach(feeds(for: store)) { feed in
+                            SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
                         }
-
-                        
                     }
                     .padding(6)
                 }
