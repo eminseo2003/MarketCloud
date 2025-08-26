@@ -67,7 +67,7 @@ struct CreateDoneView: View {
                 
                 HStack(spacing: 10) {
                     Button(action: {
-                        //route = .recommendMarket
+                        dismiss()
                     }) {
                         Text("다시 생성하기")
                             .fontWeight(.semibold)
@@ -118,7 +118,7 @@ struct CreateDoneView: View {
             }
             .alert("정말 삭제하시겠습니까?", isPresented: $showDeleteAlert) {
                 Button("삭제", role: .destructive) {
-                    dismiss()//그냥 dismiss를 여러번 하는 방법으로 해줘
+                    dismiss()
                 }
                 Button("취소", role: .cancel) {}
             }
