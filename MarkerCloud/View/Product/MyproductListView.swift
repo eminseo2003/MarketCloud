@@ -95,7 +95,7 @@ struct MyproductListView: View {
             }.padding(.horizontal)
         }
         .navigationDestination(item: $selectedProduct) { product in
-            ProductPostView(feed: product)
+            FeedView(feed: product)
                 .navigationTitle(product.title)
         }
         .navigationDestination(item: $pushPromotion) { promo in

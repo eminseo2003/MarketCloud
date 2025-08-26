@@ -91,7 +91,7 @@ struct MyLikedView: View {
                 }
             }
             .navigationDestination(item: $selectedFeed) { feed in
-                EventPostView(feed: feed)
+                FeedView(feed: feed)
                     //.navigationTitle(feed.eventName)
             }
             .navigationTitle("좋아요")

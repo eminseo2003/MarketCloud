@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-struct ProductPostView: View {
-    var ismyProduct: Bool = true
+struct FeedView: View {
     let feed: Feed
     private var firstStore: Store? {
         dummyStores.first
@@ -25,7 +24,7 @@ struct ProductPostView: View {
                 LazyVGrid(columns: columns, spacing: 8) {
                     VStack(spacing: 16) {
                         if let store = firstStore {
-                            ProductCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
+                            FeedCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
                         }
                         
                     }
@@ -33,25 +32,28 @@ struct ProductPostView: View {
                 }
                 .padding(.top, 10)
             }
-            if ismyProduct {
-                Button(action: {
-                    pushFeed = feed
-                }) {
-                    Text("상품 상세보기")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                }.padding(.horizontal)
-            }
-            
+            Button(action: {
+                pushFeed = feed
+            }) {
+                Text("피드 상세보기")
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .font(.body)
+                    .padding()
+                    .background(Color("Main"))
+                    .cornerRadius(12)
+            }.padding(.horizontal)
         }
         .navigationTitle(Text(feed.title))
         .navigationDestination(item: $pushFeed) { feed in
-            //ProductDetailView(feed: feed)
+            if feed.promoKind == .store {
+                
+            } else if feed.promoKind == .product {
+                ProductDetailView(product: feed)
+            } else if feed.promoKind == .event {
+                EventDetailView(event: feed)
+            }
         }
         
     }

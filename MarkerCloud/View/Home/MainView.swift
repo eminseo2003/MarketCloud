@@ -86,7 +86,7 @@ struct MainView: View {
                         VStack(spacing: 16) {
                             ForEach(storesInSelectedMarket) { store in
                                 ForEach(imageFeeds) { feed in
-                                    ProductCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
+                                    FeedCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
                                 }
                                 
                                 

@@ -95,7 +95,7 @@ struct MyeventListView: View {
             }.padding(.horizontal)
         }
         .navigationDestination(item: $selectedEvent) { event in
-            EventPostView(feed: event)
+            FeedView(feed: event)
                 .navigationTitle(event.title)
         }
         .navigationDestination(item: $pushPromotion) { promo in

@@ -84,7 +84,7 @@ struct ProductReviewDetailView: View {
         .navigationTitle("리뷰 상세")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $selectedFeed) { feed in
-            ProductPostView(feed: feed)
+            FeedView(feed: feed)
                 .navigationTitle(feed.title)
         }
     }

@@ -180,10 +180,10 @@ struct SearchView: View {
                         }
                     }
                     .navigationDestination(item: $selectedProductFeed) { product in
-                        ProductPostView(feed: product)
+                        FeedView(feed: product)
                     }
                     .navigationDestination(item: $selectedEventFeed) { event in
-                        EventPostView(feed: event)
+                        FeedView(feed: event)
                     }
                 } else {
                     ScrollView {

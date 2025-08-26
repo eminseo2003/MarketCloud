@@ -195,9 +195,9 @@ struct StoreProfileView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $selectedFeed) { feed in
             if feed.promoKind == .product {
-                ProductPostView(feed: feed)
+                FeedView(feed: feed)
             } else if feed.promoKind == .event {
-                EventPostView(feed: feed)
+                FeedView(feed: feed)
             }
             
         }

@@ -131,10 +131,10 @@ struct SearchResultView: View {
             }
         }
         .navigationDestination(item: $selectedProduct) { product in
-            ProductPostView(feed: product)
+            FeedView(feed: product)
         }
         .navigationDestination(item: $selectedEvent) { event in
-            EventPostView(feed: event)
+            FeedView(feed: event)
         }
         
     }

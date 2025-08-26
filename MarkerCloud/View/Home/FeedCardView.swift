@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProductCardView: View {
+struct FeedCardView: View {
     let feed: Feed
     let store: Store
     @State private var isCommentSheetPresented = false

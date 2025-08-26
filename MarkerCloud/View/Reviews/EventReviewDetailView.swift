@@ -84,7 +84,7 @@ struct EventReviewDetailView: View {
         .navigationTitle("리뷰 상세")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $selectedEvent) { event in
-            EventPostView(feed: event)
+            FeedView(feed: event)
                 .navigationTitle(event.title)
         }
     }

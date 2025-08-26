@@ -10,7 +10,7 @@ import Foundation
 struct ProductFeedPayload: Codable, Hashable {
     var productName: String        // 상품명
     var description: String?       // 상품설명
-    var imgUrl: URL?               // 상품이미지
+    var imgUrl: URL               // 상품이미지
 
     var productCategoryId: Int?
 

@@ -32,7 +32,7 @@ struct MoreProductView: View {
                 .padding(.horizontal)
             }
             .navigationDestination(item: $selectedProduct) { product in
-                ProductPostView(feed: product)
+                FeedView(feed: product)
             }
             .navigationTitle(Text("상품 더보기"))
         }
