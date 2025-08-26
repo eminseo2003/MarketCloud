@@ -27,8 +27,7 @@ struct SearchView: View {
     private var storeFeeds: [Feed] { dummyStores.flatMap(\.feeds) }
     private var firstProducts: [Feed] { dummyFeed }
     private var firstEvents: [Feed] { dummyFeed }
-    @State private var selectedStore: Store? = nil
-    @State private var selectedStoreFeed: Feed? = nil
+    @State private var pushStore: Store? = nil
     @State private var selectedProductFeed: Feed? = nil
     @State private var selectedEventFeed: Feed? = nil
     
@@ -94,8 +93,7 @@ struct SearchView: View {
                                         ForEach(dummyStores.prefix(10)) { store in
                                             VStack {
                                                 Button {
-                                                    selectedStore = store
-                                                    route = .storeDetail
+                                                    pushStore = store
                                                 } label: {
                                                     AsyncImage(url: store.profileImageURL) { image in
                                                         image
@@ -173,10 +171,6 @@ struct SearchView: View {
                             MoreProductView(filteredProducts: firstProducts)
                         } else if route == .moreEvent {
                             MoreEventView(filteredEvents: firstEvents)
-                        } else if route == .storeDetail {
-                            if let store = selectedStore {
-                                StoreProfileView(store: store)
-                            }
                         }
                     }
                     .navigationDestination(item: $selectedProductFeed) { product in
@@ -184,6 +178,9 @@ struct SearchView: View {
                     }
                     .navigationDestination(item: $selectedEventFeed) { event in
                         FeedView(feed: event)
+                    }
+                    .navigationDestination(item: $pushStore) { store in
+                        StoreProfileView(store: store)
                     }
                 } else {
                     ScrollView {
