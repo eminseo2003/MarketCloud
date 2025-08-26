@@ -15,9 +15,22 @@ enum StoreTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 struct MainView: View {
-    var imageFeeds: [Feed] {
-        dummyFeed.filter { $0.mediaType == .image }
+    var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
+    private func feeds(for store: Store) -> [Feed] {
+        let storeFeeds = imageFeeds.filter { $0.storeId == store.id }
+        
+        switch selectedTab {
+        case .all:
+            return storeFeeds
+        case .store:
+            return storeFeeds.filter { $0.promoKind == .store }
+        case .product:
+            return storeFeeds.filter { $0.promoKind == .product }
+        case .event:
+            return storeFeeds.filter { $0.promoKind == .event }
+        }
     }
+    
     
     @Binding var selectedMarketID: String
     
@@ -80,15 +93,12 @@ struct MainView: View {
                     }
                     .pickerStyle(.segmented)
                     .padding()
-                    //여기 맨위에서 스크롤하면 새로고침하는 기능을 넣고싶어
                     LazyVGrid(columns: columns, spacing: 8) {
                         VStack(spacing: 16) {
                             ForEach(storesInSelectedMarket) { store in
-                                ForEach(imageFeeds) { feed in
+                                ForEach(feeds(for: store)) { feed in
                                     FeedCardView(feed: feed, store: store, pushStore: $pushStore)
                                 }
-                                
-                                
                             }
                             
                         }

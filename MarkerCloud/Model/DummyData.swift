@@ -331,6 +331,24 @@ let dummyFeed: [Feed] = [
             productCategoryId: StoreCategory.meat.rawValue
         ),
         reviews: sampleReviews
+    ),
+    Feed(
+        id: DummyFeedIDs.feed6,
+        storeId: DummyStoreIDs.breadSister,
+        promoKind: .store,
+        mediaType: .image,
+        title: "fwfwegthge점포/사진",
+        prompt: "이 상품으로 홍보문구 생성",
+        mediaUrl: kDummyImageURL,
+        body: "산지직송 사과 특가!",
+        createdAt: Date(),
+        event: nil,
+        storeInfo: StoreFeedPayload(
+            description: "아오리 사과 3kg",
+            imgUrl: kDummyImageURL
+        ),
+        product: nil,
+        reviews: sampleReviews
     )
 ]
 
