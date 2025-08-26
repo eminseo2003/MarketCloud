@@ -24,8 +24,10 @@ struct SearchView: View {
     private var firstStore: Store? {
         dummyStores.first
     }
-    private var firstProducts: [Feed] { dummyFeed }
-    private var firstEvents: [Feed] { dummyFeed }
+    private var productFeeds: [Feed] { dummyFeed.filter { $0.promoKind == .product } }
+    private var eventFeeds: [Feed]   { dummyFeed.filter { $0.promoKind == .event } }
+
+
     @State private var pushStore: Store? = nil
     @State private var selectedFeed: Feed? = nil
     @State private var selectedSectionTitle: String? = nil
@@ -115,10 +117,10 @@ struct SearchView: View {
                             
                             
                             SearchViewSectionHeader(title: "인기 상품")
-                            if !firstProducts.isEmpty {
+                            if !productFeeds.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
-                                        ForEach(firstProducts.prefix(10)) { feed in
+                                        ForEach(productFeeds.prefix(10)) { feed in
                                             FeedCard(feed: feed, selectedFeed: $selectedFeed)
                                         }
                                     }
@@ -137,10 +139,10 @@ struct SearchView: View {
                             }
                             
                             SearchViewSectionHeader(title: "인기 이벤트")
-                            if !firstEvents.isEmpty {
+                            if !eventFeeds.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
-                                        ForEach(firstEvents.prefix(10)) { feed in
+                                        ForEach(eventFeeds.prefix(10)) { feed in
                                             FeedCard(feed: feed, selectedFeed: $selectedFeed)
                                         }
                                     }
