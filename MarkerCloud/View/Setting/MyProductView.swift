@@ -9,13 +9,14 @@ import SwiftUI
 
 struct MyProductView: View {
     var hasProduct: Bool = true
-    private var firstStore: Store? {
-        dummyStores.first
+    var filteredProducts: [Feed] {
+        dummyFeed
+            .filter { $0.promoKind == .product }
     }
     var body: some View {
         VStack(spacing: 0) {
             if hasProduct {
-                MyproductListView(productList: dummyFeed)
+                MyproductListView(productList: filteredProducts)
             } else {
                 NoProductView()
                     .background(Color(uiColor: .systemGray6).ignoresSafeArea())

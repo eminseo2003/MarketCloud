@@ -8,7 +8,7 @@
 import SwiftUI
 import PhotosUI
 
-struct ProductReviewWriteView: View {
+struct ReviewWriteView: View {
     let feed: Feed
     
     @Environment(\.dismiss) var dismiss

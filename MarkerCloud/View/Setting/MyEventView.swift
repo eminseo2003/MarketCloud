@@ -9,13 +9,14 @@ import SwiftUI
 
 struct MyEventView: View {
     var hasEvent: Bool = true
-    private var firstStore: Store? {
-        dummyStores.first
+    var filteredEvents: [Feed] {
+        dummyFeed
+            .filter { $0.promoKind == .event }
     }
     var body: some View {
         VStack(spacing: 0) {
             if hasEvent {
-                MyeventListView(eventList: dummyFeed)
+                MyeventListView(eventList: filteredEvents)
             } else {
                 NoEventView()
                     .background(Color(uiColor: .systemGray6).ignoresSafeArea())

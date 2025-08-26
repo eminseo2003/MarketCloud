@@ -62,7 +62,7 @@ struct CommentSheetView: View {
                 .buttonStyle(FilledCTA())
                 .padding()
                 .sheet(isPresented: $isWritingReview) {
-                    ProductReviewWriteView(feed: feed)
+                    ReviewWriteView(feed: feed)
                 }
             }
             .navigationTitle("리뷰")

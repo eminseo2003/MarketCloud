@@ -198,7 +198,7 @@ struct EventDetailView: View {
     func timeText(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy년 M월 d일 HH:mm"
+        formatter.dateFormat = "yyyy년 M월 d일"
         return formatter.string(from: date)
     }
 

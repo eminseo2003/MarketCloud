@@ -16,9 +16,9 @@ struct FirstStoreCreateView: View {
     @State private var storeName: String = ""
     private let storePromotion = Promotion(name: "점포", imageName: "loginBackground")
     @State private var pushPromotion: Promotion? = nil
-    @State private var selectedCategory: String = "전체"
+    @State private var selectedCategory: String = "음식점"
     private let categories: [String] = [
-        "전체","음식점","반찬","카페·제과·간식","옷가게","한복·이불·혼수",
+        "음식점","반찬","카페·제과·간식","옷가게","한복·이불·혼수",
         "패션잡화·화장품","생활·주방·문구","꽃·악기·화구","농자재·철물","사진·뷰티·게임", "수산물", "축산물","과일야채", "기타"
     ]
     var body: some View {

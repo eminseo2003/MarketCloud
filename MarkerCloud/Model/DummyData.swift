@@ -376,7 +376,7 @@ let sampleReviews: [Review] = [
 Review(
     id: DummyReviewIDs.review2,
     userId: DummyUserIDs.user2,
-    feedId: DummyFeedIDs.feed1,
+    feedId: DummyFeedIDs.feed2,
         content: "배송이 빨라요",
         imageURL: kDummyImageURL,
         rating: 4,

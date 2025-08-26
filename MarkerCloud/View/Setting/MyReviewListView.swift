@@ -62,7 +62,7 @@ struct MyReviewListView: View {
         
         .navigationDestination(item: $selectedReview) { review in
             if let f = feed(forFeedId: review.feedId) {
-                ProductReviewDetailView(feed: f, review: review)
+                ReviewDetailView(feed: f, review: review)
             }
         }
     }

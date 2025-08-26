@@ -80,7 +80,7 @@ struct ReviewListView: View {
         .background(Color(uiColor: .systemGray6).ignoresSafeArea())
         
         .navigationDestination(item: $selectedReview) { review in
-            ProductReviewDetailView(feed: feed, review: review)
+            ReviewDetailView(feed: feed, review: review)
         }
     }
 }

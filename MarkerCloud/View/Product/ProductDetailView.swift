@@ -75,7 +75,7 @@ struct ProductDetailView: View {
                             }
                             if isInfoExpanded {
                                 RowButton(title: "카테고리",
-                                          value: product.title.isEmpty ? " " : product.title, icon: nil)
+                                          value: product.product?.category?.displayName ?? " ", icon: nil)
                                 Button {
                                     withAnimation(.easeInOut) { isScriptExpanded.toggle() }
                                 } label: {
