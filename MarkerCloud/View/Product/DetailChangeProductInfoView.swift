@@ -34,15 +34,9 @@ struct ChangeproductName: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                 }
+                .buttonStyle(FilledCTA())
+                .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("상품 이름")
@@ -94,15 +88,9 @@ struct ChangeproductMemo: View {
                     onSave(t.isEmpty ? nil : t); dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                }
+                .buttonStyle(FilledCTA())
+                .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("상품 내용")

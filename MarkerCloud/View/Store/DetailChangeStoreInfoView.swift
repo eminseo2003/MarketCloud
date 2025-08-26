@@ -42,20 +42,9 @@ struct ChangeName: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                    //                            .fontWeight(.bold)
-                    //                            .foregroundColor(.white)
-                    //                            .frame(maxWidth: .infinity)
-                    //                            .padding()
-                    //                            .background(Color("Main"))
                 }
+                .buttonStyle(FilledCTA())
+                .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("점포 이름")
@@ -97,15 +86,8 @@ struct ChangeCategory: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }
             .padding(.bottom, 10)
         }
@@ -142,15 +124,8 @@ struct ChangePhoneNumber: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }.padding(.bottom, 10)
         }
         
@@ -203,16 +178,9 @@ struct ChangeWeekdayHour: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                     
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("평일 운영 시간")
@@ -264,15 +232,8 @@ struct ChangeWeekendHour: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }
             .padding(.bottom, 10)
         }
@@ -307,15 +268,8 @@ struct ChangeRoadAddress: View {
                     onSave(t.isEmpty ? nil : t); dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }
             .padding(.bottom, 10)
         }
@@ -358,15 +312,8 @@ struct ChangePaymentMethod: View {
                     onSave(options); dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }
             .padding(.bottom, 10)
             
@@ -419,20 +366,8 @@ struct ChangeAbout: View {
                     onSave(t.isEmpty ? nil : t); dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                    //                            .fontWeight(.bold)
-                    //                            .foregroundColor(.white)
-                    //                            .frame(maxWidth: .infinity)
-                    //                            .padding()
-                    //                            .background(Color("Main"))
-                }
+                }.buttonStyle(FilledCTA())
+                    .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("점포 소개")

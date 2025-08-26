@@ -36,14 +36,8 @@ struct FeedView: View {
                 pushFeed = feed
             }) {
                 Text("피드 상세보기")
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .font(.body)
-                    .padding()
-                    .background(Color("Main"))
-                    .cornerRadius(12)
-            }.padding(.horizontal)
+            }.buttonStyle(FilledCTA())
+                .padding()
         }
         .navigationTitle(Text(feed.title))
         .navigationDestination(item: $pushFeed) { feed in

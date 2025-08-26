@@ -160,17 +160,9 @@ struct EventDetailView: View {
                 pushPromotion = eventPromotion
             } label: {
                 Text("이벤트 홍보 생성하기")
-                    .font(.headline).bold()
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color("Main"))
-                    )
-            }
+            }.buttonStyle(FilledCTA())
+                .padding()
             .padding(.vertical, 8)
-            .padding(.horizontal)
         }
         .background(Color(uiColor: .systemGray6).ignoresSafeArea())
         .navigationTitle("\(event.title) 정보")

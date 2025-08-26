@@ -33,15 +33,9 @@ struct ChangeEventName: View {
                     dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                 }
+                .buttonStyle(FilledCTA())
+                .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("이벤트 이름")
@@ -93,15 +87,9 @@ struct ChangeEventMemo: View {
                     onSave(t.isEmpty ? nil : t); dismiss()
                 }) {
                     Text("완료")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                }
+                .buttonStyle(FilledCTA())
+                .padding()
             }.padding(.bottom, 10)
         }
         .navigationTitle("이벤트 내용")

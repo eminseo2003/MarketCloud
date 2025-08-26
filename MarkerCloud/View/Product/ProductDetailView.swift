@@ -142,17 +142,9 @@ struct ProductDetailView: View {
                 pushPromotion = productPromotion
             } label: {
                 Text("상품 홍보 생성하기")
-                    .font(.headline).bold()
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color("Main"))
-                    )
-            }
+            }.buttonStyle(FilledCTA())
+                .padding()
             .padding(.vertical, 8)
-            .padding(.horizontal)
         }
         .background(Color(uiColor: .systemGray6).ignoresSafeArea())
         .navigationTitle("\(product.title) 정보")

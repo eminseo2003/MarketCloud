@@ -58,15 +58,9 @@ struct CommentSheetView: View {
                     isWritingReview = true
                 }) {
                     Text("리뷰 작성하기")
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .font(.body)
-                        .padding()
-                        .background(Color("Main"))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                 }
+                .buttonStyle(FilledCTA())
+                .padding()
                 .sheet(isPresented: $isWritingReview) {
                     ProductReviewWriteView(feed: feed)
                 }
