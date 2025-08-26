@@ -29,8 +29,7 @@ struct MainView: View {
         guard let id = selectedMarketUUID else { return [] }
         return dummyStores.filter { $0.marketId == id }
     }
-    @State private var selectedStore: Store? = nil
-    @State private var route: Route? = nil
+    @State private var pushStore: Store? = nil
     let columns = [
         GridItem(.flexible())
     ]
@@ -86,7 +85,7 @@ struct MainView: View {
                         VStack(spacing: 16) {
                             ForEach(storesInSelectedMarket) { store in
                                 ForEach(imageFeeds) { feed in
-                                    FeedCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
+                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
                                 }
                                 
                                 
@@ -103,16 +102,8 @@ struct MainView: View {
                 Spacer()
                 
             }
-            .navigationDestination(item: $route) { route in
-                if route == .storeDetail {
-                    if let store = selectedStore {
-                        StoreProfileView(store: store)
-                    }
-                } else if route == .moreProduct {
-                    //MoreProductView(filteredProducts: firstProducts)
-                } else if route == .moreEvent {
-                    //MoreEventView(filteredEvents: firstEvents)
-                }
+            .navigationDestination(item: $pushStore) { store in
+                StoreProfileView(store: store)
             }
         }
         

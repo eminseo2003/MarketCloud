@@ -24,7 +24,7 @@ struct FeedView: View {
                 LazyVGrid(columns: columns, spacing: 8) {
                     VStack(spacing: 16) {
                         if let store = firstStore {
-                            FeedCardView(feed: feed, store: store, route: $route, selectedStore: $selectedStore)
+                            FeedCardView(feed: feed, store: store, pushStore: $selectedStore)
                         }
                         
                     }

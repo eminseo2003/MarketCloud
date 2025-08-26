@@ -11,13 +11,11 @@ struct FeedCardView: View {
     let feed: Feed
     let store: Store
     @State private var isCommentSheetPresented = false
-    @Binding var route: Route?
-    @Binding var selectedStore: Store?
+    @Binding var pushStore: Store?
     var body: some View {
         VStack {
             Button {
-                selectedStore = store
-                route = .storeDetail
+                pushStore = store
             } label: {
                 HStack {
                     AsyncImage(url: store.profileImageURL) { image in
