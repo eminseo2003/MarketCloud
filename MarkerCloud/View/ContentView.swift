@@ -25,8 +25,8 @@ struct ContentView: View {
             //SearchView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
-            Text("Tab 3")
-            //AICreateView(selectedMarketID: $selectedMarketID)
+            
+            AICreateView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             

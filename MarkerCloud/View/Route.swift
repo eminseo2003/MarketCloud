@@ -14,7 +14,6 @@ enum Route: Hashable, Identifiable {
     case selectComplete //선택 완료
     case selextMarket //시장 선택
     case pushPromotion
-    case createComplete //생성 완료
     case searchResult //검색 결과
     case moreStore //점포 더보기
     case moreProduct //상품 더보기
@@ -34,3 +33,4 @@ enum Route: Hashable, Identifiable {
     case firstStoreCreate
     var id: Self { self }
 }
+

@@ -7,16 +7,6 @@
 
 import Foundation
 
-enum PromoKind: String, Codable, CaseIterable, Identifiable, Hashable {
-    case store, product, event
-    var id: String { rawValue }
-}
-
-enum MediaType: String, Codable, CaseIterable, Identifiable, Hashable {
-    case image, video
-    var id: String { rawValue }
-}
-
 //struct Feed: Identifiable, Codable, Hashable {
 //    var id: String = UUID().uuidString
 //    
