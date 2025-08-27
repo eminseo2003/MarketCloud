@@ -9,9 +9,11 @@ import SwiftUI
 
 struct MarketSelectionView: View {
     @Binding var selectedMarketID: String
-    @State private var selectedChoice: UUID? = nil
+    @StateObject private var vm = MarketListVM()
+    
+    @State private var selectedChoice: String? = nil
     @State private var route: Route? = nil
-    let markets: [Market] = dummyMarkets
+    
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -37,25 +39,43 @@ struct MarketSelectionView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(markets) { market in
-                            Button {
-                                selectedChoice = market.id
-                            } label: {
-                                MarketCardView(
-                                    market: market,
-                                    isSelected: selectedChoice == market.id
-                                )
-                                .aspectRatio(1, contentMode: .fit)
+                Group {
+                    if vm.isLoading {
+                        ProgressView().padding()
+                    } else if let err = vm.errorMessage {
+                        VStack(spacing: 8) {
+                            Text("불러오기 실패").font(.headline)
+                            Text(err).foregroundColor(.secondary)
+                            Button("다시 시도") {
+                                Task { await vm.fetch() }
                             }
-                            .buttonStyle(.plain)
+                        }
+                        .padding()
+                    } else {
+                        ScrollView {
+                            LazyVGrid(columns: columns, spacing: 16) {
+                                ForEach(vm.markets) { market in
+                                    Button {
+                                        selectedChoice = market.code
+                                    } label: {
+                                        MarketCardView(
+                                            name: market.name,
+                                            assetName: market.imageAssetName,
+                                            isSelected: selectedChoice == market.code
+                                        )
+                                        .aspectRatio(1, contentMode: .fit)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal)
+                            
                         }
                     }
-                    .padding(.horizontal)
-
+                    
                 }
-                                
+                
+                
                 Spacer()
                 
                 HStack(spacing: 10) {
@@ -75,7 +95,7 @@ struct MarketSelectionView: View {
                     
                     Button(action: {
                         if let choice = selectedChoice {
-                            selectedMarketID = choice.uuidString
+                            selectedMarketID = choice
                         }
                     }) {
                         Text("선택")
@@ -103,41 +123,34 @@ struct MarketSelectionView: View {
 }
 
 struct MarketCardView: View {
-    let market: Market
+    let name: String
+    let assetName: String
     let isSelected: Bool
     
     var body: some View {
         ZStack {
-            AsyncImage(url: market.imageName) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                        .frame(width: 180, height: 180)
-                        .frame(maxWidth: .infinity)
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 180, height: 180)
-                        .frame(maxWidth: .infinity)
-                        .clipped()
-                case .failure:
-                    Color.gray.opacity(0.2)
-                        .overlay(Image(systemName: "photo").imageScale(.large))
-                        .frame(width: 180, height: 180)
-                        .frame(maxWidth: .infinity)
-                @unknown default:
-                    EmptyView()
-                }
-            }
-            .grayscale(isSelected ? 0 : 1)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color("Main") : .clear, lineWidth: 3)
-            )
-            .cornerRadius(12)
+            Image(assetName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 180, height: 180)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .cornerRadius(12)
+                .grayscale(isSelected ? 0 : 1)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSelected ? Color("Main") : .clear, lineWidth: 3)
+                )
+                .cornerRadius(12)
+                .overlay( // 텍스트 가독성용 그라데이션
+                    LinearGradient(
+                        gradient: Gradient(colors: [.black.opacity(0.0), .black.opacity(0.5)]),
+                        startPoint: .top, endPoint: .bottom
+                    )
+                    .cornerRadius(12)
+                )
             
-            Text(market.marketName)
+            Text(name)
                 .font(.headline)
                 .foregroundColor(.white)
                 .padding(6)

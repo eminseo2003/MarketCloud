@@ -105,7 +105,7 @@ struct RecommendMarketView: View {
                                                q3: Answer3 ?? "",
                                                q4: Answer4)
                             if let top = vm.result?.top1Market {
-                                print("🎯 추천 결과:", Answer1 ?? "", Answer2 ?? "", Answer3 ?? "", Answer4)
+                                print("🎯 추천 결과:", top)
                             }
                             route = .selectComplete
                         }
