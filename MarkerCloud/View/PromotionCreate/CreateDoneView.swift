@@ -16,49 +16,43 @@ struct CreateDoneView: View {
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    init(mediaUrl: String, body: String) {
-            self.mediaUrl = mediaUrl
-            _contentText = State(initialValue: body)
-        }
+    init(mediaUrl: String, body: String, mediaType: MediaType) {
+        self.mediaUrl = mediaUrl
+        self.mediaType = mediaType
+        _contentText = State(initialValue: body)
+    }
     @FocusState private var isTextFieldFocused: Bool
-
+    let mediaType: MediaType
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
-                
-                AsyncImage(url: URL(string: mediaUrl)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                } placeholder: {
-                    ProgressView()
+                if mediaType == .image {
+                    if let url = URL(string: mediaUrl) {
+                        AsyncImage(url: url) { img in
+                            img.resizable().scaledToFit()
+                        } placeholder: { ProgressView() }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    } else {
+                        Text("잘못된 이미지 URL")
+                    }
+                } else {
+                    if let url = URL(string: mediaUrl) {
+                        VideoPlayer(player: AVPlayer(url: url))
+                            .frame(minHeight: 220)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    } else {
+                        Text("잘못된 비디오 URL")
+                    }
                 }
-//                if post.mediaType == .image {
-//                    AsyncImage(url: mediaUrl) { image in
-//                        image
-//                            .resizable()
-//                            .scaledToFit()
-//                            .padding()
-//                            .frame(maxWidth: .infinity, alignment: .leading)
-//                            .background(Color(.systemGray6))
-//                            .cornerRadius(10)
-//                            .padding(.horizontal)
-//                    } placeholder: {
-//                        ProgressView()
-//                    }
-//                } else if post.mediaType == .video {
-//                    VideoPlayer(player: AVPlayer(url: post.mediaUrl))
-//                        .padding()
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                        .background(Color(.systemGray6))
-//                        .cornerRadius(10)
-//                        .padding(.horizontal)
-//                }
                 
                 TextField("내용을 입력하세요", text: $contentText)
                     .padding()

@@ -141,11 +141,11 @@ struct CreateEventView: View {
             .navigationDestination(item: $createRoute) { route in
                 switch route {
                 case .createStoreComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
                 case .createProductComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
                 case .createEventComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
                 }
             }
             .onChange(of: photoItem) { _, item in
