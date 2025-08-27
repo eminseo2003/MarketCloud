@@ -84,7 +84,10 @@ struct PromotionMethodSelectView: View {
                                 method: pushMethod?.mediaType ?? .image
                             )
                         } else {
-                            //CreateEventView(method: method, promotion: promotion)
+                            CreateEventView(
+                                feedType: mapFeedType(from: promotion.name),
+                                method: pushMethod?.mediaType ?? .image
+                            )
                         }
                     }
                     

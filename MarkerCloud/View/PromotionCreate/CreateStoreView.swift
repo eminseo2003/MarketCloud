@@ -11,12 +11,13 @@ import PhotosUI
 enum CreateRoute: Identifiable, Hashable {
     case createStoreComplete(GenerateDTO)
     case createProductComplete(GenerateDTO)
-    //case createEventComplete(GenerateDTO)
+    case createEventComplete(GenerateDTO)
 
     var id: String {
         switch self {
         case .createStoreComplete(let dto): return "createComplete:\(dto.id)"
         case .createProductComplete(let dto): return "createComplete:\(dto.id)"
+        case .createEventComplete(let dto): return "createComplete:\(dto.id)"
         }
     }
 }
@@ -142,6 +143,8 @@ struct CreateStoreView: View {
                 case .createStoreComplete(let dto):
                     CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
                 case .createProductComplete(let dto):
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                case .createEventComplete(let dto):
                     CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
                 }
             }

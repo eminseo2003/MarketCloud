@@ -118,7 +118,6 @@ struct CreateProductView: View {
                         .padding(.vertical, 4)
                     }
                 }
-                
             }
             .navigationTitle("상품 홍보 생성하기")
             .navigationBarTitleDisplayMode(.inline)
@@ -161,6 +160,8 @@ struct CreateProductView: View {
                 case .createStoreComplete(let dto):
                     CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
                 case .createProductComplete(let dto):
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                case .createEventComplete(let dto):
                     CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
                 }
             }
