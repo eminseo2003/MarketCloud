@@ -16,11 +16,11 @@ struct FeedCardView: View {
         VStack(alignment: .leading, spacing: 8) {
             
             Button {
-                //pushStoreName = feed.storeName
+                pushStoreName = feed.storeName
             } label: {
                 HStack {
-                    //AsyncImage(url: URL(string: feed.storeImageUrl)) { image in
-                        AsyncImage(url: kDummyImageURL) { image in
+                    AsyncImage(url: URL(string: feed.storeImageUrl)) { image in
+                        //AsyncImage(url: kDummyImageURL) { image in
                             image
                             .resizable()
                             .scaledToFill()
@@ -33,10 +33,10 @@ struct FeedCardView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(feed.prompt ?? "")
+                        Text(feed.storeName)
                             .font(.headline)
                             .foregroundColor(.primary)
-                        Text(formatDate(from: feed.created_at))
+                        Text(formatDate(from: feed.createdAt))
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
@@ -45,7 +45,7 @@ struct FeedCardView: View {
                 }
             }
             
-            AsyncImage(url: URL(string: feed.mediaUrl)) { image in
+            AsyncImage(url: URL(string: feed.feedImageUrl)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -66,7 +66,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text("0")
+                    Text(feed.feedLikeCount)
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -91,7 +91,7 @@ struct FeedCardView: View {
             .padding(.vertical, 5)
             
             //피드 제목 필요
-            Text(feed.body ?? "")
+            Text(feed.feedContent)
                 .font(.subheadline)
                 .foregroundColor(.primary)
         }

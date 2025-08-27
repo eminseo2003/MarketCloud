@@ -125,11 +125,11 @@ struct MainView: View {
             case .all:
                 return feedVM.feeds
             case .store:
-                return feedVM.feeds.filter { $0.promoKind == "store" }
+                return feedVM.feeds.filter { $0.feedType == "점포" }
             case .product:
-                return feedVM.feeds.filter { $0.promoKind == "product" }
+                return feedVM.feeds.filter { $0.feedType == "상품" }
             case .event:
-                return feedVM.feeds.filter { $0.promoKind == "event" }
+                return feedVM.feeds.filter { $0.feedType == "이벤트" }
             }
         }
 }

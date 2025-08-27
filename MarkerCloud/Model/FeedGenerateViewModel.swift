@@ -95,7 +95,7 @@ final class FeedGenerateViewModel: ObservableObject {
             // 1) Feed로 시도
             if let feed = try? JSONDecoder().decode(Feed.self, from: data) {
                 created = feed
-                print("✅ 생성 성공: feedid=\(feed.feedid)")
+                print("✅ 생성 성공: feedid=\(feed.feedId)")
                 return
             }
             // 2) 메시지 형태 시도

@@ -14,3 +14,9 @@ struct Market: Identifiable, Codable, Hashable {
     let memo: String
     let address: String
 }
+//struct Market: Identifiable, Codable, Hashable {
+//    let id: UUID
+//    let marketCode: String
+//    let marketName: String
+//    let address: String
+//}
