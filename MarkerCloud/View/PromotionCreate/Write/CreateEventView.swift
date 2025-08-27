@@ -143,7 +143,7 @@ struct CreateEventView: View {
                             if let g = vm.generated {
                                 createRoute = .createEventComplete(g)
                                         } else if let err = vm.errorMessage {
-                                            print("❌ Upload failed: \(err)")
+                                            print("Upload failed: \(err)")
                                         }
                         }
                         isEventScriptFocused = false

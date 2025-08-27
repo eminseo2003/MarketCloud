@@ -156,7 +156,7 @@ struct CreateProductView: View {
                             if let g = vm.generated {
                                 createRoute = .createProductComplete(g)
                                         } else if let err = vm.errorMessage {
-                                            print("❌ Upload failed: \(err)")
+                                            print("Upload failed: \(err)")
                                         }
                         }
                         isProductWriteFocused = false
@@ -168,7 +168,22 @@ struct CreateProductView: View {
             .navigationDestination(item: $createRoute) { route in
                 Group {
                     if case let .createProductComplete(dto) = route {
-                        ProductCreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, method: method)
+                        if let img = selectedImage, let storeId = Int(storeIdText), let categoryId = selectedCategoryId {
+                            ProductCreateDoneView(
+                                mediaUrl: dto.feedMediaUrl,
+                                body: dto.feedBody,
+                                method: method,
+                                feedType: "product",
+                                mediaType: (method == .image ? "image" : "video"),
+                                storeId: storeId,
+                                productName: productName,
+                                categoryId: categoryId,
+                                productDescription: productScript,
+                                productImage: img
+                            )
+                        } else {
+                            Text("필수 값이 없습니다. (이미지/점포 ID)")
+                        }
 
                     } else {
                         EmptyView()

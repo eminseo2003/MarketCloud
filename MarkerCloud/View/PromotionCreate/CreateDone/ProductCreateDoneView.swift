@@ -10,19 +10,34 @@ import AVKit
 
 struct ProductCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var vm = ProductFeedUpLoadVM()
     
     let mediaUrl: String
     
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    init(mediaUrl: String, body: String, method: MediaType) {
+    let method: MediaType
+    let feedType: String
+    let mediaType: String
+    let storeId: Int
+    let productName: String
+    let categoryId: Int
+    let productDescription: String
+    let productImage: UIImage
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, productName: String, categoryId: Int, productDescription: String, productImage: UIImage) {
         self.mediaUrl = mediaUrl
         self.method = method
+        self.feedType = feedType
+        self.mediaType = mediaType
+        self.storeId = storeId
+        self.productName = productName
+        self.categoryId = categoryId
+        self.productDescription = productDescription
+        self.productImage = productImage
         _contentText = State(initialValue: body)
     }
     @FocusState private var isTextFieldFocused: Bool
-    let method: MediaType
     
     var body: some View {
         NavigationStack {
@@ -61,14 +76,6 @@ struct ProductCreateDoneView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .focused($isTextFieldFocused)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("완료") {
-                                isTextFieldFocused = false
-                            }
-                        }
-                    }
                 Spacer()
                 
                 HStack(spacing: 10) {
@@ -87,7 +94,21 @@ struct ProductCreateDoneView: View {
                     }
                     
                     Button(action: {
-                        showPostAlert = true
+                        Task {
+                            
+                            await vm.uploadStoreFeed(
+                                feedType: feedType,
+                                mediaType: mediaType,
+                                storeId: storeId,
+                                productName: productName,
+                                categoryId: categoryId,
+                                productDescription: productDescription,
+                                productImage: productImage,
+                                feedMediaUrl: mediaUrl,
+                                feedBody: contentText
+                            )
+                            showPostAlert = true
+                        }
                     }) {
                         Text("게시하기")
                             .fontWeight(.semibold)
@@ -104,24 +125,24 @@ struct ProductCreateDoneView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss() // 현재 뷰 닫기
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(.primary)
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isTextFieldFocused = false
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showDeleteAlert = true
-                    }) {
-                        Label("삭제", systemImage: "trash")
-                            .labelStyle(.iconOnly)
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "chevron.left").foregroundColor(.primary)
                     }
                 }
-                
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button { showDeleteAlert = true } label: {
+                        Label("삭제", systemImage: "trash").labelStyle(.iconOnly)
+                    }
+                }
             }
+
             .alert("정말 삭제하시겠습니까?", isPresented: $showDeleteAlert) {
                 Button("삭제", role: .destructive) {
                     dismiss()
@@ -132,6 +153,21 @@ struct ProductCreateDoneView: View {
                 Button("확인", role: .cancel) {
                     dismiss()
                 }
+            }
+            .overlay {
+                if vm.isUploading {
+                    ZStack {
+                        Color.black.opacity(0.25).ignoresSafeArea()
+                        ProgressView("업로드 중…")
+                            .padding().background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
+                Button("확인") { vm.errorMessage = nil }
+            } message: {
+                Text(vm.errorMessage ?? "")
             }
         }
     }
