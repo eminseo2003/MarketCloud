@@ -56,9 +56,9 @@ struct CreateStoreView: View {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $storeScript)
                             .frame(height: 150)
-                            .onChange(of: storeScript) { new in
-                                if new.count > maxCharacters {
-                                    storeScript = String(new.prefix(maxCharacters))
+                            .onChange(of: storeScript) { oldValue, newValue in
+                                if newValue.count > maxCharacters {
+                                    storeScript = String(newValue.prefix(maxCharacters))
                                 }
                             }
                         .frame(height: 150)
