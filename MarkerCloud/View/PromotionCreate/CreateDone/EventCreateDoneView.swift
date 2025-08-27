@@ -8,7 +8,7 @@
 import SwiftUI
 import AVKit
 
-struct CreateDoneView: View {
+struct EventCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
     
     let mediaUrl: String
@@ -16,18 +16,18 @@ struct CreateDoneView: View {
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    init(mediaUrl: String, body: String, mediaType: MediaType) {
+    init(mediaUrl: String, body: String, method: MediaType) {
         self.mediaUrl = mediaUrl
-        self.mediaType = mediaType
+        self.method = method
         _contentText = State(initialValue: body)
     }
     @FocusState private var isTextFieldFocused: Bool
-    let mediaType: MediaType
+    let method: MediaType
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
-                if mediaType == .image {
+                if method == .image {
                     if let url = URL(string: mediaUrl) {
                         AsyncImage(url: url) { img in
                             img.resizable().scaledToFit()

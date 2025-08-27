@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @MainActor
-final class StoreFeedUploadVM: ObservableObject {
+final class StoreFeedGenerateVM: ObservableObject {
     @Published var isUploading = false
     @Published var errorMessage: String?
     @Published var done = false

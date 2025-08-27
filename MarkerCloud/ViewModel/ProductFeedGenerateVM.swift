@@ -1,5 +1,5 @@
 //
-//  EventFeedUploadVM.swift
+//  ProductFeedUploadVM.swift
 //  MarkerCloud
 //
 //  Created by 이민서 on 8/27/25.
@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @MainActor
-final class EventFeedUploadVM: ObservableObject {
+final class ProductFeedGenerateVM: ObservableObject {
     @Published var isUploading = false
     @Published var errorMessage: String?
     @Published var done = false
@@ -35,44 +35,25 @@ final class EventFeedUploadVM: ObservableObject {
             .appendingPathComponent("feed")
             .appendingPathComponent("generate")
     }
-
-    // 서버가 좋아하는 ISO8601 (타임존 없이 "yyyy-MM-dd'T'HH:mm:ss")
-    private func serverDateString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(secondsFromGMT: 0)   // 서버가 로컬시간 기대면 Asia/Seoul 로 바꿔줘
-        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return f.string(from: date)
-    }
-
-    func uploadEventFeed(
-        feedType: String,          // "event"
+    
+    func uploadProductFeed(
+        feedType: String,          // "product"
         mediaType: String,         // "image" | "video"
         storeId: Int,
-        eventName: String,
-        eventDescription: String,
-        eventStartAt: Date,
-        eventEndAt: Date,
+        productName: String,
+        categoryId: Int,
+        productDescription: String,
         image: UIImage
     ) async {
         let t0 = CFAbsoluteTimeGetCurrent()
-        log("▶️ uploadEventFeed called | feedType:", feedType, "| mediaType:", mediaType,
-            "| storeId:", storeId, "| name:", eventName, "| descLen:", eventDescription.count,
-            "| start:", eventStartAt, "| end:", eventEndAt)
+        log("▶️ uploadProductFeed called | feedType:", feedType, "| mediaType:", mediaType,
+            "| storeId:", storeId, "| name:", productName, "| categoryId:", categoryId,
+            "| descLen:", productDescription.count)
 
         guard let data = image.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"; log("❌ 이미지 인코딩 실패"); return
         }
         log("📦 image data size:", data.count, "bytes")
-
-        // (옵션) 시작/종료 유효성 체크
-        guard eventEndAt >= eventStartAt else {
-            errorMessage = "이벤트 종료 시간이 시작 시간보다 빠릅니다."
-            log("⚠️ 잘못된 시간 범위"); return
-        }
-
-        let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let mt = mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
         var req = URLRequest(url: generateURL)
         req.httpMethod = "POST"
@@ -87,25 +68,25 @@ final class EventFeedUploadVM: ObservableObject {
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
 
-        // 텍스트 필드
-        addField("feedType", ft)                       // "event"
-        addField("mediaType", mt)                      // "image" | "video"
+        // 필드
+        let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let mt = mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        addField("feedType", ft)                           // "product"
+        addField("mediaType", mt)                          // "image" | "video"
         addField("storeId", String(storeId))
-        addField("eventName", eventName)
-        addField("eventDescription", eventDescription)
-        addField("eventStartAt", serverDateString(eventStartAt))
-        addField("eventEndAt", serverDateString(eventEndAt))
+        addField("productName", productName)
+        addField("productDescription", productDescription)
+        addField("categoryId", String(categoryId))         // 서버 스펙에 맞춰 전송
 
-        // 파일: eventImage
+        // 파일: productImage
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"eventImage\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"productImage\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
         body.append(data)
         body.append("\r\n".data(using: .utf8)!)
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
         req.httpBody = body
-
         log("🌐 POST \(generateURL.absoluteString)")
         log("📤 payload size:", body.count, "bytes")
 
@@ -131,7 +112,7 @@ final class EventFeedUploadVM: ObservableObject {
                 log("⚠️ 업로드 실패:", errorMessage ?? ""); return
             }
 
-            // 생성 응답 디코딩 (GenerateResponse / generated 활용)
+            // GenerateResponse 디코딩 (이미 VM에 타입/프로퍼티(generated) 있어야 함)
             do {
                 let res = try JSONDecoder().decode(GenerateResponse.self, from: data)
                 if res.success {

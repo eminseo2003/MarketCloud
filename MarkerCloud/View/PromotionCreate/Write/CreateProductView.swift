@@ -1,5 +1,5 @@
 //
-//  CreateEventView.swift
+//  CreateProductView.swift
 //  MarkerCloud
 //
 //  Created by 이민서 on 8/14/25.
@@ -8,61 +8,74 @@
 import SwiftUI
 import PhotosUI
 
-struct CreateEventView: View {
+struct CreateProductView: View {
     let feedType: FeedType
     let method: MediaType
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = EventFeedUploadVM()
+    @StateObject private var vm = ProductFeedGenerateVM()
     @State private var createRoute: CreateRoute? = nil
     
     @State private var storeIdText: String = "1"
-    @State private var eventName: String = ""
-    @State private var eventScript: String = ""
-    @State var eventStart: Date = Date()
-    @State var eventEnd: Date = Date()
+    @State private var productName: String = ""
+    @State private var selectedCategory: String = "음식점"
+    private var selectedCategoryId: Int? {
+        StoreCategory(label: selectedCategory)?.rawValue
+    }
+    private let categories: [String] =
+        StoreCategory.allCases
+            .sorted { $0.rawValue < $1.rawValue }
+            .map { $0.displayName }
+
+    private var productCategory: String { selectedCategory == "전체" ? "" : selectedCategory }
+    @State private var productScript: String = ""
     let maxCharacters = 500
     @State private var photoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage? = nil
+    
+    private var hasName: Bool { !productName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    private var hasCategory: Bool { selectedCategory != "전체" }
+    private var hasDesc: Bool { !productScript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    private var hasImage: Bool { selectedImage != nil }
+    
+    private var canCreate: Bool {
+        hasName && hasCategory && hasDesc && hasImage
+    }
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text("이벤트명")) {
-                    TextField("이벤트명", text: $eventName)
+                Section(header: Text("상품명")) {
+                    TextField("상품명", text: $productName)
                 }
-                Section(header: Text("이벤트 진행 일정")) {
-                    HStack {
-                        Text("시작 시간")
-                        Spacer()
-                        DatePicker("", selection: $eventStart, displayedComponents: [.date])
-                            .labelsHidden()
-                        DatePicker("", selection: $eventStart, displayedComponents: [.hourAndMinute])
-                            .labelsHidden()
+                Section(header: Text("카테고리")) {
+                    FlowLayout(spacing: 8, lineSpacing: 10) {
+                        ForEach(categories, id: \.self) { cat in
+                            Button {
+                                selectedCategory = cat
+                            } label: {
+                                TagChip(title: cat, isSelected: cat == selectedCategory)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    HStack {
-                        Text("종료 시작")
-                        Spacer()
-                        DatePicker("", selection: $eventEnd, displayedComponents: [.date])
-                            .labelsHidden()
-                        DatePicker("", selection: $eventEnd, displayedComponents: [.hourAndMinute])
-                            .labelsHidden()
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
                 }
-                Section(header: Text("이벤트 설명")) {
+                Section(header: Text("상품 설명")) {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: Binding(
-                            get: { eventScript },
+                            get: { productScript },
                             set: { newValue in
                                 if newValue.count <= maxCharacters {
-                                    eventScript = newValue
+                                    productScript = newValue
                                 } else {
-                                    eventScript = String(newValue.prefix(maxCharacters))
+                                    productScript = String(newValue.prefix(maxCharacters))
                                 }
                             }
                         ))
                         .frame(height: 150)
                         
-                        if eventScript.isEmpty {
+                        if productScript.isEmpty {
                             Text("홍보 게시글을 생성하는 데 사용됩니다.")
                                 .foregroundColor(.gray)
                                 .padding(.top, 8)
@@ -71,7 +84,7 @@ struct CreateEventView: View {
                     }
                     HStack {
                         Spacer()
-                        Text("\(eventScript.count)/\(maxCharacters)자")
+                        Text("\(productScript.count)/\(maxCharacters)자")
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
@@ -106,7 +119,7 @@ struct CreateEventView: View {
                     }
                 }
             }
-            .navigationTitle("이벤트 홍보 생성하기")
+            .navigationTitle("상품 홍보 생성하기")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -118,34 +131,38 @@ struct CreateEventView: View {
                     Button("생성") {
                         guard let img = selectedImage,
                               let storeId = Int(storeIdText) else { return }
+                        guard let categoryId = selectedCategoryId else {
+                                vm.errorMessage = "카테고리를 선택해주세요"; return
+                            }
                         Task {
-                            await vm.uploadEventFeed(
-                                feedType: "event",
+                            await vm.uploadProductFeed(
+                                feedType: "product",
                                 mediaType: method == .image ? "image" : "video",
                                 storeId: storeId,
-                                eventName: eventName,
-                                eventDescription: eventScript,
-                                eventStartAt: eventStart,
-                                eventEndAt: eventEnd,
+                                productName: productName,
+                                categoryId: categoryId,
+                                productDescription: productScript,
                                 image: img
                             )
                             if let g = vm.generated {
-                                createRoute = .createEventComplete(g)
+                                createRoute = .createProductComplete(g)
                                         } else if let err = vm.errorMessage {
                                             print("❌ Upload failed: \(err)")
                                         }
                         }
                     }
+                    .disabled(!canCreate)
+                    .tint(canCreate ? Color("Main") : Color.gray)
                 }
             }
             .navigationDestination(item: $createRoute) { route in
-                switch route {
-                case .createStoreComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
-                case .createProductComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
-                case .createEventComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
+                Group {
+                    if case let .createProductComplete(dto) = route {
+                        ProductCreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, method: method)
+
+                    } else {
+                        EmptyView()
+                    }
                 }
             }
             .onChange(of: photoItem) { _, item in
@@ -172,6 +189,60 @@ struct CreateEventView: View {
             } message: {
                 Text(vm.errorMessage ?? "")
             }
+        }
+        
+        
+    }
+}
+struct TagChip: View {
+    let title: String
+    let isSelected: Bool
+    var body: some View {
+        Text(title)
+            .font(.subheadline)
+            .fontWeight(isSelected ? .bold : .regular)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(isSelected ? Color(.systemGray3) : Color(.systemGray5)))
+            .foregroundColor(.black)
+    }
+}
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    var lineSpacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x + s.width > maxWidth {
+                x = 0
+                y += rowH + lineSpacing
+                rowH = 0
+            }
+            x += s.width + spacing
+            rowH = max(rowH, s.height)
+        }
+        return CGSize(width: maxWidth, height: y + rowH)
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let maxWidth = bounds.width
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x + s.width > maxWidth {
+                x = 0
+                y += rowH + lineSpacing
+                rowH = 0
+            }
+            v.place(
+                at: CGPoint(x: bounds.minX + x, y: bounds.minY + y),
+                proposal: ProposedViewSize(width: s.width, height: s.height)
+            )
+            x += s.width + spacing
+            rowH = max(rowH, s.height)
         }
     }
 }

@@ -1,0 +1,179 @@
+//
+//  CreateDoneView.swift
+//  MarkerCloud
+//
+//  Created by 이민서 on 8/14/25.
+//
+
+import SwiftUI
+import AVKit
+
+struct StoreCreateDoneView: View {
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var vm = StoreFeedUpLoadVM()
+    
+    let mediaUrl: String
+    
+    @State private var showDeleteAlert = false
+    @State private var showPostAlert = false
+    @State private var contentText: String
+    
+    @FocusState private var isTextFieldFocused: Bool
+    let method: MediaType
+    let feedType: String
+    let mediaType: String
+    let storeId: Int
+    let storeDescription: String
+    let storeImage: UIImage
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, storeDescription: String, storeImage: UIImage) {
+        self.mediaUrl = mediaUrl
+        self.method = method
+        self.feedType = feedType
+        self.mediaType = mediaType
+        self.storeId = storeId
+        self.storeDescription = storeDescription
+        self.storeImage = storeImage
+        _contentText = State(initialValue: body)
+    }
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 12) {
+                if method == .image {
+                    if let url = URL(string: mediaUrl) {
+                        AsyncImage(url: url) { img in
+                            img.resizable().scaledToFit()
+                        } placeholder: { ProgressView() }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    } else {
+                        Text("잘못된 이미지 URL")
+                    }
+                } else {
+                    if let url = URL(string: mediaUrl) {
+                        VideoPlayer(player: AVPlayer(url: url))
+                            .frame(minHeight: 220)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    } else {
+                        Text("잘못된 비디오 URL")
+                    }
+                }
+                
+                TextField("내용을 입력하세요", text: $contentText)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                    .focused($isTextFieldFocused)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("완료") {
+                                isTextFieldFocused = false
+                            }
+                        }
+                    }
+                Spacer()
+                
+                HStack(spacing: 10) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Text("다시 생성하기")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color("Main"))
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color("Main"), lineWidth: 1)
+                            )
+                    }
+                    
+                    Button(action: {
+                        Task {
+                            await vm.uploadStoreFeed(
+                                feedType: feedType,
+                                mediaType: mediaType,
+                                storeId: storeId,
+                                storeDescription: storeDescription,
+                                image: storeImage,
+                                feedMediaUrl: mediaUrl,
+                                    feedBody: contentText
+                            )
+                            showPostAlert = true
+                            
+                        }
+                    }) {
+                        Text("게시하기")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color("Main"))
+                            .cornerRadius(10)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("생성 완료")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss() // 현재 뷰 닫기
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.primary)
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showDeleteAlert = true
+                    }) {
+                        Label("삭제", systemImage: "trash")
+                            .labelStyle(.iconOnly)
+                    }
+                }
+                
+            }
+            .alert("정말 삭제하시겠습니까?", isPresented: $showDeleteAlert) {
+                Button("삭제", role: .destructive) {
+                    dismiss()
+                }
+                Button("취소", role: .cancel) {}
+            }
+            .alert("게시 완료 되었습니다.", isPresented: $showPostAlert) {
+                Button("확인", role: .cancel) {
+                    
+                    dismiss()
+                }
+            }
+            .overlay {
+                if vm.isUploading {
+                    ZStack {
+                        Color.black.opacity(0.25).ignoresSafeArea()
+                        ProgressView("업로드 중…")
+                            .padding().background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
+                Button("확인") { vm.errorMessage = nil }
+            } message: {
+                Text(vm.errorMessage ?? "")
+            }
+        }
+    }
+}
+
+

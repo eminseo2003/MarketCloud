@@ -26,7 +26,7 @@ struct CreateStoreView: View {
     let method: MediaType
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = StoreFeedUploadVM()
+    @StateObject private var vm = StoreFeedGenerateVM()
     @State private var createRoute: CreateRoute? = nil
     
     @State private var storeIdText: String = "1"
@@ -39,6 +39,9 @@ struct CreateStoreView: View {
     private var canCreate: Bool {
         selectedImage != nil
     }
+    
+    @FocusState private var isStoreScriptFocused: Bool
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -56,12 +59,21 @@ struct CreateStoreView: View {
                     ZStack(alignment: .topLeading) {
                         TextEditor(text: $storeScript)
                             .frame(height: 150)
+                            .focused($isStoreScriptFocused)
                             .onChange(of: storeScript) { oldValue, newValue in
                                 if newValue.count > maxCharacters {
                                     storeScript = String(newValue.prefix(maxCharacters))
                                 }
                             }
                         .frame(height: 150)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("완료") {
+                                    isStoreScriptFocused = false
+                                }
+                            }
+                        }
                         
                         if storeScript.isEmpty {
                             Text("점포 설명")
@@ -133,21 +145,36 @@ struct CreateStoreView: View {
                                             print("❌ Upload failed: \(err)")
                                         }
                         }
+                        isStoreScriptFocused = false
                     }
                     .disabled(!canCreate)
                     .tint(canCreate ? Color("Main") : Color.gray)
                 }
             }
             .navigationDestination(item: $createRoute) { route in
-                switch route {
-                case .createStoreComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
-                case .createProductComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
-                case .createEventComplete(let dto):
-                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, mediaType: method)
+                Group {
+                    if case let .createStoreComplete(dto) = route {
+                        if let img = selectedImage, let storeId = Int(storeIdText) {
+                            StoreCreateDoneView(
+                                mediaUrl: dto.feedMediaUrl,
+                                body: dto.feedBody,
+                                method: method,
+                                feedType: "store",
+                                mediaType: (method == .image ? "image" : "video"),
+                                storeId: storeId,
+                                storeDescription: storeScript,
+                                storeImage: img
+                            )
+                        } else {
+                            Text("필수 값이 없습니다. (이미지/점포 ID)")
+                        }
+
+                    } else {
+                        EmptyView()
+                    }
                 }
             }
+
 
             .onChange(of: photoItem) { _, item in
                 guard let item else { selectedImage = nil; return }
