@@ -7,13 +7,8 @@
 
 import SwiftUI
 
-struct Quest: Identifiable {
-    let id = UUID()
-    let title: String
-    let quest1: String
-    let quest2: String
-}
 struct RecommendMarketView: View {
+    @StateObject private var vm = MarketRecommendVM()
     @Binding var selectedMarketID: String
     @State private var route: Route? = nil
     @State var Answer1: String? = nil
@@ -41,10 +36,10 @@ struct RecommendMarketView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(spacing: 16) {
-                                optionRowView(title: "평일 낮")
-                                optionRowView(title: "평일 저녁")
-                                optionRowView(title: "주말 낮")
-                                optionRowView(title: "주말 저녁")
+                                optionRowView(title: "평일 낮", selection: $Answer1)
+                                optionRowView(title: "평일 저녁", selection: $Answer1)
+                                optionRowView(title: "주말 낮", selection: $Answer1)
+                                optionRowView(title: "주말 저녁", selection: $Answer1)
                             }
                             .padding()
                         }
@@ -58,9 +53,9 @@ struct RecommendMarketView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(spacing: 16) {
-                                optionRowView(title: "활기 선호")
-                                optionRowView(title: "보통")
-                                optionRowView(title: "한적 선호")
+                                optionRowView(title: "활기 선호", selection: $Answer2)
+                                optionRowView(title: "보통", selection: $Answer2)
+                                optionRowView(title: "한적 선호", selection: $Answer2)
                             }
                             .padding()
                         }
@@ -74,10 +69,10 @@ struct RecommendMarketView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(spacing: 16) {
-                                optionRowView(title: "자차")
-                                optionRowView(title: "자전거")
-                                optionRowView(title: "도보")
-                                optionRowView(title: "대중교통")
+                                optionRowView(title: "자차", selection: $Answer3)
+                                optionRowView(title: "자전거", selection: $Answer3)
+                                optionRowView(title: "도보", selection: $Answer3)
+                                optionRowView(title: "대중교통", selection: $Answer3)
                             }
                             .padding()
                         }
@@ -91,10 +86,10 @@ struct RecommendMarketView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(spacing: 16) {
-                                optionRowView(title: "먹거리 탐방")
-                                optionRowView(title: "장보기")
-                                optionRowView(title: "구경·산책")
-                                optionRowView(title: "데이트")
+                                MultiOptionRow(title: "먹거리 탐방", selections: $Answer4)
+                                MultiOptionRow(title: "장보기", selections: $Answer4)
+                                MultiOptionRow(title: "구경·산책", selections: $Answer4)
+                                MultiOptionRow(title: "데이트", selections: $Answer4)
                             }
                             .padding()
                         }
@@ -104,7 +99,17 @@ struct RecommendMarketView: View {
                 Spacer()
                 VStack {
                     Button {
-                        route = .selectComplete
+                        Task {
+                            await vm.recommend(q1: Answer1 ?? "",
+                                               q2: Answer2 ?? "",
+                                               q3: Answer3 ?? "",
+                                               q4: Answer4)
+                            if let top = vm.result?.top1Market {
+                                print("🎯 추천 결과:", Answer1 ?? "", Answer2 ?? "", Answer3 ?? "", Answer4)
+                            }
+                            route = .selectComplete
+                        }
+                        
                     } label: {
                         Text("완료")
                             .fontWeight(.bold)
@@ -133,12 +138,13 @@ struct RecommendMarketView: View {
 }
 struct optionRowView: View {
     let title: String
+    @Binding var selection: String?
     
     var body: some View {
         VStack(alignment: .leading) {
             Button {
                 withAnimation(.snappy(duration: 0.12)) {
-                    //selectedIndex = index
+                    selection = title
                 }
             } label: {
                 HStack {
@@ -146,12 +152,40 @@ struct optionRowView: View {
                         .font(.body)
                         .foregroundColor(.primary)
                     Spacer()
-                    Image(systemName: "checkmark.circle")
+                    Image(systemName: selection == title ? "checkmark.circle.fill" : "checkmark.circle")
                         .imageScale(.large)
-                        .foregroundColor(Color("Main"))
-//                    Image(systemName: selectedIndex == index ? "checkmark.circle.fill" : "checkmark.circle")
-//                        .imageScale(.large)
-//                        .foregroundColor(selectedIndex == index ? Color("Main") : .primary.opacity(0.7))
+                        .foregroundColor(selection == title ? Color("Main") : .primary.opacity(0.7))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+struct MultiOptionRow: View {
+    let title: String
+    @Binding var selections: [String]
+    var isSelected: Bool { selections.contains(title) }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button {
+                withAnimation(.snappy(duration: 0.12)) {
+                    if isSelected {
+                        selections.removeAll { $0 == title }
+                    } else {
+                        selections.append(title)
+                    }
+                }
+            } label: {
+                HStack {
+                    Text(title)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "checkmark.circle")
+                        .imageScale(.large)
+                        .foregroundColor(isSelected ? Color("Main") : .primary.opacity(0.7))
                 }
                 .contentShape(Rectangle())
             }
