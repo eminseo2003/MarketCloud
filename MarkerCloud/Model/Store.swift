@@ -69,7 +69,7 @@ enum PaymentMethod: Int, CaseIterable, Identifiable, Codable, Hashable {
         }
     }
 }
-struct Store: Hashable, Identifiable {
+struct Store: Codable, Identifiable {
     let id: UUID
     let storeName: String
     let profileImageURL: URL?

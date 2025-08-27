@@ -64,7 +64,7 @@ struct RecommendMarketView: View {
                 .background(Color(UIColor.systemGroupedBackground))
                 .navigationDestination(item: $route) { route in
                     if route == .selectComplete {
-                        CompleteRecommendView(selectedMarketID: $selectedMarketID)
+                        //CompleteRecommendView(selectedMarketID: $selectedMarketID)
                     }
                 }
             }

@@ -158,67 +158,67 @@ enum DummyStoreIDs {
     static let coffeeZzang = UUID(uuidString: "B1F4E2A9-4F3B-49C1-9A7D-2D0C8B2B2222")!
     static let breadSister = UUID(uuidString: "C3D2B1A0-9E8D-4C7A-8123-5F6E7D0C3333")!
 }
-let dummyStores: [Store] = [
-    Store(
-        id: DummyStoreIDs.coffeeKing,
-        storeName: "커피킹",
-        profileImageURL: kDummyImageURL,
-        marketId: DummyMarketIDs.marketOne,
-        categoryId: StoreCategory.cafeBakerySnacks.rawValue,
-        tel: "02-1234-5678",
-        dayOpenTime: time(9, 0),
-        dayCloseTime: time(18, 0),
-        weekendOpenTime: time(10, 0),
-        weekendCloseTime: time(17, 0),
-        address: "서울특별시 동대문구 어쩌고 501 120 301",
-        paymentMethods: Set([.onnuriVoucher, .zeropay]),
-        description: "스페셜티 원두로 내리는 드립/에스프레소 전문.",
-        feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeKing }
-    ),
-    Store(
-        id: DummyStoreIDs.coffeeWang,
-        storeName: "커피왕점포",
-        profileImageURL: kDummyImageURL,
-        marketId: DummyMarketIDs.marketOne,
-        categoryId: StoreCategory.cafeBakerySnacks.rawValue,
-        tel: "02-1234-5678",
-        dayOpenTime: time(9, 0),
-        dayCloseTime: time(18, 0),
-        weekendOpenTime: time(10, 0),
-        weekendCloseTime: time(17, 0),
-        address: "서울특별시 동대문구 어쩔로 50길 100 301",
-        paymentMethods: Set([.onnuriVoucher, .zeropay]),
-        description: "핸드드립 전문 카페입니다.",
-        feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeWang }
-        ),
-    Store(id: DummyStoreIDs.coffeeZzang,
-          storeName: "커피짱점포",
-          profileImageURL: kDummyImageURL,
-          marketId: DummyMarketIDs.marketOne,
-          categoryId: StoreCategory.sideDishes.rawValue,
-          tel: "02-1234-5678",
-          dayOpenTime: time(9, 0),
-          dayCloseTime: time(18, 0),
-          weekendOpenTime: time(10, 0),
-          weekendCloseTime: time(17, 0),
-          address: "서울특별시 동대문구 어쩔로 50길 100 301",
-          paymentMethods: Set([.onnuriVoucher, .zeropay]),
-          description: "핸드드립 전문 카페입니다.",
-          feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeZzang }
-         ),
-    Store(id: DummyStoreIDs.breadSister, storeName: "빵굽는언니점포", profileImageURL: kDummyImageURL, marketId: DummyMarketIDs.marketTwo,
-          categoryId: StoreCategory.sideDishes.rawValue,
-          tel: "02-1234-5678",
-          dayOpenTime: time(9, 0),
-          dayCloseTime: time(18, 0),
-          weekendOpenTime: time(10, 0),
-          weekendCloseTime: time(17, 0),
-          address: "서울특별시 동대문구 어쩔로 50길 100 301",
-          paymentMethods: Set([.onnuriVoucher, .zeropay]),
-          description: "핸드드립 전문 카페입니다.",
-          feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.breadSister }
-         )
-]
+//let dummyStores: [Store] = [
+//    Store(
+//        id: DummyStoreIDs.coffeeKing,
+//        storeName: "커피킹",
+//        profileImageURL: kDummyImageURL,
+//        marketId: DummyMarketIDs.marketOne,
+//        categoryId: StoreCategory.cafeBakerySnacks.rawValue,
+//        tel: "02-1234-5678",
+//        dayOpenTime: time(9, 0),
+//        dayCloseTime: time(18, 0),
+//        weekendOpenTime: time(10, 0),
+//        weekendCloseTime: time(17, 0),
+//        address: "서울특별시 동대문구 어쩌고 501 120 301",
+//        paymentMethods: Set([.onnuriVoucher, .zeropay]),
+//        description: "스페셜티 원두로 내리는 드립/에스프레소 전문.",
+//        feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeKing }
+//    ),
+//    Store(
+//        id: DummyStoreIDs.coffeeWang,
+//        storeName: "커피왕점포",
+//        profileImageURL: kDummyImageURL,
+//        marketId: DummyMarketIDs.marketOne,
+//        categoryId: StoreCategory.cafeBakerySnacks.rawValue,
+//        tel: "02-1234-5678",
+//        dayOpenTime: time(9, 0),
+//        dayCloseTime: time(18, 0),
+//        weekendOpenTime: time(10, 0),
+//        weekendCloseTime: time(17, 0),
+//        address: "서울특별시 동대문구 어쩔로 50길 100 301",
+//        paymentMethods: Set([.onnuriVoucher, .zeropay]),
+//        description: "핸드드립 전문 카페입니다.",
+//        feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeWang }
+//        ),
+//    Store(id: DummyStoreIDs.coffeeZzang,
+//          storeName: "커피짱점포",
+//          profileImageURL: kDummyImageURL,
+//          marketId: DummyMarketIDs.marketOne,
+//          categoryId: StoreCategory.sideDishes.rawValue,
+//          tel: "02-1234-5678",
+//          dayOpenTime: time(9, 0),
+//          dayCloseTime: time(18, 0),
+//          weekendOpenTime: time(10, 0),
+//          weekendCloseTime: time(17, 0),
+//          address: "서울특별시 동대문구 어쩔로 50길 100 301",
+//          paymentMethods: Set([.onnuriVoucher, .zeropay]),
+//          description: "핸드드립 전문 카페입니다.",
+//          feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.coffeeZzang }
+//         ),
+//    Store(id: DummyStoreIDs.breadSister, storeName: "빵굽는언니점포", profileImageURL: kDummyImageURL, marketId: DummyMarketIDs.marketTwo,
+//          categoryId: StoreCategory.sideDishes.rawValue,
+//          tel: "02-1234-5678",
+//          dayOpenTime: time(9, 0),
+//          dayCloseTime: time(18, 0),
+//          weekendOpenTime: time(10, 0),
+//          weekendCloseTime: time(17, 0),
+//          address: "서울특별시 동대문구 어쩔로 50길 100 301",
+//          paymentMethods: Set([.onnuriVoucher, .zeropay]),
+//          description: "핸드드립 전문 카페입니다.",
+//          feeds: dummyFeed.filter { $0.storeId == DummyStoreIDs.breadSister }
+//         )
+//]
 
 enum DummyFeedIDs {
     static let feed1 = "F-00000000-0000-0000-0000-000000000001"
@@ -229,128 +229,128 @@ enum DummyFeedIDs {
     static let feed6 = "F-00000000-0000-0000-0000-000000000006"
 
 }
-let dummyFeed: [Feed] = [
-    Feed(
-        id: DummyFeedIDs.feed1,
-        storeId: DummyStoreIDs.coffeeKing,
-        promoKind: .event,
-        mediaType: .image,
-        title: "fwjnofsd이벤트/사진",
-        prompt: "ㅇㅇ러주대러주낻",
-        mediaUrl: kDummyImageURL,
-        body: "주더ㅜㄹ잳어ㅑㅐㅔㅈㄴ",
-        createdAt: Date(),
-        event: EventFeedPayload(
-            eventName: "가을맞이 할인",
-            description: "전 품목 10%~30%",
-            imgUrl: kDummyImageURL,
-            startAt: Date(),
-            endAt: Calendar.current.date(byAdding: .day, value: 7, to: Date())
-        ),
-        storeInfo: nil,
-        product: nil,
-        reviews: sampleReviews
-    ),
-    Feed(
-        id: DummyFeedIDs.feed2,
-        storeId: DummyStoreIDs.breadSister,
-        promoKind: .product,
-        mediaType: .image,
-        title: "fwfwegthge상품/사진",
-        prompt: "이 상품으로 홍보문구 생성",
-        mediaUrl: kDummyImageURL,
-        body: "산지직송 사과 특가!",
-        createdAt: Date(),
-        event: nil,
-        storeInfo: nil,
-        product: ProductFeedPayload(
-            productName: "아오리 사과 3kg",
-            description: "새콤달콤 아삭",
-            imgUrl: kDummyImageURL,
-            productCategoryId: StoreCategory.meat.rawValue
-        ),
-        reviews: sampleReviews
-    ),
-    Feed(
-        id: DummyFeedIDs.feed3,
-        storeId: DummyStoreIDs.breadSister,
-        promoKind: .product,
-        mediaType: .video,
-        title: "fewfedw상품/비디오",
-        prompt: "이 상품으로 홍보문구 생성",
-        mediaUrl: kDummyVideoURL,
-        body: "산지직송 사과 특가!",
-        createdAt: Date(),
-        event: nil,
-        storeInfo: nil,
-        product: ProductFeedPayload(
-            productName: "아오리 사과 3kg",
-            description: "새콤달콤 아삭",
-            imgUrl: kDummyImageURL,
-            productCategoryId: StoreCategory.meat.rawValue
-        ),
-        reviews: sampleReviews
-    ),
-    Feed(
-        id: DummyFeedIDs.feed4,
-        storeId: DummyStoreIDs.coffeeKing,
-        promoKind: .event,
-        mediaType: .image,
-        title: "fwjnofsd이벤트/사진",
-        prompt: "ㅇㅇ러주대러주낻",
-        mediaUrl: kDummyImageURL,
-        body: "주더ㅜㄹ잳어ㅑㅐㅔㅈㄴ",
-        createdAt: Date(),
-        event: EventFeedPayload(
-            eventName: "가을맞이 할인",
-            description: "전 품목 10%~30%",
-            imgUrl: kDummyImageURL,
-            startAt: Date(),
-            endAt: Calendar.current.date(byAdding: .day, value: 7, to: Date())
-        ),
-        storeInfo: nil,
-        product: nil,
-        reviews: sampleReviews
-    ),
-    Feed(
-        id: DummyFeedIDs.feed5,
-        storeId: DummyStoreIDs.breadSister,
-        promoKind: .product,
-        mediaType: .image,
-        title: "fwfwegthge상품/사진",
-        prompt: "이 상품으로 홍보문구 생성",
-        mediaUrl: kDummyImageURL,
-        body: "산지직송 사과 특가!",
-        createdAt: Date(),
-        event: nil,
-        storeInfo: nil,
-        product: ProductFeedPayload(
-            productName: "아오리 사과 3kg",
-            description: "새콤달콤 아삭",
-            imgUrl: kDummyImageURL,
-            productCategoryId: StoreCategory.meat.rawValue
-        ),
-        reviews: sampleReviews
-    ),
-    Feed(
-        id: DummyFeedIDs.feed6,
-        storeId: DummyStoreIDs.breadSister,
-        promoKind: .store,
-        mediaType: .image,
-        title: "fwfwegthge점포/사진",
-        prompt: "이 상품으로 홍보문구 생성",
-        mediaUrl: kDummyImageURL,
-        body: "산지직송 사과 특가!",
-        createdAt: Date(),
-        event: nil,
-        storeInfo: StoreFeedPayload(
-            description: "아오리 사과 3kg",
-            imgUrl: kDummyImageURL
-        ),
-        product: nil,
-        reviews: sampleReviews
-    )
-]
+//let dummyFeed: [Feed] = [
+//    Feed(
+//        id: DummyFeedIDs.feed1,
+//        storeId: DummyStoreIDs.coffeeKing,
+//        promoKind: .event,
+//        mediaType: .image,
+//        title: "fwjnofsd이벤트/사진",
+//        prompt: "ㅇㅇ러주대러주낻",
+//        mediaUrl: kDummyImageURL,
+//        body: "주더ㅜㄹ잳어ㅑㅐㅔㅈㄴ",
+//        createdAt: Date(),
+//        event: EventFeedPayload(
+//            eventName: "가을맞이 할인",
+//            description: "전 품목 10%~30%",
+//            imgUrl: kDummyImageURL,
+//            startAt: Date(),
+//            endAt: Calendar.current.date(byAdding: .day, value: 7, to: Date())
+//        ),
+//        storeInfo: nil,
+//        product: nil,
+//        reviews: sampleReviews
+//    ),
+//    Feed(
+//        id: DummyFeedIDs.feed2,
+//        storeId: DummyStoreIDs.breadSister,
+//        promoKind: .product,
+//        mediaType: .image,
+//        title: "fwfwegthge상품/사진",
+//        prompt: "이 상품으로 홍보문구 생성",
+//        mediaUrl: kDummyImageURL,
+//        body: "산지직송 사과 특가!",
+//        createdAt: Date(),
+//        event: nil,
+//        storeInfo: nil,
+//        product: ProductFeedPayload(
+//            productName: "아오리 사과 3kg",
+//            description: "새콤달콤 아삭",
+//            imgUrl: kDummyImageURL,
+//            productCategoryId: StoreCategory.meat.rawValue
+//        ),
+//        reviews: sampleReviews
+//    ),
+//    Feed(
+//        id: DummyFeedIDs.feed3,
+//        storeId: DummyStoreIDs.breadSister,
+//        promoKind: .product,
+//        mediaType: .video,
+//        title: "fewfedw상품/비디오",
+//        prompt: "이 상품으로 홍보문구 생성",
+//        mediaUrl: kDummyVideoURL,
+//        body: "산지직송 사과 특가!",
+//        createdAt: Date(),
+//        event: nil,
+//        storeInfo: nil,
+//        product: ProductFeedPayload(
+//            productName: "아오리 사과 3kg",
+//            description: "새콤달콤 아삭",
+//            imgUrl: kDummyImageURL,
+//            productCategoryId: StoreCategory.meat.rawValue
+//        ),
+//        reviews: sampleReviews
+//    ),
+//    Feed(
+//        id: DummyFeedIDs.feed4,
+//        storeId: DummyStoreIDs.coffeeKing,
+//        promoKind: .event,
+//        mediaType: .image,
+//        title: "fwjnofsd이벤트/사진",
+//        prompt: "ㅇㅇ러주대러주낻",
+//        mediaUrl: kDummyImageURL,
+//        body: "주더ㅜㄹ잳어ㅑㅐㅔㅈㄴ",
+//        createdAt: Date(),
+//        event: EventFeedPayload(
+//            eventName: "가을맞이 할인",
+//            description: "전 품목 10%~30%",
+//            imgUrl: kDummyImageURL,
+//            startAt: Date(),
+//            endAt: Calendar.current.date(byAdding: .day, value: 7, to: Date())
+//        ),
+//        storeInfo: nil,
+//        product: nil,
+//        reviews: sampleReviews
+//    ),
+//    Feed(
+//        id: DummyFeedIDs.feed5,
+//        storeId: DummyStoreIDs.breadSister,
+//        promoKind: .product,
+//        mediaType: .image,
+//        title: "fwfwegthge상품/사진",
+//        prompt: "이 상품으로 홍보문구 생성",
+//        mediaUrl: kDummyImageURL,
+//        body: "산지직송 사과 특가!",
+//        createdAt: Date(),
+//        event: nil,
+//        storeInfo: nil,
+//        product: ProductFeedPayload(
+//            productName: "아오리 사과 3kg",
+//            description: "새콤달콤 아삭",
+//            imgUrl: kDummyImageURL,
+//            productCategoryId: StoreCategory.meat.rawValue
+//        ),
+//        reviews: sampleReviews
+//    ),
+//    Feed(
+//        id: DummyFeedIDs.feed6,
+//        storeId: DummyStoreIDs.breadSister,
+//        promoKind: .store,
+//        mediaType: .image,
+//        title: "fwfwegthge점포/사진",
+//        prompt: "이 상품으로 홍보문구 생성",
+//        mediaUrl: kDummyImageURL,
+//        body: "산지직송 사과 특가!",
+//        createdAt: Date(),
+//        event: nil,
+//        storeInfo: StoreFeedPayload(
+//            description: "아오리 사과 3kg",
+//            imgUrl: kDummyImageURL
+//        ),
+//        product: nil,
+//        reviews: sampleReviews
+//    )
+//]
 
 enum DummyReviewIDs {
     static let review1 = "R-00000000-0000-0000-0000-000000000001"

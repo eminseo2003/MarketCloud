@@ -15,21 +15,8 @@ enum StoreTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 struct MainView: View {
-    var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
-    private func feeds(for store: Store) -> [Feed] {
-        let storeFeeds = imageFeeds.filter { $0.storeId == store.id }
-        
-        switch selectedTab {
-        case .all:
-            return storeFeeds
-        case .store:
-            return storeFeeds.filter { $0.promoKind == .store }
-        case .product:
-            return storeFeeds.filter { $0.promoKind == .product }
-        case .event:
-            return storeFeeds.filter { $0.promoKind == .event }
-        }
-    }
+    @StateObject private var feedVM = FeedViewModel()
+    //var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
     
     
     @Binding var selectedMarketID: String
@@ -38,11 +25,11 @@ struct MainView: View {
     private var selectedMarketUUID: UUID? {
         UUID(uuidString: selectedMarketID)
     }
-    private var storesInSelectedMarket: [Store] {
-        guard let id = selectedMarketUUID else { return [] }
-        return dummyStores.filter { $0.marketId == id }
-    }
-    @State private var pushStore: Store? = nil
+//    private var storesInSelectedMarket: [Store] {
+//        guard let id = selectedMarketUUID else { return [] }
+//        return dummyStores.filter { $0.marketId == id }
+//    }
+    @State private var pushStoreName: String? = nil
     let columns = [
         GridItem(.flexible())
     ]
@@ -93,31 +80,57 @@ struct MainView: View {
                     }
                     .pickerStyle(.segmented)
                     .padding()
-                    LazyVGrid(columns: columns, spacing: 8) {
-                        VStack(spacing: 16) {
-                            ForEach(storesInSelectedMarket) { store in
-                                ForEach(feeds(for: store)) { feed in
-                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
-                                }
+                    
+                    if feedVM.isLoading {
+                        ProgressView("불러오는 중...")
+                    } else {
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredFeeds) { feed in
+                                FeedCardView(feed: feed, pushStoreName: $pushStoreName)
                             }
-                            
                         }
                         .padding(.horizontal)
                     }
+//                    LazyVGrid(columns: columns, spacing: 8) {
+//                        VStack(spacing: 16) {
+//                            ForEach(storesInSelectedMarket) { store in
+//                                ForEach(feeds(for: store)) { feed in
+//                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
+//                                }
+//                            }
+//                            
+//                        }
+//                        .padding(.horizontal)
+//                    }
                     
                 }
-                .refreshable {
-                    
-                }
+                .task {
+                                    // 최초 로드 시 실행
+                                    await feedVM.fetchFeeds(marketId: 1)
+                                }
+                                .refreshable {
+                                    await feedVM.fetchFeeds(marketId: 1)
+                                }
                 Spacer()
                 
             }
-            .navigationDestination(item: $pushStore) { store in
-                StoreProfileView(store: store)
-            }
+//            .navigationDestination(item: $pushStore) { store in
+//                StoreProfileView(store: store)
+//            }
         }
         
     }
-    
+    private var filteredFeeds: [Feed] {
+            switch selectedTab {
+            case .all:
+                return feedVM.feeds
+            case .store:
+                return feedVM.feeds.filter { $0.promoKind == "store" }
+            case .product:
+                return feedVM.feeds.filter { $0.promoKind == "product" }
+            case .event:
+                return feedVM.feeds.filter { $0.promoKind == "event" }
+            }
+        }
 }
 
