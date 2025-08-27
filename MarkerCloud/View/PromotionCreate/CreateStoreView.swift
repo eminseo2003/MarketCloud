@@ -9,11 +9,14 @@ import SwiftUI
 import PhotosUI
 
 enum CreateRoute: Identifiable, Hashable {
-    case createComplete(GenerateDTO)
+    case createStoreComplete(GenerateDTO)
+    case createProductComplete(GenerateDTO)
+    //case createEventComplete(GenerateDTO)
 
     var id: String {
         switch self {
-        case .createComplete(let dto): return "createComplete:\(dto.id)"
+        case .createStoreComplete(let dto): return "createComplete:\(dto.id)"
+        case .createProductComplete(let dto): return "createComplete:\(dto.id)"
         }
     }
 }
@@ -22,7 +25,7 @@ struct CreateStoreView: View {
     let method: MediaType
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = FeedUploadVM()
+    @StateObject private var vm = StoreFeedUploadVM()
     @State private var createRoute: CreateRoute? = nil
     
     @State private var storeIdText: String = "1"
@@ -124,7 +127,7 @@ struct CreateStoreView: View {
                                 image: img
                             )
                             if let g = vm.generated {
-                                createRoute = .createComplete(g)
+                                createRoute = .createStoreComplete(g)
                                         } else if let err = vm.errorMessage {
                                             print("❌ Upload failed: \(err)")
                                         }
@@ -136,7 +139,9 @@ struct CreateStoreView: View {
             }
             .navigationDestination(item: $createRoute) { route in
                 switch route {
-                case .createComplete(let dto):
+                case .createStoreComplete(let dto):
+                    CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
+                case .createProductComplete(let dto):
                     CreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody)
                 }
             }

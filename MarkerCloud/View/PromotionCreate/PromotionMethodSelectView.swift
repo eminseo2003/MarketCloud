@@ -79,7 +79,10 @@ struct PromotionMethodSelectView: View {
                                 method: pushMethod?.mediaType ?? .image
                             )
                         } else if promotion.name == "상품"{
-                            //CreateProductView(method: method, promotion: promotion)
+                            CreateProductView(
+                                feedType: mapFeedType(from: promotion.name),
+                                method: pushMethod?.mediaType ?? .image
+                            )
                         } else {
                             //CreateEventView(method: method, promotion: promotion)
                         }
