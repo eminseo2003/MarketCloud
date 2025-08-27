@@ -25,13 +25,14 @@ struct CreateEventView: View {
     @State private var photoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage? = nil
     
-    @FocusState private var isTextFieldFocused: Bool
+    @FocusState private var isEventScriptFocused: Bool
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("이벤트명")) {
                     TextField("이벤트명", text: $eventName)
+                        .focused($isEventScriptFocused)
                 }
                 Section(header: Text("이벤트 진행 일정")) {
                     HStack {
@@ -64,6 +65,7 @@ struct CreateEventView: View {
                             }
                         ))
                         .frame(height: 150)
+                        .focused($isEventScriptFocused)
                         
                         if eventScript.isEmpty {
                             Text("홍보 게시글을 생성하는 데 사용됩니다.")
@@ -112,6 +114,12 @@ struct CreateEventView: View {
             .navigationTitle("이벤트 홍보 생성하기")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isEventScriptFocused = false
+                    }
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("취소") {
                         dismiss()
@@ -138,6 +146,7 @@ struct CreateEventView: View {
                                             print("❌ Upload failed: \(err)")
                                         }
                         }
+                        isEventScriptFocused = false
                     }
                 }
             }
@@ -175,7 +184,6 @@ struct CreateEventView: View {
             } message: {
                 Text(vm.errorMessage ?? "")
             }
-            .onDisappear { isTextFieldFocused = false }
 
         }
     }

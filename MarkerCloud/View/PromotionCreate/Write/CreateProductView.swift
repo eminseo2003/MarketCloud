@@ -41,12 +41,17 @@ struct CreateProductView: View {
     private var canCreate: Bool {
         hasName && hasCategory && hasDesc && hasImage
     }
+    
+    @FocusState private var isProductWriteFocused: Bool
+    
     var body: some View {
         NavigationStack {
             Form {
                 Section(header: Text("상품명")) {
                     TextField("상품명", text: $productName)
+                        .focused($isProductWriteFocused)
                 }
+                
                 Section(header: Text("카테고리")) {
                     FlowLayout(spacing: 8, lineSpacing: 10) {
                         ForEach(categories, id: \.self) { cat in
@@ -63,20 +68,18 @@ struct CreateProductView: View {
                 }
                 Section(header: Text("상품 설명")) {
                     ZStack(alignment: .topLeading) {
-                        TextEditor(text: Binding(
-                            get: { productScript },
-                            set: { newValue in
-                                if newValue.count <= maxCharacters {
-                                    productScript = newValue
-                                } else {
+                        TextEditor(text: $productScript)
+                            .frame(height: 150)
+                            .focused($isProductWriteFocused)
+                            .onChange(of: productScript) { oldValue, newValue in
+                                if newValue.count > maxCharacters {
                                     productScript = String(newValue.prefix(maxCharacters))
                                 }
                             }
-                        ))
                         .frame(height: 150)
                         
                         if productScript.isEmpty {
-                            Text("홍보 게시글을 생성하는 데 사용됩니다.")
+                            Text("상품 설명")
                                 .foregroundColor(.gray)
                                 .padding(.top, 8)
                                 .padding(.leading, 6)
@@ -122,6 +125,12 @@ struct CreateProductView: View {
             .navigationTitle("상품 홍보 생성하기")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isProductWriteFocused = false
+                    }
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("취소") {
                         dismiss()
@@ -150,6 +159,7 @@ struct CreateProductView: View {
                                             print("❌ Upload failed: \(err)")
                                         }
                         }
+                        isProductWriteFocused = false
                     }
                     .disabled(!canCreate)
                     .tint(canCreate ? Color("Main") : Color.gray)

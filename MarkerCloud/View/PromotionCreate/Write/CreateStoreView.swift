@@ -66,15 +66,6 @@ struct CreateStoreView: View {
                                 }
                             }
                         .frame(height: 150)
-                        .toolbar {
-                            ToolbarItemGroup(placement: .keyboard) {
-                                Spacer()
-                                Button("완료") {
-                                    isStoreScriptFocused = false
-                                }
-                            }
-                        }
-                        
                         if storeScript.isEmpty {
                             Text("점포 설명")
                                 .foregroundColor(.gray)
@@ -122,6 +113,12 @@ struct CreateStoreView: View {
             .navigationTitle("점포 홍보 생성하기")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isStoreScriptFocused = false
+                    }
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("취소") {
                         dismiss()
