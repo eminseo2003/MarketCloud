@@ -153,7 +153,23 @@ struct CreateEventView: View {
             .navigationDestination(item: $createRoute) { route in
                 Group {
                     if case let .createEventComplete(dto) = route {
-                        EventCreateDoneView(mediaUrl: dto.feedMediaUrl, body: dto.feedBody, method: method)
+                        if let img = selectedImage, let storeId = Int(storeIdText) {
+                            EventCreateDoneView(
+                                mediaUrl: dto.feedMediaUrl,
+                                body: dto.feedBody,
+                                method: method,
+                                feedType: "event",
+                                mediaType: (method == .image ? "image" : "video"),
+                                storeId: storeId,
+                                eventName: eventName,
+                                eventDescription: eventScript,
+                                eventStartAt: eventStart,
+                                eventEndAt: eventEnd,
+                                eventImage: img
+                            )
+                        } else {
+                            Text("필수 값이 없습니다. (이미지/점포 ID)")
+                        }
 
                     } else {
                         EmptyView()

@@ -96,7 +96,7 @@ struct ProductCreateDoneView: View {
                     Button(action: {
                         Task {
                             
-                            await vm.uploadStoreFeed(
+                            await vm.uploadProductFeed(
                                 feedType: feedType,
                                 mediaType: mediaType,
                                 storeId: storeId,

@@ -10,19 +10,37 @@ import AVKit
 
 struct EventCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var vm = EventFeedUpLoadVM()
     
     let mediaUrl: String
     
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    init(mediaUrl: String, body: String, method: MediaType) {
+    let method: MediaType
+    let feedType: String
+    let mediaType: String
+    let storeId: Int
+    let eventName: String
+    let eventDescription: String
+    let eventStartAt: Date
+    let eventEndAt: Date
+    let eventImage: UIImage
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, eventName: String, eventDescription: String, eventStartAt: Date, eventEndAt: Date, eventImage: UIImage) {
         self.mediaUrl = mediaUrl
         self.method = method
+        self.feedType = feedType
+        self.mediaType = mediaType
+        self.storeId = storeId
+        self.eventName = eventName
+        self.eventDescription = eventDescription
+        self.eventStartAt = eventStartAt
+        self.eventEndAt = eventEndAt
+        self.eventImage = eventImage
         _contentText = State(initialValue: body)
     }
     @FocusState private var isTextFieldFocused: Bool
-    let method: MediaType
+    
     
     var body: some View {
         NavigationStack {
@@ -61,14 +79,6 @@ struct EventCreateDoneView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .focused($isTextFieldFocused)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("완료") {
-                                isTextFieldFocused = false
-                            }
-                        }
-                    }
                 Spacer()
                 
                 HStack(spacing: 10) {
@@ -87,7 +97,21 @@ struct EventCreateDoneView: View {
                     }
                     
                     Button(action: {
-                        showPostAlert = true
+                        Task {
+                            await vm.uploadEventFeed(
+                                feedType: feedType,
+                                mediaType: mediaType,
+                                storeId: storeId,
+                                eventName: eventName,
+                                eventDescription: eventDescription,
+                                eventStartAt: eventStartAt,
+                                eventEndAt: eventEndAt,
+                                eventImage: eventImage,
+                                feedMediaUrl: mediaUrl,
+                                feedBody: contentText
+                            )
+                            showPostAlert = true
+                        }
                     }) {
                         Text("게시하기")
                             .fontWeight(.semibold)
@@ -104,6 +128,12 @@ struct EventCreateDoneView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isTextFieldFocused = false
+                    }
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         dismiss() // 현재 뷰 닫기
@@ -132,6 +162,21 @@ struct EventCreateDoneView: View {
                 Button("확인", role: .cancel) {
                     dismiss()
                 }
+            }
+            .overlay {
+                if vm.isUploading {
+                    ZStack {
+                        Color.black.opacity(0.25).ignoresSafeArea()
+                        ProgressView("업로드 중…")
+                            .padding().background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
+                Button("확인") { vm.errorMessage = nil }
+            } message: {
+                Text(vm.errorMessage ?? "")
             }
         }
     }
