@@ -19,7 +19,7 @@ struct FeedCardView: View {
                 pushStoreName = feed.storeName
             } label: {
                 HStack {
-                    AsyncImage(url: URL(string: feed.storeImageUrl)) { image in
+                    AsyncImage(url: feed.storeImageURL) { image in
                         //AsyncImage(url: kDummyImageURL) { image in
                             image
                             .resizable()
@@ -45,7 +45,7 @@ struct FeedCardView: View {
                 }
             }
             
-            AsyncImage(url: URL(string: feed.feedImageUrl)) { image in
+            AsyncImage(url: feed.imageURL) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -66,7 +66,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text("\(feed.feedLikeCount)")
+                    Text("\(feed.likeCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -80,7 +80,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text("\(feed.feedReviewCount)")
+                    Text("\(feed.reviewCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -91,43 +91,42 @@ struct FeedCardView: View {
             .padding(.vertical, 5)
             
             (
-                Text(feed.feedTitle).bold() +
-                Text(" \(feed.feedContent)")
+                Text(feed.title).bold() +
+                Text(" \(feed.content)")
             )
             .font(.subheadline)
             .foregroundColor(.primary)
         }
         .padding(.bottom, 8)
         .sheet(isPresented: $isCommentSheetPresented) {
-            CommentSheetView(feedId: feed.feedId)
+            CommentSheetView(feedId: feed.id)
                 .presentationDetents([.medium])
         }
     }
 }
 
-private func parseServerDate(_ s: String) -> Date? {
-    if s.contains("Z") || s.range(of: #"[+\-]\d{2}:\d{2}$"#, options: .regularExpression) != nil {
-        let iso = ISO8601DateFormatter()
-        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = iso.date(from: s) { return d }
-        iso.formatOptions = [.withInternetDateTime]
-        if let d = iso.date(from: s) { return d }
-    }
+//private func parseServerDate(_ s: String) -> Date? {
+//    if s.contains("Z") || s.range(of: #"[+\-]\d{2}:\d{2}$"#, options: .regularExpression) != nil {
+//        let iso = ISO8601DateFormatter()
+//        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+//        if let d = iso.date(from: s) { return d }
+//        iso.formatOptions = [.withInternetDateTime]
+//        if let d = iso.date(from: s) { return d }
+//    }
+//
+//    let f = DateFormatter()
+//    f.locale = Locale(identifier: "en_US_POSIX")
+//    f.timeZone = TimeZone(secondsFromGMT: 0)
+//    f.dateFormat = s.contains(".") ? "yyyy-MM-dd'T'HH:mm:ss.SSS" : "yyyy-MM-dd'T'HH:mm:ss"
+//    return f.date(from: s)
+//}
 
-    let f = DateFormatter()
-    f.locale = Locale(identifier: "en_US_POSIX")
-    f.timeZone = TimeZone(secondsFromGMT: 0)
-    f.dateFormat = s.contains(".") ? "yyyy-MM-dd'T'HH:mm:ss.SSS" : "yyyy-MM-dd'T'HH:mm:ss"
-    return f.date(from: s)
-}
-
-func formatDate(from raw: String) -> String {
-    guard let date = parseServerDate(raw) else { return raw }
+func formatDate(from raw: Date) -> String {
     let out = DateFormatter()
     out.locale = Locale(identifier: "ko_KR")
     out.timeZone = .current
     out.dateFormat = "yyyy년 M월 d일 HH:mm"
-    return out.string(from: date)
+    return out.string(from: raw)
 }
 
 

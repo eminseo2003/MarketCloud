@@ -69,29 +69,29 @@ enum PaymentMethod: Int, CaseIterable, Identifiable, Codable, Hashable {
         }
     }
 }
-struct Store: Codable, Identifiable {
-    let id: UUID
-    let storeName: String
-    let profileImageURL: URL?
-    var marketId: UUID
-    
-    var categoryId: Int?
-    
-    var category: StoreCategory? {
-        get { categoryId.flatMap(StoreCategory.init(rawValue:)) }
-        set { categoryId = newValue?.rawValue }
-    }
-    var tel: String?
-    var dayOpenTime: Date?
-    var dayCloseTime: Date?
-    var weekendOpenTime: Date?
-    var weekendCloseTime: Date?
-    var address: String?
-    var paymentMethods: Set<PaymentMethod> = []
-    var description: String?
-    
-    var feeds: [Feed] = []
-}
+//struct Store: Codable, Identifiable {
+//    let id: UUID
+//    let storeName: String
+//    let profileImageURL: URL?
+//    var marketId: UUID
+//    
+//    var categoryId: Int?
+//    
+//    var category: StoreCategory? {
+//        get { categoryId.flatMap(StoreCategory.init(rawValue:)) }
+//        set { categoryId = newValue?.rawValue }
+//    }
+//    var tel: String?
+//    var dayOpenTime: Date?
+//    var dayCloseTime: Date?
+//    var weekendOpenTime: Date?
+//    var weekendCloseTime: Date?
+//    var address: String?
+//    var paymentMethods: Set<PaymentMethod> = []
+//    var description: String?
+//    
+//    var feeds: [Feed] = []
+//}
 
 extension Set where Element == PaymentMethod {
     var summary: String {

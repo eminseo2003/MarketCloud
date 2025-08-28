@@ -7,8 +7,20 @@
 
 import Foundation
 
-struct Feed: Codable, Identifiable {
-    var id: Int { feedId }
+struct Feed: Identifiable, Hashable {
+    let id: Int
+    let storeName: String
+    let storeImageURL: URL
+    let createdAt: Date
+    let title: String
+    let content: String
+    let imageURL: URL
+    let feedType: String
+    let likeCount: Int
+    let reviewCount: Int
+}
+
+private struct FeedItemDTO: Decodable {
     let feedId: Int
     let storeName: String
     let storeImageUrl: String
@@ -20,12 +32,12 @@ struct Feed: Codable, Identifiable {
     let feedLikeCount: Int
     let feedReviewCount: Int
 }
-
-private struct FeedListContainer: Decodable {
-    let feedList: [Feed]
+private struct FeedListDTO: Decodable {
+    let feedList: [FeedItemDTO]
 }
+
 private struct FeedListResponse: Decodable {
-    let responseDto: FeedListContainer
+    let responseDto: FeedListDTO?
     let error: String?
     let success: Bool
 }
@@ -36,48 +48,101 @@ final class FeedViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    func fetchFeeds(marketId: Int) async {
-        guard let url = URL(string: "https://famous-blowfish-plainly.ngrok-free.app/api/feed/\(marketId)") else {
-            print("잘못된 URL: marketId=\(marketId)")
-            return
-        }
+    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 
-        print("[FeedViewModel] 요청 시작:", url.absoluteString)
+    private func makeURL(marketId: Int, userId: Int) -> URL {
+        base.appendingPathComponent("api")
+            .appendingPathComponent("feed")
+            .appendingPathComponent(String(marketId))
+            .appendingPathComponent(String(userId))
+    }
+
+    func fetch(marketId: Int, userId: Int) async {
+        errorMessage = nil
         isLoading = true
-        defer {
-            isLoading = false
-            print("[FeedViewModel] 요청 종료")
-        }
+        defer { isLoading = false }
 
+        let url = makeURL(marketId: marketId, userId: userId)
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         req.setValue("application/json", forHTTPHeaderField: "Accept")
         req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
 
         do {
+            log("GET", url.absoluteString)
             let (data, resp) = try await URLSession.shared.data(for: req)
-            if let http = resp as? HTTPURLResponse { print("[FeedViewModel] 응답 코드:", http.statusCode) }
+            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
+            log("status:", code)
+            if let pretty = prettyJSON(data) { log("↩︎ JSON\n\(pretty)") }
 
-            if let wrapped = try? JSONDecoder().decode(FeedListResponse.self, from: data),
-               wrapped.success {
-                self.feeds = wrapped.responseDto.feedList
-                print("[FeedViewModel] 피드 불러오기 성공(래핑): \(feeds.count)개")
+            guard (200...299).contains(code) else {
+                errorMessage = "HTTP \(code)"
                 return
             }
 
-            if let direct = try? JSONDecoder().decode([Feed].self, from: data) {
-                self.feeds = direct
-                print("[FeedViewModel] 피드 불러오기 성공(직접 배열): \(feeds.count)개")
+            let decoded = try JSONDecoder().decode(FeedListResponse.self, from: data)
+            guard decoded.success, let dto = decoded.responseDto else {
+                errorMessage = decoded.error ?? "서버 응답 오류"
                 return
             }
 
-            errorMessage = "응답 파싱 실패"
-            if let s = String(data: data, encoding: .utf8) {
-                print("[FeedViewModel] 파싱 실패. 원본:", s)
+            self.feeds = dto.feedList.map { item in
+                Feed(
+                    id: item.feedId,
+                    storeName: item.storeName,
+                    storeImageURL: urlFrom(item.storeImageUrl),
+                    createdAt: parseAPIDate(item.createdAt),
+                    title: item.feedTitle,
+                    content: item.feedContent,
+                    imageURL: urlFrom(item.feedImageUrl),
+                    feedType: item.feedType,
+                    likeCount: item.feedLikeCount,
+                    reviewCount: item.feedReviewCount
+                )
             }
+            log("loaded feeds:", feeds.count)
+
         } catch {
             errorMessage = error.localizedDescription
-            print("[FeedViewModel] 네트워크/디코딩 에러:", error.localizedDescription)
+            log("error:", error.localizedDescription)
         }
+    }
+
+    private let fallbackURL = URL(string: "https://example.com/")!
+
+    private func urlFrom(_ s: String) -> URL {
+        URL(string: s) ?? fallbackURL
+    }
+
+    private func parseAPIDate(_ s: String) -> Date {
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = iso.date(from: s) { return d }
+        iso.formatOptions = [.withInternetDateTime]
+        if let d = iso.date(from: s) { return d }
+
+        let fmts = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd HH:mm:ss"
+        ]
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        for f in fmts {
+            df.dateFormat = f
+            if let d = df.date(from: s) { return d }
+        }
+        return Date()
+    }
+
+    private func prettyJSON(_ data: Data) -> String? {
+        guard let obj = try? JSONSerialization.jsonObject(with: data),
+              let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
+              let s = String(data: d, encoding: .utf8) else { return nil }
+        return s
+    }
+
+    private func log(_ items: Any...) {
+        print("[FeedViewModel]", items.map { "\($0)" }.joined(separator: " "))
     }
 }

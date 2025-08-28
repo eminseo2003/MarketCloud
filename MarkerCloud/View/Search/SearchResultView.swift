@@ -30,7 +30,7 @@ struct SearchResultView: View {
     //            .filter { $0.title.localizedCaseInsensitiveContains(keyword)}
     //    }
     
-    @State private var selectedStore: Store? = nil
+    //@State private var selectedStore: Store? = nil
     @State private var selectedProduct: Feed? = nil
     @State private var selectedEvent: Feed? = nil
     

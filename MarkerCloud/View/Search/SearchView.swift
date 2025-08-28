@@ -31,7 +31,7 @@ struct SearchView: View {
     @StateObject private var eventRankVM  = EventRankVM()
     @StateObject private var searchRankVM  = SearchRankVM()
     
-    @State private var pushStore: Store? = nil
+    //@State private var pushStore: Store? = nil
     @State private var selectedFeed: Feed? = nil
     @State private var selectedSectionTitle: String? = nil
     @FocusState private var isTextFieldFocused: Bool
