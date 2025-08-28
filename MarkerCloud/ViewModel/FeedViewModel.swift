@@ -30,7 +30,7 @@ final class FeedViewModel: ObservableObject {
             let (data, response) = try await URLSession.shared.data(from: url)
             
             if let httpRes = response as? HTTPURLResponse {
-                print("📡 응답 코드: \(httpRes.statusCode)")
+                print("응답 코드: \(httpRes.statusCode)")
             }
             
             let decoded = try JSONDecoder().decode([Feed].self, from: data)

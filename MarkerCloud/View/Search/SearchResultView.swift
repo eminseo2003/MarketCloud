@@ -48,7 +48,7 @@ struct SearchResultView: View {
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            ForEach(vm.stores) { s in
+                            ForEach(vm.stores.prefix(10)) { s in
                                 VStack {
                                     AsyncImage(url: s.imgURL) { img in
                                         img
@@ -117,7 +117,7 @@ struct SearchResultView: View {
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 12) {
-                                            ForEach(vm.products) { p in
+                                            ForEach(vm.products.prefix(10)) { p in
                                                 MediaThumbCard(title: p.name, url: p.mediaURL, likeCount: p.likeCount)
                                             }
                                         }.padding(.horizontal)
@@ -154,7 +154,7 @@ struct SearchResultView: View {
                 } else {
                     ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 12) {
-                                            ForEach(vm.events) { e in
+                                            ForEach(vm.events.prefix(10)) { e in
                                                 MediaThumbCard(title: e.name, url: e.mediaURL, likeCount: e.likeCount)
                                             }
                                         }.padding(.horizontal)
