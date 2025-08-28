@@ -245,7 +245,7 @@ struct SearchView: View {
                     }
                     .navigationDestination(item: $route) { route in
                         if route == .searchResult {
-                            //SearchResultView(keyword: searchText)
+                            SearchResultView(keyword: searchText)
                         }
                     }
                 }
@@ -315,7 +315,7 @@ private struct StoreBubbleView: View {
     }
 }
 
-private struct MediaThumbCard: View {
+struct MediaThumbCard: View {
     let title: String
     let url: URL?
     let likeCount: Int?
