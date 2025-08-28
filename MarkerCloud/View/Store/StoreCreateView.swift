@@ -8,7 +8,7 @@
 import SwiftUI
 import PhotosUI
 
-struct FirstStoreCreateView: View {
+struct StoreCreateView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var storeDetail: StoreDetail
     @State var selectedStoreImage: [UIImage] = []
@@ -24,21 +24,52 @@ struct FirstStoreCreateView: View {
         StoreCategory.allCases
             .sorted { $0.rawValue < $1.rawValue }
             .map { $0.displayName }
-    @StateObject private var vm = StoreCreateVM()
+    @StateObject private var createVm = StoreCreateVM()
+    @StateObject private var lookUpVm = StoreLookupVM()
+    @State private var showLookupAlert = false
+    @State private var lookupAlertMessage = ""
+    @FocusState private var isTextFieldFocused: Bool
+    
     var body: some View {
         Form {
             Section(header: Text("점포명")) {
-                HStack {
-                    TextField("점포명", text: $storeName)
-                    
-                    Button(action: {
-                        // 여기에 검색 기능 추가
-                    }) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
+                TextField("점포명", text: $storeName)
+                    .padding(.trailing, 36)
+                    .overlay(alignment: .trailing) {
+                        Button {
+                            Task {
+                                await lookUpVm.fetch(by: storeName)
+
+                                if let dto = lookUpVm.store {
+                                    if let display = StoreCategory(rawValue: dto.categoryId)?.displayName {
+                                        selectedCategory = display
+                                    }
+                                    storeDetail.phoneNumber = dto.phoneNumber
+                                    storeDetail.weekdayOpen  = fromZTimeString(dto.weekdayStart)
+                                    storeDetail.weekdayClose = fromZTimeString(dto.weekdayEnd)
+                                    storeDetail.weekendOpen  = fromZTimeString(dto.weekendStart)
+                                    storeDetail.weekendClose = fromZTimeString(dto.weekendEnd)
+                                    storeDetail.roadAddress = dto.address
+                                    storeDetail.usesVouchers = dto.paymentMethods
+
+                                    lookupAlertMessage = "조회한 정보로 폼을 채웠어요. 확인 후 수정/저장하세요."
+                                    showLookupAlert = true
+                                } else {
+                                    lookupAlertMessage = lookUpVm.errorMessage ?? "해당 점포 정보를 찾지 못했어요."
+                                    showLookupAlert = true
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                                .imageScale(.medium)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.plain)
                     }
-                }
+                    .focused($isTextFieldFocused)
             }
+
             Section(header: Text("업종 구분")) {
                 FlowLayout(spacing: 8, lineSpacing: 10) {
                     ForEach(categories, id: \.self) { cat in
@@ -56,6 +87,7 @@ struct FirstStoreCreateView: View {
             Section(header: Text("전화번호")) {
                 TextField("전화번호를 입력해주세요", text: $storeDetail.phoneNumber)
                     .keyboardType(.phonePad)
+                    .focused($isTextFieldFocused)
             }
             
             Section(header: Text("운영시간")) {
@@ -81,6 +113,7 @@ struct FirstStoreCreateView: View {
             
             Section(header: Text("주소")) {
                 TextField("주소를 입력해주세요", text: $storeDetail.roadAddress)
+                    .focused($isTextFieldFocused)
             }
             
             Section(header: Text("결제가능수단")) {
@@ -130,6 +163,7 @@ struct FirstStoreCreateView: View {
                         }
                     ))
                     .frame(height: 150)
+                    .focused($isTextFieldFocused)
                     
                     if storeDetail.storeDescription.isEmpty {
                         Text("점포 소개")
@@ -149,10 +183,14 @@ struct FirstStoreCreateView: View {
         .navigationTitle("점포 등록하기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("완료") { isTextFieldFocused = false }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("등록") {
                     Task {
-                            await vm.createStore(
+                            await createVm.createStore(
                                 storeName: storeName,
                                 categoryId: selectedCategoryId ?? 1,
                                 phoneNumber: storeDetail.phoneNumber,
@@ -164,7 +202,7 @@ struct FirstStoreCreateView: View {
                                 paymentMethods: storeDetail.usesVouchers,
                                 storeDescript: storeDetail.storeDescription
                             )
-                            if vm.done {
+                            if createVm.done {
                                 
                             }
                             pushPromotion = storePromotion
@@ -176,6 +214,12 @@ struct FirstStoreCreateView: View {
         .navigationDestination(item: $pushPromotion) { promo in
             PromotionMethodSelectView(promotion: promo)
         }
+        .alert("알림", isPresented: $showLookupAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(lookupAlertMessage)
+        }
+
     }
     func toZTimeString(_ date: Date) -> String {
         let f = DateFormatter()
@@ -185,6 +229,20 @@ struct FirstStoreCreateView: View {
         f.dateFormat = "HH:mm:ss.SSS'Z'"
         return f.string(from: date)
     }
+    func fromZTimeString(_ str: String) -> Date {
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .gregorian)
+        fmt.locale   = Locale(identifier: "en_US_POSIX")
+        fmt.timeZone = TimeZone(secondsFromGMT: 0)
 
+        fmt.dateFormat = "HH:mm:ss.SSS'Z'"
+        if let d = fmt.date(from: str) { return d }
+
+        fmt.dateFormat = "HH:mm:ss'Z'"
+        if let d = fmt.date(from: str) { return d }
+
+        fmt.dateFormat = "HH:mm:ss"
+        return fmt.date(from: str) ?? Date()
+    }
 
 }

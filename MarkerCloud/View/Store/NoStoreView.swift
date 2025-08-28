@@ -64,7 +64,7 @@ struct NoStoreView: View {
                     .background(Color(uiColor: .systemGray6).ignoresSafeArea())
                 .navigationDestination(item: $route) { route in
                     if route == .firstStoreCreate {
-                        FirstStoreCreateView(storeDetail: storeDetail)
+                        StoreCreateView(storeDetail: storeDetail)
                     }
                 }
             }
