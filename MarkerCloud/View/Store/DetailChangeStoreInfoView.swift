@@ -311,9 +311,9 @@
 //    var body: some View {
 //        ZStack {
 //            Form {
-//                Toggle("온누리상품권",  isOn: binding(.onnuriVoucher))
+//                Toggle("온누리 상품권",  isOn: binding(.onnuriVoucher))
 //                Toggle("제로페이",     isOn: binding(.zeropay))
-//                Toggle("민생회복쿠폰", isOn: binding(.livelihoodCoupon))
+//                Toggle("민생회복 소비쿠폰", isOn: binding(.livelihoodCoupon))
 //            }
 //            VStack {
 //                Spacer()

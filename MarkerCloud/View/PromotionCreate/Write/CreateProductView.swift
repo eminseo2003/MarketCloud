@@ -27,7 +27,6 @@ struct CreateProductView: View {
             .sorted { $0.rawValue < $1.rawValue }
             .map { $0.displayName }
 
-    private var productCategory: String { selectedCategory == "전체" ? "" : selectedCategory }
     @State private var productScript: String = ""
     let maxCharacters = 500
     @State private var photoItem: PhotosPickerItem?

@@ -67,13 +67,13 @@
 //                }
 //                
 //                Section(header: Text("결제가능수단")) {
-//                    Toggle("온누리상품권", isOn: Binding(
-//                        get: { storeDetail.usesVouchers.contains("온누리상품권") },
+//                    Toggle("온누리 상품권", isOn: Binding(
+//                        get: { storeDetail.usesVouchers.contains("온누리 상품권") },
 //                        set: { newValue in
 //                            if newValue {
-//                                storeDetail.usesVouchers.append("온누리상품권")
+//                                storeDetail.usesVouchers.append("온누리 상품권")
 //                            } else {
-//                                storeDetail.usesVouchers.removeAll { $0 == "온누리상품권" }
+//                                storeDetail.usesVouchers.removeAll { $0 == "온누리 상품권" }
 //                            }
 //                        }
 //                    ))
@@ -89,13 +89,13 @@
 //                        }
 //                    ))
 //                    
-//                    Toggle("민생회복쿠폰", isOn: Binding(
-//                        get: { storeDetail.usesVouchers.contains("민생회복쿠폰") },
+//                    Toggle("민생회복 소비쿠폰", isOn: Binding(
+//                        get: { storeDetail.usesVouchers.contains("민생회복 소비쿠폰") },
 //                        set: { newValue in
 //                            if newValue {
-//                                storeDetail.usesVouchers.append("민생회복쿠폰")
+//                                storeDetail.usesVouchers.append("민생회복 소비쿠폰")
 //                            } else {
-//                                storeDetail.usesVouchers.removeAll { $0 == "민생회복쿠폰" }
+//                                storeDetail.usesVouchers.removeAll { $0 == "민생회복 소비쿠폰" }
 //                            }
 //                        }
 //                    ))

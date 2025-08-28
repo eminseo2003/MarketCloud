@@ -63,9 +63,9 @@ enum PaymentMethod: Int, CaseIterable, Identifiable, Codable, Hashable {
     
     var displayName: String {
         switch self {
-        case .onnuriVoucher:     return "온누리상품권"
+        case .onnuriVoucher:     return "온누리 상품권"
         case .zeropay:           return "제로페이"
-        case .livelihoodCoupon:  return "민생회복쿠폰"
+        case .livelihoodCoupon:  return "민생회복 소비쿠폰"
         }
     }
 }
