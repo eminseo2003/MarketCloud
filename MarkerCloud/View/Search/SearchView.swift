@@ -21,15 +21,16 @@ struct SearchView: View {
     @Binding var selectedMarketID: String
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     @State private var route: Route? = nil
-//    private var firstStore: Store? {
-//        dummyStores.first
-//    }
-//    private var productFeeds: [Feed] { dummyFeed.filter { $0.promoKind == .product } }
-//    private var eventFeeds: [Feed]   { dummyFeed.filter { $0.promoKind == .event } }
+    //    private var firstStore: Store? {
+    //        dummyStores.first
+    //    }
+    //    private var productFeeds: [Feed] { dummyFeed.filter { $0.promoKind == .product } }
+    //    private var eventFeeds: [Feed]   { dummyFeed.filter { $0.promoKind == .event } }
     @StateObject private var storeRankVM = StoreRankVM()
-        @StateObject private var productRankVM = ProductRankVM()
-        @StateObject private var eventRankVM  = EventRankVM()
-
+    @StateObject private var productRankVM = ProductRankVM()
+    @StateObject private var eventRankVM  = EventRankVM()
+    @StateObject private var searchRankVM  = SearchRankVM()
+    
     @State private var pushStore: Store? = nil
     @State private var selectedFeed: Feed? = nil
     @State private var selectedSectionTitle: String? = nil
@@ -80,146 +81,157 @@ struct SearchView: View {
                             
                             SearchViewSectionHeader(title: "인기 점포")
                             RankSectionHorizontal(
-                                                            isLoading: storeRankVM.isLoading,
-                                                            error: storeRankVM.errorMessage,
-                                                            retry: { Task { await storeRankVM.fetch() } }
-                                                        ) {
-                                                            LazyHStack(spacing: 12) {
-                                                                ForEach(storeRankVM.stores) { s in
-                                                                    StoreBubbleView(name: s.name, url: s.imageURL)
-                                                                        .onTapGesture {
-                                                                            // TODO: 점포 상세로 이동하려면 code/id 매핑 후 네비게이션 연결
-                                                                            print("tapped store:", s.name)
-                                                                        }
-                                                                }
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
-//                            if dummyStores.isEmpty {
-//                                HStack {
-//                                    Spacer()
-//                                    Text("점포가 없습니다.")
-//                                        .font(.caption)
-//                                        .foregroundColor(.secondary)
-//                                    Spacer()
-//                                }
-//                            } else {
-//                                ScrollView(.horizontal, showsIndicators: false) {
-//                                    HStack(spacing: 12) {
-//                                        ForEach(dummyStores.prefix(10)) { store in
-//                                            VStack {
-//                                                Button {
-//                                                    pushStore = store
-//                                                } label: {
-//                                                    AsyncImage(url: store.profileImageURL) { image in
-//                                                        image
-//                                                            .resizable()
-//                                                            .scaledToFill()
-//                                                            .frame(width: 56, height: 56)
-//                                                            .clipShape(Circle())
-//                                                            .background(Circle().fill(Color(.systemGray5)))
-//                                                    } placeholder: {
-//                                                        ProgressView()
-//                                                    }
-//                                                }
-//                                                
-//                                                Text(store.storeName)
-//                                                    .font(.caption2)
-//                                                    .lineLimit(1)
-//                                            }
-//                                        }
-//                                    }
-//                                    .padding(.horizontal)
-//                                }
-//                            }
+                                isLoading: storeRankVM.isLoading,
+                                error: storeRankVM.errorMessage,
+                                retry: { Task { await storeRankVM.fetch() } }
+                            ) {
+                                LazyHStack(spacing: 12) {
+                                    ForEach(storeRankVM.stores) { s in
+                                        StoreBubbleView(name: s.name, url: s.imageURL)
+                                            .onTapGesture {
+                                                // 점포 상세로 이동
+                                                print("tapped store:", s.name)
+                                            }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            //                            if dummyStores.isEmpty {
+                            //                                HStack {
+                            //                                    Spacer()
+                            //                                    Text("점포가 없습니다.")
+                            //                                        .font(.caption)
+                            //                                        .foregroundColor(.secondary)
+                            //                                    Spacer()
+                            //                                }
+                            //                            } else {
+                            //                                ScrollView(.horizontal, showsIndicators: false) {
+                            //                                    HStack(spacing: 12) {
+                            //                                        ForEach(dummyStores.prefix(10)) { store in
+                            //                                            VStack {
+                            //                                                Button {
+                            //                                                    pushStore = store
+                            //                                                } label: {
+                            //                                                    AsyncImage(url: store.profileImageURL) { image in
+                            //                                                        image
+                            //                                                            .resizable()
+                            //                                                            .scaledToFill()
+                            //                                                            .frame(width: 56, height: 56)
+                            //                                                            .clipShape(Circle())
+                            //                                                            .background(Circle().fill(Color(.systemGray5)))
+                            //                                                    } placeholder: {
+                            //                                                        ProgressView()
+                            //                                                    }
+                            //                                                }
+                            //
+                            //                                                Text(store.storeName)
+                            //                                                    .font(.caption2)
+                            //                                                    .lineLimit(1)
+                            //                                            }
+                            //                                        }
+                            //                                    }
+                            //                                    .padding(.horizontal)
+                            //                                }
+                            //                            }
                             
                             
                             SearchViewSectionHeader(title: "인기 상품")
                             RankSectionHorizontal(
-                                                            isLoading: productRankVM.isLoading,
-                                                            error: productRankVM.errorMessage,
-                                                            retry: { Task { await productRankVM.fetch() } }
-                                                        ) {
-                                                            LazyHStack(spacing: 12) {
-                                                                ForEach(productRankVM.products) { p in
-                                                                    MediaThumbCard(title: p.name, url: p.imageURL, likeCount: p.likeCount)
-                                                                }
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
-//                            if !productFeeds.isEmpty {
-//                                ScrollView(.horizontal, showsIndicators: false) {
-//                                    HStack(spacing: 12) {
-//                                        ForEach(productFeeds.prefix(10)) { feed in
-//                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
-//                                        }
-//                                    }
-//                                    
-//                                    .padding(.horizontal)
-//                                }
-//                                
-//                            } else {
-//                                HStack {
-//                                    Spacer()
-//                                    Text("상품이 없습니다.")
-//                                        .font(.caption)
-//                                        .foregroundColor(.secondary)
-//                                    Spacer()
-//                                }
-//                            }
+                                isLoading: productRankVM.isLoading,
+                                error: productRankVM.errorMessage,
+                                retry: { Task { await productRankVM.fetch() } }
+                            ) {
+                                LazyHStack(spacing: 12) {
+                                    ForEach(productRankVM.products) { p in
+                                        MediaThumbCard(title: p.name, url: p.imageURL, likeCount: p.likeCount)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            //                            if !productFeeds.isEmpty {
+                            //                                ScrollView(.horizontal, showsIndicators: false) {
+                            //                                    HStack(spacing: 12) {
+                            //                                        ForEach(productFeeds.prefix(10)) { feed in
+                            //                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
+                            //                                        }
+                            //                                    }
+                            //
+                            //                                    .padding(.horizontal)
+                            //                                }
+                            //
+                            //                            } else {
+                            //                                HStack {
+                            //                                    Spacer()
+                            //                                    Text("상품이 없습니다.")
+                            //                                        .font(.caption)
+                            //                                        .foregroundColor(.secondary)
+                            //                                    Spacer()
+                            //                                }
+                            //                            }
                             
                             SearchViewSectionHeader(title: "인기 이벤트")
                             RankSectionHorizontal(
-                                                            isLoading: eventRankVM.isLoading,
-                                                            error: eventRankVM.errorMessage,
-                                                            retry: { Task { await eventRankVM.fetch() } }
-                                                        ) {
-                                                            LazyHStack(spacing: 12) {
-                                                                ForEach(eventRankVM.events) { e in
-                                                                    MediaThumbCard(title: e.name, url: e.imageURL, likeCount: e.likeCount)
-                                                                }
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
-//                            if !eventFeeds.isEmpty {
-//                                ScrollView(.horizontal, showsIndicators: false) {
-//                                    HStack(spacing: 12) {
-//                                        ForEach(eventFeeds.prefix(10)) { feed in
-//                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
-//                                        }
-//                                    }
-//                                    
-//                                    .padding(.horizontal)
-//                                }
-//                                
-//                            } else {
-//                                HStack {
-//                                    Spacer()
-//                                    Text("이벤트가 없습니다.")
-//                                        .font(.caption)
-//                                        .foregroundColor(.secondary)
-//                                    Spacer()
-//                                }
-//                                
-//                            }
+                                isLoading: eventRankVM.isLoading,
+                                error: eventRankVM.errorMessage,
+                                retry: { Task { await eventRankVM.fetch() } }
+                            ) {
+                                LazyHStack(spacing: 12) {
+                                    ForEach(eventRankVM.events) { e in
+                                        MediaThumbCard(title: e.name, url: e.imageURL, likeCount: e.likeCount)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            //                            if !eventFeeds.isEmpty {
+                            //                                ScrollView(.horizontal, showsIndicators: false) {
+                            //                                    HStack(spacing: 12) {
+                            //                                        ForEach(eventFeeds.prefix(10)) { feed in
+                            //                                            FeedCard(feed: feed, selectedFeed: $selectedFeed)
+                            //                                        }
+                            //                                    }
+                            //
+                            //                                    .padding(.horizontal)
+                            //                                }
+                            //
+                            //                            } else {
+                            //                                HStack {
+                            //                                    Spacer()
+                            //                                    Text("이벤트가 없습니다.")
+                            //                                        .font(.caption)
+                            //                                        .foregroundColor(.secondary)
+                            //                                    Spacer()
+                            //                                }
+                            //
+                            //                            }
                         }
                     }
-//                    .navigationDestination(item: $selectedFeed) { feed in
-//                        //FeedView(feed: feed)
-//                    }
-//                    .navigationDestination(item: $pushStore) { store in
-//                        //StoreProfileView(store: store)
-//                    }
+                    //점포 상세로 이동
+                    //                    .navigationDestination(item: $selectedFeed) { feed in
+                    //                        //FeedView(feed: feed)
+                    //                    }
+                    //                    .navigationDestination(item: $pushStore) { store in
+                    //                        //StoreProfileView(store: store)
+                    //                    }
                 } else {
                     ScrollView {
-                        VStack() {
-                            TrendingKeywordsView(
-                                keywords: ["마라탕 맛집", "빵지순례", "핸드메이드 소품",
-                                           "야시장 공연", "비 오는 날 카페"].prefix(5).map { String($0) }
-                            )
-                            Spacer()
-                        }
-                    }
+                                            VStack {
+                                                if searchRankVM.isLoading {
+                                                    HStack { Spacer(); ProgressView(); Spacer() }
+                                                        .padding(.vertical, 8)
+                                                } else if let err = searchRankVM.errorMessage {
+                                                    VStack(spacing: 8) {
+                                                        Text("인기 검색어 불러오기 실패").font(.subheadline).bold()
+                                                        Text(err).font(.caption).foregroundColor(.secondary)
+                                                        Button("다시 시도") { Task { await searchRankVM.fetch() } }
+                                                    }
+                                                    .padding(.horizontal)
+                                                } else {
+                                                    TrendingKeywordsView(keywords: searchRankVM.keywords)
+                                                }
+
+                                                Spacer()
+                                            }
+                                        }
                     
                     Button(action: {
                         route = .searchResult
@@ -234,15 +246,16 @@ struct SearchView: View {
                     .navigationDestination(item: $route) { route in
                         if route == .searchResult {
                             //SearchResultView(keyword: searchText)
-                            }
+                        }
                     }
                 }
             }
             .task {
-                            await storeRankVM.fetch()
-                            await productRankVM.fetch()
-                            await eventRankVM.fetch()
-                        }
+                await storeRankVM.fetch()
+                await productRankVM.fetch()
+                await eventRankVM.fetch()
+                await searchRankVM.fetch()
+            }
         }
     }
 }
@@ -251,7 +264,7 @@ private struct RankSectionHorizontal<Content: View>: View {
     let error: String?
     let retry: () -> Void
     @ViewBuilder let content: () -> Content
-
+    
     var body: some View {
         if isLoading {
             HStack { Spacer(); ProgressView(); Spacer() }
@@ -274,7 +287,7 @@ private struct RankSectionHorizontal<Content: View>: View {
 private struct StoreBubbleView: View {
     let name: String
     let url: URL?
-
+    
     var body: some View {
         VStack {
             AsyncImage(url: url) { phase in
@@ -306,13 +319,13 @@ private struct MediaThumbCard: View {
     let title: String
     let url: URL?
     let likeCount: Int?
-
+    
     init(title: String, url: URL?, likeCount: Int? = nil) {
         self.title = title
         self.url = url
         self.likeCount = likeCount
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             AsyncImage(url: url) { phase in
@@ -336,12 +349,12 @@ private struct MediaThumbCard: View {
             .frame(width: 140, height: 140)
             .clipped()
             .clipShape(RoundedRectangle(cornerRadius: 12))
-
+            
             Text(title)
                 .font(.caption)
                 .lineLimit(1)
                 .frame(width: 140, alignment: .leading)
-
+            
             if let like = likeCount {
                 HStack(spacing: 4) {
                     Image(systemName: "heart.fill").font(.caption2)
@@ -356,7 +369,7 @@ private struct MediaThumbCard: View {
 
 private struct TrendingKeywordsView: View {
     let keywords: [String]
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -369,7 +382,7 @@ private struct TrendingKeywordsView: View {
             .foregroundColor(.primary)
             .padding(.horizontal, 4)
             .padding(.top, 10)
-
+            
             VStack(spacing: 8) {
                 ForEach(Array(keywords.enumerated()), id: \.offset) { idx, keyword in
                     HStack(spacing: 8) {
@@ -380,11 +393,11 @@ private struct TrendingKeywordsView: View {
                             .background(
                                 Circle().fill(Color(uiColor: .secondarySystemBackground))
                             )
-
+                        
                         Text(keyword)
                             .font(.body).bold()
                             .lineLimit(1)
-
+                        
                         Spacer()
                     }
                     .padding(.vertical, 10)
