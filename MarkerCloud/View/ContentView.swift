@@ -14,7 +14,7 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainView(selectedMarketID: $selectedMarketID)
+            MainView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             
@@ -26,12 +26,11 @@ struct ContentView: View {
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             
-            //Text("Tab 4")
             VideoLoadView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
-            Text("Tab 5")
-            //SettingsView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+
+            SettingsView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("마이페이지", systemImage: "person.crop.circle") }
                 .tag(4)
         }

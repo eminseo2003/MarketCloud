@@ -20,6 +20,7 @@ struct MainView: View {
     
     
     @Binding var selectedMarketID: String
+    @Binding var currentUserID: String
     
     @State private var selectedTab: StoreTab = .all
     private var selectedMarketUUID: UUID? {
