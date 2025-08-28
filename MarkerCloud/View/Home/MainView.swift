@@ -21,15 +21,16 @@ struct MainView: View {
     
     @Binding var selectedMarketID: String
     @Binding var currentUserID: String
+    private var marketInt: Int { Int(selectedMarketID) ?? 1 }
     
     @State private var selectedTab: StoreTab = .all
     private var selectedMarketUUID: UUID? {
         UUID(uuidString: selectedMarketID)
     }
-//    private var storesInSelectedMarket: [Store] {
-//        guard let id = selectedMarketUUID else { return [] }
-//        return dummyStores.filter { $0.marketId == id }
-//    }
+    //    private var storesInSelectedMarket: [Store] {
+    //        guard let id = selectedMarketUUID else { return [] }
+    //        return dummyStores.filter { $0.marketId == id }
+    //    }
     @State private var pushStoreName: String? = nil
     let columns = [
         GridItem(.flexible())
@@ -83,7 +84,16 @@ struct MainView: View {
                     .padding()
                     
                     if feedVM.isLoading {
-                        ProgressView("불러오는 중...")
+                        ProgressView("불러오는 중…")
+                    } else if let err = feedVM.errorMessage {
+                        VStack(spacing: 8) {
+                            Text("불러오기 실패").font(.headline)
+                            Text(err).foregroundColor(.secondary).font(.caption)
+                            Button("다시 시도") {
+                                Task { await feedVM.fetchFeeds(marketId: marketInt) }
+                            }
+                        }
+                        .padding(.vertical, 24)
                     } else {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredFeeds) { feed in
@@ -92,46 +102,49 @@ struct MainView: View {
                         }
                         .padding(.horizontal)
                     }
-//                    LazyVGrid(columns: columns, spacing: 8) {
-//                        VStack(spacing: 16) {
-//                            ForEach(storesInSelectedMarket) { store in
-//                                ForEach(feeds(for: store)) { feed in
-//                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
-//                                }
-//                            }
-//                            
-//                        }
-//                        .padding(.horizontal)
-//                    }
+                    //                    LazyVGrid(columns: columns, spacing: 8) {
+                    //                        VStack(spacing: 16) {
+                    //                            ForEach(storesInSelectedMarket) { store in
+                    //                                ForEach(feeds(for: store)) { feed in
+                    //                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
+                    //                                }
+                    //                            }
+                    //
+                    //                        }
+                    //                        .padding(.horizontal)
+                    //                    }
                     
                 }
                 .task {
-                                    // 최초 로드 시 실행
-                                    await feedVM.fetchFeeds(marketId: 1)
-                                }
-                                .refreshable {
-                                    await feedVM.fetchFeeds(marketId: 1)
-                                }
+                    // 최초 로드 시 실행
+                    await feedVM.fetchFeeds(marketId: marketInt)
+                }
+                .refreshable {
+                    await feedVM.fetchFeeds(marketId: marketInt)
+                }
+                .onChange(of: selectedMarketID) { oldValue, newValue in
+                    Task { await feedVM.fetchFeeds(marketId: marketInt) }
+                }
                 Spacer()
                 
             }
-//            .navigationDestination(item: $pushStore) { store in
-//                StoreProfileView(store: store)
-//            }
+            //            .navigationDestination(item: $pushStore) { store in
+            //                StoreProfileView(store: store)
+            //            }
         }
         
     }
     private var filteredFeeds: [Feed] {
-            switch selectedTab {
-            case .all:
-                return feedVM.feeds
-            case .store:
-                return feedVM.feeds.filter { $0.feedType == "점포" }
-            case .product:
-                return feedVM.feeds.filter { $0.feedType == "상품" }
-            case .event:
-                return feedVM.feeds.filter { $0.feedType == "이벤트" }
-            }
+        switch selectedTab {
+        case .all:
+            return feedVM.feeds
+        case .store:
+            return feedVM.feeds.filter { $0.feedType == "점포" }
+        case .product:
+            return feedVM.feeds.filter { $0.feedType == "상품" }
+        case .event:
+            return feedVM.feeds.filter { $0.feedType == "이벤트" }
         }
+    }
 }
 

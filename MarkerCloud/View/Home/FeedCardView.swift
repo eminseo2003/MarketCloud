@@ -66,7 +66,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text(feed.feedLikeCount)
+                    Text("\(feed.feedLikeCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -80,7 +80,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text("0")
+                    Text("\(feed.feedReviewCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -90,14 +90,16 @@ struct FeedCardView: View {
             }
             .padding(.vertical, 5)
             
-            //피드 제목 필요
-            Text(feed.feedContent)
-                .font(.subheadline)
-                .foregroundColor(.primary)
+            (
+                Text(feed.feedTitle).bold() +
+                Text(" \(feed.feedContent)")
+            )
+            .font(.subheadline)
+            .foregroundColor(.primary)
         }
         .padding(.bottom, 8)
         .sheet(isPresented: $isCommentSheetPresented) {
-            Text("댓글 기능 준비중…")
+            CommentSheetView(feedId: feed.feedId)
                 .presentationDetents([.medium])
         }
     }
