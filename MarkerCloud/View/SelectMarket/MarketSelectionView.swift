@@ -116,7 +116,12 @@ struct MarketSelectionView: View {
             }
             
         }
-        
+        .task {
+            await vm.fetch()
+        }
+        .refreshable {
+            await vm.fetch()
+        }
         
         
     }

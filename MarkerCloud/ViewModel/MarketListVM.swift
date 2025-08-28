@@ -36,14 +36,11 @@ final class MarketListVM: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    // 서버 베이스 URL
-    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-    // 응답 샘플에 맞춰 목록을 주는 엔드포인트 (필요 시 수정)
+    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app/")!
     private var apiURL: URL {
-        base.appendingPathComponent("api/market/") // ← trailing slash 중요
+        base.appendingPathComponent("api/market/")
     }
 
-    // marketCode → Asset 이름 매핑
     private let assetMap: [String: String] = [
         "MKT001": "market1",
         "MKT002": "market2",
@@ -101,7 +98,13 @@ final class MarketListVM: ObservableObject {
                 errorMessage = "서버 오류"
                 return
             }
-
+            let list = decoded.responseDto.marketList
+                    log("fetched markets:", list.count)
+                    for m in list {
+                        log("• code:", m.marketCode,
+                            "| name:", m.marketName,
+                            "| asset:", assetName(for: m.marketCode))
+                    }
             self.markets = decoded.responseDto.marketList.map {
                 MarketCardUI(code: $0.marketCode,
                              name: $0.marketName,
