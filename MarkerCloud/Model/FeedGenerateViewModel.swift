@@ -8,7 +8,7 @@
 import Foundation
 
 // API Base
-//private let BASE = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
+private let BASE = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 
 enum FeedType: String, Codable { case store, product, event }
 enum MediaType: String, Codable { case image, video }
