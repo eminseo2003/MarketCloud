@@ -185,19 +185,19 @@ struct SearchResultView: View {
         }
         .navigationTitle("검색 결과")
         .task { await vm.fetch(keyword: keyword) }
-//        .navigationDestination(item: $route) { route in
-//            if route == .moreStore {
-//                MoreStoreView(filteredStores: filteredStores)
-//            } else if route == .moreProduct {
-//                MoreProductView(filteredProducts: filteredProducts)
-//            } else if route == .moreEvent {
-//                MoreEventView(filteredEvents: filteredEvents)
+        .navigationDestination(item: $route) { route in
+            if route == .moreStore {
+                MoreStoreView(searchResultStore: vm.stores)
+            } else if route == .moreProduct {
+                MoreProductView(searchResultProduct: vm.products)
+            } else if route == .moreEvent {
+                MoreEventView(searchResultEvent: vm.events)
 //            } else if route == .storeDetail {
 //                if let store = selectedStore {
 //                    StoreProfileView(store: store)
 //                }
-//            }
-//        }
+            }
+        }
 //        .navigationDestination(item: $selectedProduct) { product in
 //            FeedView(feed: product)
 //        }
@@ -239,53 +239,60 @@ struct SectionHeader: View {
     }
 }
 
-//struct FeedCard: View {
-//    let feed: Feed
-//    @Binding var selectedFeed: Feed?
-//    
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 8) {
-//            Button {
-//                selectedFeed = feed
-//            } label: {
-//                AsyncImage(url: feed.mediaUrl) { phase in
-//                    switch phase {
-//                    case .success(let image):
-//                        image
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 180, height: 180)
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                            .clipped()
-//                    case .failure(_):
-//                        Image(systemName: "photo")
-//                            .resizable().scaledToFit().padding(24)
-//                            .frame(width: 180, height: 180)
-//                            .foregroundStyle(.secondary)
-//                            .background(Color(uiColor: .systemGray5))
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    default:
-//                        ProgressView()
-//                            .frame(width: 180, height: 180)
-//                            .frame(maxWidth: .infinity)
-//                            .background(Color(uiColor: .systemGray5))
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    }
-//                }
-//            }
-//            
-//            
-//            HStack {
-//                Image(systemName: "heart")
-//                    .foregroundColor(.primary)
-//                Text("16")
-//                    .font(.caption)
-//                Spacer()
-//                Text(feed.title)
-//                    .font(.caption)
-//                    .lineLimit(1)
-//            }
-//        }
-//    }
-//}
+struct FeedCard: View {
+    let title: String
+    let url: URL?
+    let likeCount: Int?
+    @Binding var selectedFeed: Feed?
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                //selectedFeed = title
+            } label: {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 180, height: 180)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .clipped()
+                    case .failure(_):
+                        Image(systemName: "photo")
+                            .resizable().scaledToFit().padding(24)
+                            .frame(width: 180, height: 180)
+                            .foregroundStyle(.secondary)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    default:
+                        ProgressView()
+                            .frame(width: 180, height: 180)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+            
+            
+            HStack {
+                Image(systemName: "heart")
+                    .foregroundColor(.primary)
+                if let likeCount = likeCount {
+                    Text("\(likeCount)")
+                        .font(.caption)
+                } else {
+                    Text("0")
+                        .font(.caption)
+                }
+                Spacer()
+                Text(title)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+        }
+    }
+}
 

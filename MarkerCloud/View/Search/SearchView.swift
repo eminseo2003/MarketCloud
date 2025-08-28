@@ -214,24 +214,24 @@ struct SearchView: View {
                     //                    }
                 } else {
                     ScrollView {
-                                            VStack {
-                                                if searchRankVM.isLoading {
-                                                    HStack { Spacer(); ProgressView(); Spacer() }
-                                                        .padding(.vertical, 8)
-                                                } else if let err = searchRankVM.errorMessage {
-                                                    VStack(spacing: 8) {
-                                                        Text("인기 검색어 불러오기 실패").font(.subheadline).bold()
-                                                        Text(err).font(.caption).foregroundColor(.secondary)
-                                                        Button("다시 시도") { Task { await searchRankVM.fetch() } }
-                                                    }
-                                                    .padding(.horizontal)
-                                                } else {
-                                                    TrendingKeywordsView(keywords: searchRankVM.keywords)
-                                                }
-
-                                                Spacer()
-                                            }
-                                        }
+                        VStack {
+                            if searchRankVM.isLoading {
+                                HStack { Spacer(); ProgressView(); Spacer() }
+                                    .padding(.vertical, 8)
+                            } else if let err = searchRankVM.errorMessage {
+                                VStack(spacing: 8) {
+                                    Text("인기 검색어 불러오기 실패").font(.subheadline).bold()
+                                    Text(err).font(.caption).foregroundColor(.secondary)
+                                    Button("다시 시도") { Task { await searchRankVM.fetch() } }
+                                }
+                                .padding(.horizontal)
+                            } else {
+                                TrendingKeywordsView(keywords: searchRankVM.keywords)
+                            }
+                            
+                            Spacer()
+                        }
+                    }
                     
                     Button(action: {
                         route = .searchResult

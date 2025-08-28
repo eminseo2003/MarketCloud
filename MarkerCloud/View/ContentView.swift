@@ -12,10 +12,6 @@ struct ContentView: View {
     @Binding var currentUserID: String
     @State private var selectedTab: Int = 0
     
-//    var videoFeeds: [Feed] {
-//        dummyFeed.filter { $0.mediaType == .video }
-//    }
-    
     var body: some View {
         TabView(selection: $selectedTab) {
             MainView(selectedMarketID: $selectedMarketID)
@@ -30,8 +26,8 @@ struct ContentView: View {
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             
-            Text("Tab 4")
-            //VideoView(videoFeeds: videoFeeds, selectedMarketID: $selectedMarketID)
+            //Text("Tab 4")
+            VideoLoadView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
             Text("Tab 5")
