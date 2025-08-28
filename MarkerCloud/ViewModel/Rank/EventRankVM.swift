@@ -1,0 +1,79 @@
+//
+//  EventRankVM.swift
+//  MarkerCloud
+//
+//  Created by 이민서 on 8/28/25.
+//
+
+import Foundation
+
+private struct EventRankItemDTO: Decodable {
+    let rank: Int
+    let eventName: String
+    let imgUrl: String
+    let like_count: Int
+}
+private struct EventRankListDTO: Decodable {
+    let rankings: [EventRankItemDTO]
+}
+
+struct PopularEvent: Identifiable, Hashable {
+    let id = UUID()
+    let rank: Int
+    let name: String
+    let imageURL: URL?
+    let likeCount: Int
+}
+
+@MainActor
+final class EventRankVM: ObservableObject {
+    @Published var events: [PopularEvent] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
+    private var url: URL { base.appendingPathComponent("api/trend/event") }
+
+    func fetch() async {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
+
+        do {
+            print("[EventRankVM] GET \(url.absoluteString)")
+            let (data, resp) = try await URLSession.shared.data(for: req)
+            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
+            print("[EventRankVM] status:", code)
+            if let p = prettyJSON(data) { print("[EventRankVM] ↩︎ JSON\n\(p)") }
+
+            guard (200...299).contains(code) else {
+                errorMessage = "HTTP \(code)"
+                return
+            }
+
+            let decoded = try JSONDecoder().decode(RankResponse<EventRankListDTO>.self, from: data)
+            guard decoded.success else {
+                errorMessage = decoded.error ?? "서버 오류"
+                return
+            }
+
+            events = decoded.responseDto.rankings.map {
+                PopularEvent(
+                    rank: $0.rank,
+                    name: $0.eventName,
+                    imageURL: URL(string: $0.imgUrl),
+                    likeCount: $0.like_count
+                )
+            }
+            print("[EventRankVM] loaded:", events.count)
+        } catch {
+            errorMessage = error.localizedDescription
+            print("[EventRankVM] 에러", error.localizedDescription)
+        }
+    }
+}

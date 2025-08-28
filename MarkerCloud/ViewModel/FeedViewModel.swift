@@ -15,15 +15,15 @@ final class FeedViewModel: ObservableObject {
     
     func fetchFeeds(marketId: Int) async {
         guard let url = URL(string: "https://famous-blowfish-plainly.ngrok-free.app/api/feed/\(marketId)") else {
-            print("❌ 잘못된 URL: marketId=\(marketId)")
+            print("잘못된 URL: marketId=\(marketId)")
             return
         }
         
-        print("🌐 [FeedViewModel] 요청 시작: \(url.absoluteString)")
+        print("[FeedViewModel] 요청 시작: \(url.absoluteString)")
         isLoading = true
         defer {
             isLoading = false
-            print("✅ [FeedViewModel] 요청 종료")
+            print("[FeedViewModel] 요청 종료")
         }
         
         do {
@@ -33,13 +33,13 @@ final class FeedViewModel: ObservableObject {
                 print("📡 응답 코드: \(httpRes.statusCode)")
             }
             
-            let decoded = try JSONDecoder().decode([Feed].self, from: data)  // ✅ 바로 배열 디코딩
+            let decoded = try JSONDecoder().decode([Feed].self, from: data)
             feeds = decoded
-            print("🎉 [FeedViewModel] 피드 불러오기 성공: \(feeds.count)개")
+            print("[FeedViewModel] 피드 불러오기 성공: \(feeds.count)개")
             
         } catch {
             errorMessage = error.localizedDescription
-            print("❌ [FeedViewModel] 네트워크/디코딩 에러: \(error.localizedDescription)")
+            print("[FeedViewModel] 네트워크/디코딩 에러: \(error.localizedDescription)")
         }
     }
 }

@@ -21,8 +21,8 @@ struct ContentView: View {
             MainView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
-            Text("Tab 2")
-            //SearchView(selectedMarketID: $selectedMarketID)
+            
+            SearchView(selectedMarketID: $selectedMarketID)
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
             

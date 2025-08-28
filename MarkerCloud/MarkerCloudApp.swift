@@ -14,8 +14,8 @@ struct MarkerCloudApp: App {
     @AppStorage("currentUserID") private var currentUserID: String = ""
     var body: some Scene {
         WindowGroup {
-            RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
-            //ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            //RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
         }
     }
 }
