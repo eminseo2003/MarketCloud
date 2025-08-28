@@ -43,8 +43,7 @@ final class MarketListVM: ObservableObject {
         base.appendingPathComponent("api/market/") // ← trailing slash 중요
     }
 
-    // marketCode → Asset 이름 매핑 (예시)
-    // 실제 코드에 맞춰 전부 채워주세요.
+    // marketCode → Asset 이름 매핑
     private let assetMap: [String: String] = [
         "MKT001": "market1",
         "MKT002": "market2",
@@ -52,6 +51,14 @@ final class MarketListVM: ObservableObject {
         "MKT004": "market4"
     ]
     private let defaultAsset = "market_default"
+    
+        func assetName(forMarketName name: String) -> String {
+            markets.first { $0.name == name }?.imageAssetName ?? defaultAsset
+        }
+
+        func marketCode(forMarketName name: String) -> String {
+            markets.first { $0.name == name }?.code ?? ""
+        }
 
     private func assetName(for code: String) -> String {
         assetMap[code] ?? defaultAsset

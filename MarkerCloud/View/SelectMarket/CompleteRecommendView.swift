@@ -10,9 +10,11 @@ import SwiftUI
 struct CompleteRecommendView: View {
     @State private var route: Route? = nil
     @Binding var selectedMarketID: String
+    @StateObject private var vm = MarketListVM()
+    
+    let topMarketName: String
     @Environment(\.dismiss) private var dismiss
     
-    private let recommended: Market = dummyMarkets[0]
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -20,19 +22,19 @@ struct CompleteRecommendView: View {
                     VStack(alignment: .center, spacing: 24) {
                         VStack {
                             LazyVGrid(columns: [GridItem()], spacing: 8) {
-                                MarketRecommandImage(url: recommended.imageName)
+                                MarketRecommandImage(assetName: vm.assetName(forMarketName: topMarketName))
                             }
                             
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("추천 드리는 시장은 \(recommended.marketName)이에요")
+                            Text("추천 드리는 시장은 \(topMarketName)이에요")
                                 .font(.title3).bold()
                                 .foregroundStyle(.primary)
                                 .fixedSize(horizontal: false, vertical: true)
                             
-                            Text(recommended.memo)
+                            Text("시장 주소")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -62,7 +64,7 @@ struct CompleteRecommendView: View {
                     }
                     
                     Button(action: {
-                        selectedMarketID = recommended.id.uuidString
+                        selectedMarketID = vm.marketCode(forMarketName: topMarketName)
                         withAnimation { dismiss() }
                     }) {
                         Text("이 시장 둘러보기")
@@ -88,35 +90,15 @@ struct CompleteRecommendView: View {
     }
 }
 struct MarketRecommandImage: View {
-    let url: URL
+    let assetName: String
 
     var body: some View {
-        AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .clipped()
-            case .failure(_):
-                Image(systemName: "photo")
-                    .resizable().scaledToFit().padding(24)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .foregroundStyle(.secondary)
-                    .background(Color(uiColor: .systemGray5))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            default:
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .frame(maxWidth: .infinity)
-                    .background(Color(uiColor: .systemGray5))
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            }
-        }
+        Image("market1")
+            .resizable()
+            .scaledToFill()
+            .frame(maxWidth: .infinity)
+            .frame(height: 300)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipped()
     }
 }

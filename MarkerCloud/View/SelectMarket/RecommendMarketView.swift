@@ -7,10 +7,25 @@
 
 import SwiftUI
 
+enum RecommendRoute: Identifiable, Equatable, Hashable {
+    case selectComplete(String)
+
+    var id: String {
+        switch self {
+        case .selectComplete(let name): return "selectComplete:\(name)"
+        }
+    }
+    var topMarketName: String {
+        switch self {
+        case .selectComplete(let name): return name
+        }
+    }
+}
+
 struct RecommendMarketView: View {
     @StateObject private var vm = MarketRecommendVM()
     @Binding var selectedMarketID: String
-    @State private var route: Route? = nil
+    @State private var route: RecommendRoute? = nil
     @State var Answer1: String? = nil
     @State var Answer2: String? = nil
     @State var Answer3: String? = nil
@@ -21,7 +36,6 @@ struct RecommendMarketView: View {
             let a2 = Answer2?.trimmingCharacters(in: .whitespacesAndNewlines), !a2.isEmpty,
             let a3 = Answer3?.trimmingCharacters(in: .whitespacesAndNewlines), !a3.isEmpty
         else { return false }
-        // 배열이 비어있지 않고, 최소 하나는 공백이 아닌 항목이어야 함
         return Answer4.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
     var body: some View {
@@ -105,9 +119,8 @@ struct RecommendMarketView: View {
                                                q3: Answer3 ?? "",
                                                q4: Answer4)
                             if let top = vm.result?.top1Market {
-                                print("🎯 추천 결과:", top)
+                                route = .selectComplete(top)
                             }
-                            route = .selectComplete
                         }
                         
                     } label: {
@@ -125,8 +138,12 @@ struct RecommendMarketView: View {
                 .padding(.vertical, 12)
                 .background(Color(UIColor.systemGroupedBackground))
                 .navigationDestination(item: $route) { route in
-                    if route == .selectComplete {
-                        //CompleteRecommendView(selectedMarketID: $selectedMarketID)
+                    switch route {
+                    case .selectComplete(let top):
+                        CompleteRecommendView(
+                            selectedMarketID: $selectedMarketID,
+                            topMarketName: top
+                        )
                     }
                 }
             }
