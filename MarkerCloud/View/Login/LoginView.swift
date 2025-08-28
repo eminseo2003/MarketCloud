@@ -14,7 +14,10 @@ struct LoginView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     enum Field { case email, password }
-
+    
+    @StateObject private var vm = LoginViewModel()
+    @State private var showSuccessAlert = false
+    
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
@@ -28,14 +31,14 @@ struct LoginView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 24)
             .padding(.horizontal, 20)
-
+            
             // 입력 카드
             VStack(spacing: 14) {
                 // 이메일
                 HStack(spacing: 10) {
                     Image(systemName: "envelope.fill")
                         .foregroundStyle(.secondary)
-                    TextField("이메일", text: $email)
+                    TextField("이메일", text: $vm.userId)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
@@ -46,9 +49,9 @@ struct LoginView: View {
                 }
                 .padding(14)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
-
+                
                 // 비밀번호 (보기 토글)
-                PasswordField(text: $password)
+                PasswordField(text: $vm.password)
                     .focused($focus, equals: .password)
                     .onSubmit {  }
             }
@@ -56,13 +59,14 @@ struct LoginView: View {
             .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemBackground)))
             .padding(.horizontal, 16)
             .padding(.top, 18)
-
-
+            
+            
             Spacer(minLength: 16)
-
+            
             // 로그인 버튼
             VStack(spacing: 12) {
                 Button {
+                    vm.login()
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     currentUserID = DummyUserIDs.user1
                 } label: {
@@ -72,6 +76,10 @@ struct LoginView: View {
                     }
                 }
                 .buttonStyle(FilledCTA())
+                .disabled(!vm.canSubmit || vm.isLoading)
+                
+                if let msg = vm.successMessage { Text(msg).foregroundColor(.green) }
+                if let err = vm.errorMessage { Text(err).foregroundColor(.red) }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
@@ -84,21 +92,34 @@ struct LoginView: View {
             }
         }
         .onAppear { focus = .email }
+        .onChange(of: vm.successMessage) { newValue in
+            if newValue != nil {
+                hideKeyboard()
+                currentUserID = vm.loggedInUser?.id ?? vm.userId
+                showSuccessAlert = true
+            }
+        }
+        .alert("로그인 성공", isPresented: $showSuccessAlert, actions: {
+            Button("확인") {
+            }
+        }, message: {
+            Text("환영합니다, \(vm.loggedInUser?.id ?? vm.userId)님!")
+        })
     }
     private func hideKeyboard() {
-            focus = nil
-        }
+        focus = nil
+    }
 }
 
 private struct PasswordField: View {
     @Binding var text: String
     @State private var isSecure: Bool = true
-
+    
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "lock.fill")
                 .foregroundStyle(.secondary)
-
+            
             Group {
                 if isSecure {
                     SecureField("비밀번호 (8자 이상)", text: $text)
@@ -110,7 +131,7 @@ private struct PasswordField: View {
             .submitLabel(.go)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-
+            
             Button {
                 isSecure.toggle()
             } label: {
