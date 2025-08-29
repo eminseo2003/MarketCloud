@@ -29,7 +29,7 @@ final class ProductFeedUpLoadVM: ObservableObject {
     func uploadProductFeed(
         feedType: String,
         mediaType: String,
-        storeId: Int,
+        userId: Int,
         productName: String,
         categoryId: Int,
         productDescription: String,
@@ -39,7 +39,7 @@ final class ProductFeedUpLoadVM: ObservableObject {
     ) async {
         log("▶️ post start | feedType:", feedType,
             "| mediaType:", mediaType,
-            "| storeId:", storeId,
+            "| userId:", userId,
             "| name:", productName,
             "| categoryId:", categoryId)
         
@@ -61,10 +61,15 @@ final class ProductFeedUpLoadVM: ObservableObject {
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
-        
+        func addFieldNumber(_ name: String, _ value: Int) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
         addField("feedType", feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
         addField("mediaType", mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
-        addField("storeId", String(storeId))
+        addFieldNumber("userId", userId)
         addField("productName", productName)
         addField("categoryId", String(categoryId))
         addField("productDescription", productDescription)

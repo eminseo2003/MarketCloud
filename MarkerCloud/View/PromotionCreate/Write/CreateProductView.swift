@@ -138,8 +138,7 @@ struct CreateProductView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("생성") {
-                        guard let img = selectedImage,
-                              let storeId = Int(storeIdText) else { return }
+                        guard let img = selectedImage else { return }
                         guard let categoryId = selectedCategoryId else {
                                 vm.errorMessage = "카테고리를 선택해주세요"; return
                             }
@@ -147,7 +146,7 @@ struct CreateProductView: View {
                             await vm.uploadProductFeed(
                                 feedType: "product",
                                 mediaType: method == .image ? "image" : "video",
-                                storeId: storeId,
+                                userId: currentUserID,
                                 productName: productName,
                                 categoryId: categoryId,
                                 productDescription: productScript,
@@ -168,18 +167,18 @@ struct CreateProductView: View {
             .navigationDestination(item: $createRoute) { route in
                 Group {
                     if case let .createProductComplete(dto) = route {
-                        if let img = selectedImage, let storeId = Int(storeIdText), let categoryId = selectedCategoryId {
+                        if let img = selectedImage, let categoryId = selectedCategoryId {
                             ProductCreateDoneView(
                                 mediaUrl: dto.feedMediaUrl,
                                 body: dto.feedBody,
                                 method: method,
                                 feedType: "product",
                                 mediaType: (method == .image ? "image" : "video"),
-                                storeId: storeId,
                                 productName: productName,
                                 categoryId: categoryId,
                                 productDescription: productScript,
-                                productImage: img
+                                productImage: img,
+                                currentUserID: currentUserID
                             )
                         } else {
                             Text("필수 값이 없습니다. (이미지/점포 ID)")

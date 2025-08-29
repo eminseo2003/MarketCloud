@@ -22,17 +22,17 @@ struct StoreCreateDoneView: View {
     let method: MediaType
     let feedType: String
     let mediaType: String
-    let storeId: Int
     let storeDescription: String
     let storeImage: UIImage
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, storeDescription: String, storeImage: UIImage) {
+    let currentUserID: Int
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeDescription: String, storeImage: UIImage, currentUserID: Int) {
         self.mediaUrl = mediaUrl
         self.method = method
         self.feedType = feedType
         self.mediaType = mediaType
-        self.storeId = storeId
         self.storeDescription = storeDescription
         self.storeImage = storeImage
+        self.currentUserID = currentUserID
         _contentText = State(initialValue: body)
     }
     var body: some View {
@@ -102,7 +102,7 @@ struct StoreCreateDoneView: View {
                             await vm.uploadStoreFeed(
                                 feedType: feedType,
                                 mediaType: mediaType,
-                                storeId: storeId,
+                                userId: currentUserID,
                                 storeDescription: storeDescription,
                                 image: storeImage,
                                 feedMediaUrl: mediaUrl,

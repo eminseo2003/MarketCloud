@@ -20,25 +20,24 @@ struct ProductCreateDoneView: View {
     let method: MediaType
     let feedType: String
     let mediaType: String
-    let storeId: Int
     let productName: String
     let categoryId: Int
     let productDescription: String
     let productImage: UIImage
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, productName: String, categoryId: Int, productDescription: String, productImage: UIImage) {
+    let currentUserID: Int
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, productName: String, categoryId: Int, productDescription: String, productImage: UIImage, currentUserID: Int) {
         self.mediaUrl = mediaUrl
         self.method = method
         self.feedType = feedType
         self.mediaType = mediaType
-        self.storeId = storeId
         self.productName = productName
         self.categoryId = categoryId
         self.productDescription = productDescription
         self.productImage = productImage
+        self.currentUserID = currentUserID
         _contentText = State(initialValue: body)
     }
     @FocusState private var isTextFieldFocused: Bool
-    
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
@@ -99,7 +98,7 @@ struct ProductCreateDoneView: View {
                             await vm.uploadProductFeed(
                                 feedType: feedType,
                                 mediaType: mediaType,
-                                storeId: storeId,
+                                userId: currentUserID,
                                 productName: productName,
                                 categoryId: categoryId,
                                 productDescription: productDescription,

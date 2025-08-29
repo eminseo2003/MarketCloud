@@ -39,7 +39,7 @@ final class ProductFeedGenerateVM: ObservableObject {
     func uploadProductFeed(
         feedType: String,          // "product"
         mediaType: String,         // "image" | "video"
-        storeId: Int,
+        userId: Int,
         productName: String,
         categoryId: Int,
         productDescription: String,
@@ -47,7 +47,7 @@ final class ProductFeedGenerateVM: ObservableObject {
     ) async {
         let t0 = CFAbsoluteTimeGetCurrent()
         log("▶️ uploadProductFeed called | feedType:", feedType, "| mediaType:", mediaType,
-            "| storeId:", storeId, "| name:", productName, "| categoryId:", categoryId,
+            "| userId:", userId, "| name:", productName, "| categoryId:", categoryId,
             "| descLen:", productDescription.count)
 
         guard let data = image.jpegData(compressionQuality: 0.9) else {
@@ -67,13 +67,19 @@ final class ProductFeedGenerateVM: ObservableObject {
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
+        func addFieldNumber(_ name: String, _ value: Int) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
 
         // 필드
         let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let mt = mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         addField("feedType", ft)                           // "product"
         addField("mediaType", mt)                          // "image" | "video"
-        addField("storeId", String(storeId))
+        addFieldNumber("userId", userId)
         addField("productName", productName)
         addField("productDescription", productDescription)
         addField("categoryId", String(categoryId))         // 서버 스펙에 맞춰 전송

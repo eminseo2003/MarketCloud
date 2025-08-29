@@ -20,7 +20,7 @@ final class StoreFeedGenerateVM: ObservableObject {
     private func log(_ items: Any...) {
         guard enableLog else { return }
         let msg = items.map { "\($0)" }.joined(separator: " ")
-        print("🧩 [FeedUploadVM]", msg)
+        print("[FeedUploadVM]", msg)
     }
     private func prettyJSON(_ data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data),
@@ -40,14 +40,14 @@ final class StoreFeedGenerateVM: ObservableObject {
     func uploadStoreFeed(
         feedType: String,          // "store" | "product" | "event"
         mediaType: String,         // "image" | "video"
-        storeId: Int,
+        userId: Int,
         storeDescription: String,
         image: UIImage
     ) async {
         let t0 = CFAbsoluteTimeGetCurrent()
         log("▶️ uploadStoreFeed(image) called",
             "| feedType:", feedType, "| mediaType:", mediaType,
-            "| storeId:", storeId, "| descLen:", storeDescription.count)
+            "| userId:", userId, "| descLen:", storeDescription.count)
         
         guard let data = image.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"
@@ -62,7 +62,7 @@ final class StoreFeedGenerateVM: ObservableObject {
         await uploadStoreFeed(
             feedType: ft,
             mediaType: mt,
-            storeId: storeId,
+            userId: userId,
             storeDescription: storeDescription,
             mediaData: data,
             fileName: "image.jpg",
@@ -76,7 +76,7 @@ final class StoreFeedGenerateVM: ObservableObject {
     func uploadStoreFeed(
         feedType: String,
         mediaType: String,
-        storeId: Int,
+        userId: Int,
         storeDescription: String,
         mediaData: Data,
         fileName: String,
@@ -94,13 +94,19 @@ final class StoreFeedGenerateVM: ObservableObject {
         log("🔖 headers:", ["Content-Type": "multipart/form-data; boundary=\(boundary)",
                             "ngrok-skip-browser-warning": "1"])
         log("📝 fields → feedType:", feedType, "| mediaType:", mediaType,
-            "| storeId:", storeId, "| descLen:", storeDescription.count)
+            "| userId:", userId, "| descLen:", storeDescription.count)
         log("📎 file → name:", fileName, "| mime:", mimeType, "| size:", mediaData.count, "bytes")
         
         var body = Data()
         func addField(_ name: String, _ value: String) {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+        func addFieldNumber(_ name: String, _ value: Int) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
         
@@ -112,7 +118,7 @@ final class StoreFeedGenerateVM: ObservableObject {
         // 텍스트 필드
         addField("feedType", feedType)
         addField("mediaType", mediaType)
-        addField("storeId", String(storeId))
+        addFieldNumber("userId", userId)
         addField("storeDescription", storeDescription)
         
         // 파일(이미지는 항상 storeImage로 첨부)

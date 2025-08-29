@@ -29,7 +29,7 @@ final class StoreFeedUpLoadVM: ObservableObject {
     func uploadStoreFeed(
         feedType: String,          // "store"
         mediaType: String,         // "image" | "video"
-        storeId: Int,
+        userId: Int,
         storeDescription: String,  // 점포 설명(선택 문구와 별도라면 둘 다 보냄)
         image: UIImage,            // 대표 이미지
         feedMediaUrl: String,      // 생성 결과 미디어 URL
@@ -37,7 +37,7 @@ final class StoreFeedUpLoadVM: ObservableObject {
     ) async {
         log("▶️ post start | feedType:", feedType,
             "| mediaType:", mediaType,
-            "| storeId:", storeId)
+            "| userId:", userId)
 
         guard let dataImg = image.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"; log("이미지 인코딩 실패"); return
@@ -55,11 +55,17 @@ final class StoreFeedUpLoadVM: ObservableObject {
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
+        func addFieldNumber(_ name: String, _ value: Int) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
 
         // 텍스트 필드(백엔드 키명에 맞춰 전송)
         addField("feedType", feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
         addField("mediaType", mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
-        addField("storeId", String(storeId))
+        addFieldNumber("userId", userId)
         addField("storeDescription", storeDescription)
         addField("feedMediaUrl", feedMediaUrl)   // ← 생성 결과 URL
         addField("feedBody", feedBody)           // ← 최종 본문(편집 반영)

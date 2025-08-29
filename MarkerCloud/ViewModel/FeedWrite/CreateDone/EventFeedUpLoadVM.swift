@@ -35,7 +35,7 @@ final class EventFeedUpLoadVM: ObservableObject {
     func uploadEventFeed(
             feedType: String,
             mediaType: String,
-            storeId: Int,
+            userId: Int,
             eventName: String,
             eventDescription: String,
             eventStartAt: Date,
@@ -47,7 +47,7 @@ final class EventFeedUpLoadVM: ObservableObject {
             let t0 = CFAbsoluteTimeGetCurrent()
             log("▶️ post start | feedType:", feedType,
                 "| mediaType:", mediaType,
-                "| storeId:", storeId,
+                "| userId:", userId,
                 "| name:", eventName,
                 "| start:", serverDateString(eventStartAt),
                 "| end:", serverDateString(eventEndAt))
@@ -87,11 +87,16 @@ final class EventFeedUpLoadVM: ObservableObject {
                 body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
                 body.append("\(value)\r\n".data(using: .utf8)!)
             }
-
+            func addFieldNumber(_ name: String, _ value: Int) {
+                body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+                body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+                body.append("\(value)\r\n".data(using: .utf8)!)
+            }
             // 텍스트 필드들
             addField("feedType", ft)
             addField("mediaType", mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
-            addField("storeId", String(storeId))
+            addFieldNumber("userId", userId)
             addField("eventName", eventName)
             addField("eventDescription", eventDescription)
             addField("eventStartAt", serverDateString(eventStartAt))

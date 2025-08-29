@@ -127,13 +127,12 @@ struct CreateStoreView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("생성") {
-                        guard let img = selectedImage,
-                              let storeId = Int(storeIdText) else { return }
+                        guard let img = selectedImage else { return }
                         Task {
                             await vm.uploadStoreFeed(
                                 feedType: "store",
                                 mediaType: method == .image ? "image" : "video",
-                                storeId: storeId,
+                                userId: currentUserID,
                                 storeDescription: storeScript,
                                 image: img
                             )
@@ -152,16 +151,16 @@ struct CreateStoreView: View {
             .navigationDestination(item: $createRoute) { route in
                 Group {
                     if case let .createStoreComplete(dto) = route {
-                        if let img = selectedImage, let storeId = Int(storeIdText) {
+                        if let img = selectedImage {
                             StoreCreateDoneView(
                                 mediaUrl: dto.feedMediaUrl,
                                 body: dto.feedBody,
                                 method: method,
                                 feedType: "store",
                                 mediaType: (method == .image ? "image" : "video"),
-                                storeId: storeId,
                                 storeDescription: storeScript,
-                                storeImage: img
+                                storeImage: img,
+                                currentUserID: currentUserID
                             )
                         } else {
                             Text("필수 값이 없습니다. (이미지/점포 ID)")

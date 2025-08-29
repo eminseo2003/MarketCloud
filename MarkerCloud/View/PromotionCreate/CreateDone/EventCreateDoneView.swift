@@ -20,27 +20,26 @@ struct EventCreateDoneView: View {
     let method: MediaType
     let feedType: String
     let mediaType: String
-    let storeId: Int
     let eventName: String
     let eventDescription: String
     let eventStartAt: Date
     let eventEndAt: Date
     let eventImage: UIImage
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeId: Int, eventName: String, eventDescription: String, eventStartAt: Date, eventEndAt: Date, eventImage: UIImage) {
+    let currentUserID: Int
+    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, eventName: String, eventDescription: String, eventStartAt: Date, eventEndAt: Date, eventImage: UIImage, currentUserID: Int) {
         self.mediaUrl = mediaUrl
         self.method = method
         self.feedType = feedType
         self.mediaType = mediaType
-        self.storeId = storeId
         self.eventName = eventName
         self.eventDescription = eventDescription
         self.eventStartAt = eventStartAt
         self.eventEndAt = eventEndAt
         self.eventImage = eventImage
+        self.currentUserID = currentUserID
         _contentText = State(initialValue: body)
     }
     @FocusState private var isTextFieldFocused: Bool
-    
     
     var body: some View {
         NavigationStack {
@@ -101,7 +100,7 @@ struct EventCreateDoneView: View {
                             await vm.uploadEventFeed(
                                 feedType: feedType,
                                 mediaType: mediaType,
-                                storeId: storeId,
+                                userId: currentUserID,
                                 eventName: eventName,
                                 eventDescription: eventDescription,
                                 eventStartAt: eventStartAt,

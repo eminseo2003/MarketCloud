@@ -20,7 +20,7 @@ final class EventFeedGenerateVM: ObservableObject {
     private func log(_ items: Any...) {
         guard enableLog else { return }
         let msg = items.map { "\($0)" }.joined(separator: " ")
-        print("🧩 [FeedUploadVM]", msg)
+        print("[FeedUploadVM]", msg)
     }
     private func prettyJSON(_ data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data),
@@ -48,7 +48,7 @@ final class EventFeedGenerateVM: ObservableObject {
     func uploadEventFeed(
         feedType: String,          // "event"
         mediaType: String,         // "image" | "video"
-        storeId: Int,
+        userId: Int,
         eventName: String,
         eventDescription: String,
         eventStartAt: Date,
@@ -57,7 +57,7 @@ final class EventFeedGenerateVM: ObservableObject {
     ) async {
         let t0 = CFAbsoluteTimeGetCurrent()
         log("▶️ uploadEventFeed called | feedType:", feedType, "| mediaType:", mediaType,
-            "| storeId:", storeId, "| name:", eventName, "| descLen:", eventDescription.count,
+            "| userId:", userId, "| name:", eventName, "| descLen:", eventDescription.count,
             "| start:", eventStartAt, "| end:", eventEndAt)
 
         guard let data = image.jpegData(compressionQuality: 0.9) else {
@@ -86,11 +86,18 @@ final class EventFeedGenerateVM: ObservableObject {
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
+        
+        func addFieldNumber(_ name: String, _ value: Int) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
 
         // 텍스트 필드
         addField("feedType", ft)                       // "event"
         addField("mediaType", mt)                      // "image" | "video"
-        addField("storeId", String(storeId))
+        addFieldNumber("userId", userId)  
         addField("eventName", eventName)
         addField("eventDescription", eventDescription)
         addField("eventStartAt", serverDateString(eventStartAt))
