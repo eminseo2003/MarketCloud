@@ -7,21 +7,19 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct SelectKeywordView: View {
-    let keywords: [String] = ["장보기", "먹거리 탐방", "데이트"]
+    @StateObject private var keywordVM = KeywordVM()
+
+    @State private var selectedKeyword: String? = nil
 
     @State private var selectedIndex: Int? = nil
     @State private var isShuffling = false
     @State private var showSparkle = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            // 헤더
+        VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("오늘의 행운 키워드")
-                    .font(.title2.bold())
+                Text("오늘의 행운 키워드").font(.title2.bold())
                 Spacer()
             }
             .padding(.top, 4)
@@ -30,27 +28,43 @@ struct SelectKeywordView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            VStack(spacing: 12) {
-                ForEach(displayedIndices, id: \.self) { i in
-                    Button {
-                        guard !isShuffling else { return }
-                        select(i)
-                    } label: {
-                        keywordChip(
-                            text: keywords[i],
-                            isSelected: selectedIndex == i,
-                            isShuffling: isShuffling
-                        )
+            // 본문
+            Group {
+                if keywordVM.isLoading {
+                    ProgressView().padding(.top, 12)
+                } else if let err = keywordVM.errorMessage {
+                    VStack(spacing: 8) {
+                        Text("불러오기 실패").font(.headline)
+                        Text(err).font(.caption).foregroundStyle(.secondary)
+                        Button("다시 시도") { Task { await keywordVM.fetch() } }
                     }
-                    .buttonStyle(.plain)
-                    .disabled(isShuffling)
+                } else if displayedKeywords.isEmpty {
+                    Text("표시할 키워드가 없습니다.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 12)
+                } else {
+                    VStack(spacing: 12) {
+                        ForEach(Array(displayedKeywords.enumerated()), id: \.offset) { i, word in
+                            Button {
+                                selectedKeyword = word
+                            } label: {
+                                keywordChip(
+                                    text: word,
+                                    isSelected: selectedIndex == i,
+                                    isShuffling: isShuffling
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(isShuffling)
+                        }
+                    }
+                    .padding(.top, 6)
                 }
             }
-            .padding(.top, 6)
 
             Spacer(minLength: 8)
 
-            // 액션 버튼들
             HStack(spacing: 12) {
                 Button {
                     Task { await spinPick() }
@@ -58,11 +72,11 @@ struct SelectKeywordView: View {
                     Label("랜덤 뽑기", systemImage: "dice.fill")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(RandomCTA())
-                .disabled(isShuffling)
+                .buttonStyle(OutlineCTA())
+                .disabled(isShuffling || displayedKeywords.isEmpty)
 
                 Button {
-                    confirm()
+                    
                 } label: {
                     Label("이 키워드로", systemImage: "wand.and.stars")
                         .frame(maxWidth: .infinity)
@@ -70,15 +84,8 @@ struct SelectKeywordView: View {
                 .buttonStyle(FilledCTA())
                 .disabled(selectedIndex == nil || isShuffling)
             }
-
-            // 선택 안내
-            if let idx = selectedIndex {
-                Text("선택됨: \(keywords[idx])")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .transition(.opacity.combined(with: .scale))
-            }
         }
+        .task { await keywordVM.fetch() }
         .padding(20)
         .background(
             ZStack {
@@ -97,53 +104,47 @@ struct SelectKeywordView: View {
         .animation(.easeInOut, value: isShuffling)
     }
 
-    // 표시할 인덱스(키워드가 3개 미만이어도 안전)
-    private var displayedIndices: [Int] {
-        Array(keywords.indices.prefix(3))
+    private var displayedKeywords: [String] {
+        Array(keywordVM.keywords.prefix(3))
     }
 
+//    private func select(_ i: Int) {
+//        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+//        selectedIndex = i
+//    }
+//
+//    private func confirm() {
+//        guard let i = selectedIndex, displayedKeywords.indices.contains(i) else { return }
+//        let chosen = displayedKeywords[i]
+//        UINotificationFeedbackGenerator().notificationOccurred(.success)
+//        withAnimation(.easeInOut(duration: 0.35)) { showSparkle = true }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+//            withAnimation { showSparkle = false }
+//            onConfirm?(chosen)
+//        }
+//    }
 
-    private func select(_ i: Int) {
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        selectedIndex = i
-    }
-
-    private func confirm() {
-        guard let i = selectedIndex else { return }
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        withAnimation(.easeInOut(duration: 0.35)) { showSparkle = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            withAnimation { showSparkle = false }
-            //onConfirm(keywords[i])
-        }
-    }
-
-    /// 슬롯머신처럼 빠르게 순환 후 무작위 선택
     private func spinPick() async {
-        guard !displayedIndices.isEmpty else { return }
+        guard !displayedKeywords.isEmpty else { return }
         isShuffling = true
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
 
-        // 점점 느려지는 순환
         var delay: Double = 0.08
-        let rounds = 10  // 순환 횟수
+        let rounds = 10
         for step in 0..<(rounds + Int.random(in: 3...6)) {
-            let i = displayedIndices[step % displayedIndices.count]
+            let i = step % displayedKeywords.count
             await MainActor.run { selectedIndex = i }
             try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             delay *= 1.15
         }
 
-        // 최종 랜덤 고정
-        let final = displayedIndices.randomElement()!
         await MainActor.run {
-            selectedIndex = final
+            selectedIndex = Int.random(in: 0..<displayedKeywords.count)
             isShuffling = false
         }
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
-    // MARK: - UI parts
 
     private func keywordChip(text: String, isSelected: Bool, isShuffling: Bool) -> some View {
         HStack {
@@ -182,19 +183,3 @@ struct SelectKeywordView: View {
         .contentShape(Rectangle())
     }
 }
-
-struct RandomCTA: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.callout.bold())
-            .foregroundStyle(.primary)
-            .padding(.vertical, 12)
-            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color(uiColor: .secondarySystemBackground)))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.black.opacity(0.06), lineWidth: 1)
-            )
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
-    }
-}
-
