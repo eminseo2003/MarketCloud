@@ -10,20 +10,21 @@ import Foundation
 struct Feed: Identifiable, Hashable {
     let id: Int
     let storeName: String
-    let storeImageURL: URL
+    let storeImageURL: URL?
     let createdAt: Date
     let title: String
     let content: String
     let imageURL: URL
     let feedType: String
-    let likeCount: Int
+    var likeCount: Int
     let reviewCount: Int
+    var isLiked: Bool
 }
 
 private struct FeedItemDTO: Decodable {
     let feedId: Int
     let storeName: String
-    let storeImageUrl: String
+    let storeImageUrl: String?
     let createdAt: String
     let feedTitle: String
     let feedContent: String
@@ -31,6 +32,7 @@ private struct FeedItemDTO: Decodable {
     let feedType: String
     let feedLikeCount: Int
     let feedReviewCount: Int
+    let isLiked: Bool
 }
 private struct FeedListDTO: Decodable {
     let feedList: [FeedItemDTO]
@@ -50,21 +52,21 @@ final class FeedViewModel: ObservableObject {
 
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 
-    private func makeURL(marketId: Int) -> URL {
-    //private func makeURL(marketId: Int, userId: Int) -> URL {
+    //private func makeURL(marketId: Int) -> URL {
+    private func makeURL(marketId: Int, userId: Int) -> URL {
         base.appendingPathComponent("api")
             .appendingPathComponent("feed")
             .appendingPathComponent(String(marketId))
-            //.appendingPathComponent(String(userId))
+            .appendingPathComponent(String(userId))
     }
-    func fetch(marketId: Int) async {
-    //func fetch(marketId: Int, userId: Int) async {
+    //func fetch(marketId: Int) async {
+    func fetch(marketId: Int, userId: Int) async {
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
 
-        let url = makeURL(marketId: marketId)
-        //let url = makeURL(marketId: marketId, userId: userId)
+        //let url = makeURL(marketId: marketId)
+        let url = makeURL(marketId: marketId, userId: userId)
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         req.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -88,19 +90,31 @@ final class FeedViewModel: ObservableObject {
                 return
             }
 
-            self.feeds = dto.feedList.map { item in
-                Feed(
-                    id: item.feedId,
-                    storeName: item.storeName,
-                    storeImageURL: urlFrom(item.storeImageUrl),
-                    createdAt: parseAPIDate(item.createdAt),
-                    title: item.feedTitle,
-                    content: item.feedContent,
-                    imageURL: urlFrom(item.feedImageUrl),
-                    feedType: item.feedType,
-                    likeCount: item.feedLikeCount,
-                    reviewCount: item.feedReviewCount
-                )
+            self.feeds = dto.feedList.map { item -> Feed in
+//                let storeImgURL: URL? = item.storeImageUrl?
+//                    .trimmingCharacters(in: .whitespacesAndNewlines)
+//                    .flatMap { s in
+//                                URL(string: s.trimmingCharacters(in: .whitespacesAndNewlines))
+//                            }
+//                
+//                let mainImgURL: URL = urlFrom(
+//                    item.feedImageUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+//                )
+                let storeImgURL = urlOpt(from: item.storeImageUrl)
+                let mainImgURL  = urlOpt(from: item.feedImageUrl) ?? fallbackURL
+                return Feed(
+                        id: item.feedId,
+                        storeName: item.storeName,
+                        storeImageURL: storeImgURL,
+                        createdAt: parseAPIDate(item.createdAt),
+                        title: item.feedTitle,
+                        content: item.feedContent,
+                        imageURL: mainImgURL,
+                        feedType: item.feedType,
+                        likeCount: item.feedLikeCount,
+                        reviewCount: item.feedReviewCount,
+                        isLiked: item.isLiked
+                    )
             }
             log("loaded feeds:", feeds.count)
 
@@ -109,6 +123,12 @@ final class FeedViewModel: ObservableObject {
             log("error:", error.localizedDescription)
         }
     }
+    private func urlOpt(from s: String?) -> URL? {
+        guard let t = s?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty else { return nil }
+        return URL(string: t)
+    }
+
+    
 
     private let fallbackURL = URL(string: "https://example.com/")!
 

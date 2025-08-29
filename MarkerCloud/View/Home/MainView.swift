@@ -50,15 +50,19 @@ struct MainView: View {
                         .bold(true)
                     Spacer()
                     Menu {
-                        ForEach(marketVm.markets) { market in
-                            Button(market.name) {
-                                selectedMarketID = market.code
+                        Picker("시장 선택", selection: $selectedMarketID) {
+                            ForEach(marketVm.markets) { market in
+                                Text(market.name).tag(market.code)
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Text(
-                                marketVm.markets.first(where: { $0.code == selectedMarketID })?.name
+                                marketVm.markets.first(
+                                    where: {
+                                        $0.code == selectedMarketID
+                                    }
+                                )?.name
                                 ?? "시장 선택"
                             )
                             Image(systemName: "chevron.down")
@@ -87,19 +91,20 @@ struct MainView: View {
                             Text(err).foregroundColor(.secondary).font(.caption)
                             Button("다시 시도") {
                                 Task {
-                                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                                    await feedVM.fetch(marketId: selectedMarketID)
+                                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                                    //await feedVM.fetch(marketId: selectedMarketID)
                                 }
                             }
                         }
                         .padding(.vertical, 24)
                     } else {
                         LazyVStack(spacing: 12) {
-                            ForEach(filteredFeeds) { feed in
-                                FeedCardView(feed: feed, pushStoreName: $pushStoreName)
+                            ForEach(filteredFeedIndices, id: \.self) { i in
+                                FeedCardView(feed: $feedVM.feeds[i], pushStoreName: $pushStoreName)
                             }
                         }
-                        .padding(.horizontal)
+                        //.padding(.horizontal)
+
                     }
                     //                    LazyVGrid(columns: columns, spacing: 8) {
                     //                        VStack(spacing: 16) {
@@ -116,18 +121,18 @@ struct MainView: View {
                 }
                 .task {
                     // 최초 로드 시 실행
-                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    await feedVM.fetch(marketId: selectedMarketID)
+                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    //await feedVM.fetch(marketId: selectedMarketID)
                     await marketVm.fetch()
                 }
                 .refreshable {
-                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    await feedVM.fetch(marketId: selectedMarketID)
+                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    //await feedVM.fetch(marketId: selectedMarketID)
                 }
                 .onChange(of: selectedMarketID) { oldValue, newValue in
                     Task {
-                        //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                        await feedVM.fetch(marketId: selectedMarketID)
+                        await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                        //await feedVM.fetch(marketId: selectedMarketID)
                     }
                 }
                 Spacer()
@@ -139,17 +144,17 @@ struct MainView: View {
         }
         
     }
-    private var filteredFeeds: [Feed] {
-        switch selectedTab {
-        case .all:
-            return feedVM.feeds
-        case .store:
-            return feedVM.feeds.filter { $0.feedType == "점포" }
-        case .product:
-            return feedVM.feeds.filter { $0.feedType == "상품" }
-        case .event:
-            return feedVM.feeds.filter { $0.feedType == "이벤트" }
+    private var filteredFeedIndices: [Int] {
+        feedVM.feeds.indices.filter { i in
+            let f = feedVM.feeds[i]
+            switch selectedTab {
+            case .all:     return true
+            case .store:   return f.feedType == "store"   || f.feedType == "점포"
+            case .product: return f.feedType == "product" || f.feedType == "상품"
+            case .event:   return f.feedType == "event"   || f.feedType == "이벤트"
+            }
         }
     }
+
 }
 

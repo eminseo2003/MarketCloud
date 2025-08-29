@@ -42,7 +42,15 @@ final class ReviewVM: ObservableObject {
     @Published var reviews: [ReviewUI] = []
     
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-    
+    private func log(_ items: Any...) {
+            print("[ReviewVM]", items.map { "\($0)" }.joined(separator: " "))
+        }
+        private func prettyJSON(_ data: Data) -> String? {
+            guard let obj = try? JSONSerialization.jsonObject(with: data),
+                  let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
+                  let s = String(data: d, encoding: .utf8) else { return nil }
+            return s
+        }
     func fetch(feedId: Int) async {
         errorMessage = nil
         isLoading = true
@@ -60,16 +68,30 @@ final class ReviewVM: ObservableObject {
         req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
         
         do {
+            log("GET", url.absoluteString)
             let (data, resp) = try await URLSession.shared.data(for: req)
             let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
+            log("status:", code)
+            
+            if let pretty = prettyJSON(data) {
+                            log("↩︎ JSON\n\(pretty)")
+                        } else if let raw = String(data: data, encoding: .utf8) {
+                            log("↩︎ RAW\n\(raw.prefix(512))")
+                        } else {
+                            log("↩︎ <binary \(data.count) bytes>")
+                        }
+            
             guard (200...299).contains(code) else {
                 errorMessage = "HTTP \(code)"
+                log("실패:", errorMessage!)
                 return
             }
+            
             
             let decoded = try JSONDecoder().decode(ReviewResponse.self, from: data)
             guard decoded.success else {
                 errorMessage = decoded.error ?? "서버 오류"
+                log("실패:", errorMessage!)
                 return
             }
             
@@ -82,8 +104,22 @@ final class ReviewVM: ObservableObject {
                     createdAt: Self.parseDate(dto.createAt)
                 )
             }
+            log("성공 | avgScore:", avgScore, "| reviews:", reviews.count)
+        } catch let DecodingError.keyNotFound(key, ctx) {
+            errorMessage = "디코딩 실패(key): \(key.stringValue) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+            log("❌", errorMessage!)
+        } catch let DecodingError.typeMismatch(type, ctx) {
+            errorMessage = "디코딩 실패(type): \(type) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+            log("❌", errorMessage!)
+        } catch let DecodingError.valueNotFound(type, ctx) {
+            errorMessage = "디코딩 실패(value): \(type) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
+            log("❌", errorMessage!)
+        } catch let DecodingError.dataCorrupted(ctx) {
+            errorMessage = "디코딩 실패(data): \(ctx.debugDescription)"
+            log("❌", errorMessage!)
         } catch {
             errorMessage = error.localizedDescription
+            log("❌ 네트워크/기타 에러:", error.localizedDescription)
         }
     }
     

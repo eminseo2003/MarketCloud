@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FeedCardView: View {
-    let feed: Feed
+    @Binding var feed: Feed
     @State private var isCommentSheetPresented = false
     @Binding var pushStoreName: String?
     
@@ -40,10 +40,9 @@ struct FeedCardView: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
-                    
                     Spacer()
                 }
-            }
+            }.padding(.horizontal)
             
             AsyncImage(url: feed.imageURL) { image in
                 image
@@ -60,11 +59,16 @@ struct FeedCardView: View {
             HStack(spacing: 12) {
                 HStack(spacing: 4) {
                     Button {
-                        
+                        withAnimation(.spring) {
+                                                feed.isLiked.toggle()
+                                                feed.likeCount += feed.isLiked ? 1 : -1
+                                                if feed.likeCount < 0 { feed.likeCount = 0 }
+                                            }
+                                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     } label: {
-                        Image(systemName: "heart")
+                        Image(systemName: feed.isLiked ? "heart.fill" :"heart")
                             .font(.title3)
-                            .foregroundColor(.primary)
+                            .foregroundColor(feed.isLiked ? Color("Main") :.primary)
                     }
                     Text("\(feed.likeCount)")
                         .font(.footnote)
@@ -89,6 +93,7 @@ struct FeedCardView: View {
                 Spacer()
             }
             .padding(.vertical, 5)
+            .padding(.horizontal)
             
             (
                 Text(feed.title).bold() +
@@ -96,6 +101,7 @@ struct FeedCardView: View {
             )
             .font(.subheadline)
             .foregroundColor(.primary)
+            .padding(.horizontal)
         }
         .padding(.bottom, 8)
         .sheet(isPresented: $isCommentSheetPresented) {
