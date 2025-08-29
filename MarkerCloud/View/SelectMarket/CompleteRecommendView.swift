@@ -13,6 +13,7 @@ struct CompleteRecommendView: View {
     @StateObject private var vm = MarketListVM()
     
     let topMarketName: String
+    let topMarketAddress: String
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -34,7 +35,7 @@ struct CompleteRecommendView: View {
                                 .foregroundStyle(.primary)
                                 .fixedSize(horizontal: false, vertical: true)
                             
-                            Text("시장 주소")
+                            Text("시장 주소: \(topMarketAddress)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)

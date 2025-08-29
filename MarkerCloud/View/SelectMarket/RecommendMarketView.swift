@@ -8,16 +8,22 @@
 import SwiftUI
 
 enum RecommendRoute: Identifiable, Equatable, Hashable {
-    case selectComplete(String)
+    case selectComplete(name: String, address: String)
 
     var id: String {
         switch self {
-        case .selectComplete(let name): return "selectComplete:\(name)"
+        case .selectComplete(let name, let address):
+            return "selectComplete:\(name)|\(address)"
         }
     }
     var topMarketName: String {
         switch self {
-        case .selectComplete(let name): return name
+        case .selectComplete(let name, _): return name
+        }
+    }
+    var topMarketAddress: String {
+        switch self {
+        case .selectComplete(_, let address): return address
         }
     }
 }
@@ -118,8 +124,9 @@ struct RecommendMarketView: View {
                                                q2: Answer2 ?? "",
                                                q3: Answer3 ?? "",
                                                q4: Answer4)
-                            if let top = vm.result?.top1Market {
-                                route = .selectComplete(top)
+                            if let dto = vm.result {
+                                route = .selectComplete(name: dto.top1Market,
+                                                        address: dto.marketAddress)
                             }
                         }
                         
@@ -139,10 +146,11 @@ struct RecommendMarketView: View {
                 .background(Color(UIColor.systemGroupedBackground))
                 .navigationDestination(item: $route) { route in
                     switch route {
-                    case .selectComplete(let top):
+                    case .selectComplete(let name, let address):
                         CompleteRecommendView(
                             selectedMarketID: $selectedMarketID,
-                            topMarketName: top
+                            topMarketName: name,
+                                                        topMarketAddress: address
                         )
                     }
                 }
