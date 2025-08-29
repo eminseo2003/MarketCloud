@@ -68,7 +68,6 @@ struct LoginView: View {
                 Button {
                     vm.login()
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    currentUserID = DummyUserIDs.user1
                 } label: {
                     HStack {
                         Text("로그인")
@@ -96,7 +95,6 @@ struct LoginView: View {
             if newValue != nil {
                 hideKeyboard()
                 currentUserID = vm.loggedInUser?.hostId ?? 0
-
                 showSuccessAlert = true
             }
         }

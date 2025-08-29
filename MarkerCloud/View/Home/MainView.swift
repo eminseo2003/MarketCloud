@@ -85,7 +85,7 @@ struct MainView: View {
                             Text("불러오기 실패").font(.headline)
                             Text(err).foregroundColor(.secondary).font(.caption)
                             Button("다시 시도") {
-                                Task { await feedVM.fetch(marketId: 1, userId: 123) }
+                                Task { await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID) }
                             }
                         }
                         .padding(.vertical, 24)
@@ -112,13 +112,13 @@ struct MainView: View {
                 }
                 .task {
                     // 최초 로드 시 실행
-                    await feedVM.fetch(marketId: 1, userId: 123)
+                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
                 }
                 .refreshable {
-                    await feedVM.fetch(marketId: 1, userId: 123)
+                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
                 }
                 .onChange(of: selectedMarketID) { oldValue, newValue in
-                    Task { await feedVM.fetch(marketId: 1, userId: 123) }
+                    Task { await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID) }
                 }
                 Spacer()
                 
