@@ -10,9 +10,9 @@ import Combine
 import Alamofire
 
 struct SignUpRequest: Encodable {
-    let id: String
+    let email: String
     let password: String
-    let username: String
+    let name: String
     let isHost: Bool
 }
 
@@ -65,9 +65,9 @@ final class SignUpViewModel: ObservableObject {
         }
         
         let payload = SignUpRequest(
-            id: userId.trimmingCharacters(in: .whitespacesAndNewlines),
+            email: userId.trimmingCharacters(in: .whitespacesAndNewlines),
             password: password,
-            username: username.trimmingCharacters(in: .whitespacesAndNewlines),
+            name: username.trimmingCharacters(in: .whitespacesAndNewlines),
             isHost: isHost
         )
         

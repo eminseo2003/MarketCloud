@@ -95,7 +95,7 @@ struct LoginView: View {
         .onChange(of: vm.successMessage) { newValue in
             if newValue != nil {
                 hideKeyboard()
-                currentUserID = vm.loggedInUser?.id ?? 0
+                currentUserID = vm.loggedInUser?.hostId ?? 0
 
                 showSuccessAlert = true
             }
@@ -104,7 +104,7 @@ struct LoginView: View {
             Button("확인") {
             }
         }, message: {
-            Text("환영합니다, \(vm.loggedInUser?.id ?? 0)님!")
+            Text("환영합니다, \(vm.loggedInUser?.hostId ?? 0)님!")
         })
     }
     private func hideKeyboard() {

@@ -8,7 +8,7 @@
 import Foundation
 
 struct MarketItemDTO: Decodable {
-    let marketCode: Int
+    let marketid: Int
     let marketName: String
 }
 
@@ -22,7 +22,6 @@ struct MarketListResponse: Decodable {
     let success: Bool
 }
 
-// UI에 쓰기 편한 카드 모델 (Asset 이름 포함)
 struct MarketCardUI: Identifiable, Hashable {
     let id = UUID()
     let code: Int
@@ -45,7 +44,23 @@ final class MarketListVM: ObservableObject {
         1: "market1",
         2: "market2",
         3: "market3",
-        4: "market4"
+        4: "market4",
+        5: "market4",
+        6: "market4",
+        7: "market4",
+        8: "market4",
+        9: "market4",
+        10: "market4",
+        11: "market4",
+        12: "market4",
+        13: "market4",
+        14: "market4",
+        15: "market4",
+        16: "market4",
+        17: "market4",
+        18: "market4",
+        19: "market4",
+        20: "market4",
     ]
     private let defaultAsset = "market_default"
     
@@ -101,14 +116,14 @@ final class MarketListVM: ObservableObject {
             let list = decoded.responseDto.marketList
                     log("fetched markets:", list.count)
                     for m in list {
-                        log("• code:", m.marketCode,
+                        log("• code:", m.marketid,
                             "| name:", m.marketName,
-                            "| asset:", assetName(for: m.marketCode))
+                            "| asset:", assetName(for: m.marketid))
                     }
             self.markets = decoded.responseDto.marketList.map {
-                MarketCardUI(code: $0.marketCode,
+                MarketCardUI(code: $0.marketid,
                              name: $0.marketName,
-                             imageAssetName: assetName(for: $0.marketCode))
+                             imageAssetName: assetName(for: $0.marketid))
             }
             log("loaded:", markets.count)
         } catch {

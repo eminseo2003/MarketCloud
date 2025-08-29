@@ -30,12 +30,12 @@ final class StoreFeedUpLoadVM: ObservableObject {
         feedType: String,          // "store"
         mediaType: String,         // "image" | "video"
         userId: Int,
-        storeDescription: String,  // 점포 설명(선택 문구와 별도라면 둘 다 보냄)
-        image: UIImage,            // 대표 이미지
-        feedMediaUrl: String,      // 생성 결과 미디어 URL
-        feedBody: String           // 생성 결과 문구(사용자 편집 반영)
+        storeDescription: String,
+        image: UIImage,
+        feedMediaUrl: String,
+        feedBody: String
     ) async {
-        log("▶️ post start | feedType:", feedType,
+        log("post start | feedType:", feedType,
             "| mediaType:", mediaType,
             "| userId:", userId)
 
@@ -62,15 +62,13 @@ final class StoreFeedUpLoadVM: ObservableObject {
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
 
-        // 텍스트 필드(백엔드 키명에 맞춰 전송)
         addField("feedType", feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
         addField("mediaType", mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
         addFieldNumber("userId", userId)
         addField("storeDescription", storeDescription)
-        addField("feedMediaUrl", feedMediaUrl)   // ← 생성 결과 URL
-        addField("feedBody", feedBody)           // ← 최종 본문(편집 반영)
+        addField("feedMediaUrl", feedMediaUrl)
+        addField("feedBody", feedBody)
 
-        // 파일 필드: storeImage
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"storeImage\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
