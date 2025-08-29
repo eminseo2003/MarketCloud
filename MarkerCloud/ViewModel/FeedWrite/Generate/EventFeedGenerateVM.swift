@@ -68,7 +68,7 @@ final class EventFeedGenerateVM: ObservableObject {
         // (옵션) 시작/종료 유효성 체크
         guard eventEndAt >= eventStartAt else {
             errorMessage = "이벤트 종료 시간이 시작 시간보다 빠릅니다."
-            log("⚠️ 잘못된 시간 범위"); return
+            log("잘못된 시간 범위"); return
         }
 
         let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()

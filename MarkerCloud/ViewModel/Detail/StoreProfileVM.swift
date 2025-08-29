@@ -101,7 +101,7 @@ final class StoreProfileVM: ObservableObject {
 
             guard (200...299).contains(code) else {
                 errorMessage = "HTTP \(code)"
-                log("⚠️ 실패:", errorMessage!)
+                log("실패:", errorMessage!)
                 return
             }
 
@@ -111,7 +111,7 @@ final class StoreProfileVM: ObservableObject {
 
             guard res.success, let dto = res.responseDto else {
                 errorMessage = res.error ?? "서버 응답 오류"
-                log("⚠️ 실패:", errorMessage!)
+                log("실패:", errorMessage!)
                 return
             }
 

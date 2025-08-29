@@ -8,6 +8,7 @@
 import Foundation
 
 private struct ProductRankItemDTO: Decodable {
+    let feedId: Int
     let rank: Int
     let mediaUrl: String
     let productName: String
@@ -19,6 +20,7 @@ private struct ProductRankListDTO: Decodable {
 
 struct PopularProduct: Identifiable, Hashable {
     let id = UUID()
+    let feedId: Int
     let rank: Int
     let productName: String
     let imageURL: URL?
@@ -64,6 +66,7 @@ final class ProductRankVM: ObservableObject {
 
             products = decoded.responseDto.rankings.map {
                 PopularProduct(
+                    feedId: $0.feedId,
                     rank: $0.rank,
                     productName: $0.productName,
                     imageURL: URL(string: $0.mediaUrl),

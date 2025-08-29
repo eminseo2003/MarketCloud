@@ -101,7 +101,7 @@ private func makeMultipartBody(
 //            // 2) 메시지 형태 시도
 //            if let msg = try? JSONDecoder().decode(ServerMessage.self, from: data) {
 //                if msg.success == true { print("✅ 생성 성공(메시지): \(msg.message ?? "")") }
-//                else { errorMessage = msg.message ?? "생성 실패"; print("⚠️ \(errorMessage!)") }
+//                else { errorMessage = msg.message ?? "생성 실패"; print("\(errorMessage!)") }
 //                return
 //            }
 //            // 3) 디코딩 안되면 원문 출력
@@ -109,7 +109,7 @@ private func makeMultipartBody(
 //            errorMessage = "서버 응답 형식이 예상과 다릅니다."
 //        } catch {
 //            errorMessage = error.localizedDescription
-//            print("❌ 업로드 실패:", error.localizedDescription)
+//            print("업로드 실패:", error.localizedDescription)
 //        }
 //    }
 //}

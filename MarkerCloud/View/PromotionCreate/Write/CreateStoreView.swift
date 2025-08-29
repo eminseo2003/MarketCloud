@@ -139,7 +139,7 @@ struct CreateStoreView: View {
                             if let g = vm.generated {
                                 createRoute = .createStoreComplete(g)
                                         } else if let err = vm.errorMessage {
-                                            print("❌ Upload failed: \(err)")
+                                            print("Upload failed: \(err)")
                                         }
                         }
                         isStoreScriptFocused = false

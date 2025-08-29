@@ -56,22 +56,22 @@ final class EventFeedUpLoadVM: ObservableObject {
             let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             guard ft == "event" else {
                 errorMessage = "feedType은 'event'여야 합니다. (현재: \(feedType))"
-                log("⚠️ 잘못된 feedType:", feedType)
+                log("잘못된 feedType:", feedType)
                 return
             }
             guard eventEndAt >= eventStartAt else {
                 errorMessage = "이벤트 종료 시간이 시작 시간보다 빠릅니다."
-                log("⚠️ 잘못된 시간 범위")
+                log("잘못된 시간 범위")
                 return
             }
 
             // 이미지 -> Data
             guard let dataImg = eventImage.jpegData(compressionQuality: 0.9) else {
                 errorMessage = "이미지 인코딩 실패"
-                log("❌ 이미지 인코딩 실패")
+                log(" 이미지 인코딩 실패")
                 return
             }
-            log("📦 image data size:", dataImg.count, "bytes")
+            log("image data size:", dataImg.count, "bytes")
 
             // URLRequest 구성
             var req = URLRequest(url: publishURL)
@@ -139,10 +139,10 @@ final class EventFeedUpLoadVM: ObservableObject {
                     return
                 }
                 done = true
-                log("✅ 게시 성공")
+                log("게시 성공")
             } catch {
                 errorMessage = error.localizedDescription
-                log("❌ 네트워크 에러:", error.localizedDescription)
+                log("네트워크 에러:", error.localizedDescription)
             }
         }
     }

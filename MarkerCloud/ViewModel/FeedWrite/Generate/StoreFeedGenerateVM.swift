@@ -151,7 +151,7 @@ final class StoreFeedGenerateVM: ObservableObject {
             
             guard (200..<300).contains(code) else {
                 errorMessage = "업로드 실패 (status \(code))"
-                log("⚠️ 업로드 실패:", errorMessage ?? "")
+                log("업로드 실패:", errorMessage ?? "")
                 return
             }
             do {
@@ -159,18 +159,18 @@ final class StoreFeedGenerateVM: ObservableObject {
                 if res.success {
                     self.generated = res.responseDto
                     self.done = true
-                    log("✅ 업로드 성공 | mediaUrl:", res.responseDto.feedMediaUrl)
+                    log("업로드 성공 | mediaUrl:", res.responseDto.feedMediaUrl)
                 } else {
                     self.errorMessage = res.error ?? "응답 파싱 실패"
-                    log("⚠️ 서버 실패:", self.errorMessage ?? "")
+                    log("서버 실패:", self.errorMessage ?? "")
                 }
             } catch {
                 self.errorMessage = "응답 파싱 실패: \(error.localizedDescription)"
-                log("⚠️ 디코딩 실패:", self.errorMessage ?? "")
+                log("디코딩 실패:", self.errorMessage ?? "")
             }
         } catch {
             errorMessage = error.localizedDescription
-            log("❌ 네트워크 에러:", error.localizedDescription)
+            log("네트워크 에러:", error.localizedDescription)
         }
     }
 }

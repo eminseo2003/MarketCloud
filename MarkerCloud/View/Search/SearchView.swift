@@ -86,11 +86,12 @@ struct SearchView: View {
                                     ForEach(storeRankVM.stores) { s in
                                         StoreBubbleView(name: s.storeName, url: s.imageURL)
                                             .onTapGesture {
+                                                route = .storeDetail
                                                 pushStore = s.storeId
                                                 pushStoreName = s.storeName
                                                 print("tapped store:", s.storeName)
                                                 print("pushStoreName store:", pushStoreName ?? "")
-                                                route = .storeDetail
+                                                
                                             }
                                     }
                                 }
@@ -107,7 +108,7 @@ struct SearchView: View {
                                     ForEach(productRankVM.products) { p in
                                         Button(action: {
                                             print("tapped product:", p.productName)
-                                            //selectedFeedId = p.feedId
+                                            selectedFeedId = p.feedId
                                             route = .productDetail
                                         }) {
                                             MediaThumbCard(title: p.productName, url: p.imageURL, likeCount: p.likeCount)
@@ -127,18 +128,21 @@ struct SearchView: View {
                             ) {
                                 LazyHStack(spacing: 12) {
                                     ForEach(eventRankVM.events) { e in
-                                        MediaThumbCard(title: e.name, url: e.imageURL, likeCount: e.likeCount)
-                                            .foregroundColor(.primary)
+                                        Button(action: {
+                                            print("tapped product:", e.name)
+                                            selectedFeedId = e.feedId
+                                            route = .productDetail
+                                        }) {
+                                            MediaThumbCard(title: e.name, url: e.imageURL, likeCount: e.likeCount)
+                                                .foregroundColor(.primary)
+                                            
+                                        }
                                     }
                                 }
                                 .padding(.horizontal)
                             }
                         }
                     }
-                    //점포 상세로 이동
-                    //                    .navigationDestination(item: $selectedFeed) { feed in
-                    //                        //FeedView(feed: feed)
-                    //                    }
                     
                 } else {
                     ScrollView {
@@ -181,13 +185,17 @@ struct SearchView: View {
             }
             .navigationDestination(item: $route) { route in
                 if route == .storeDetail {
-                    if let storeId = pushStore, let storeName = pushStoreName {
+                    if let storeId = pushStore {
                         StoreProfileView(storeId: storeId, currentUserID: currentUserID)
                     } else {
                         Text("잘못된 점포입니다.")
                     }
                 } else if route == .searchResult {
                     SearchResultView(keyword: searchText)
+                } else if route == .productDetail {
+                    if let id = selectedFeedId {
+                        FeedView(feedId: id, currentUserID: currentUserID)
+                    }
                 }
             }
         }

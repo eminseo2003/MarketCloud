@@ -45,7 +45,7 @@ final class ProductFeedUpLoadVM: ObservableObject {
         
         guard let dataImg = productImage.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"
-            log("❌ 이미지 인코딩 실패")
+            log("이미지 인코딩 실패")
             return
         }
         
