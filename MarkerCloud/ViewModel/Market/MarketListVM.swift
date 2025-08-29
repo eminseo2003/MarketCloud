@@ -41,26 +41,26 @@ final class MarketListVM: ObservableObject {
     }
 
     private let assetMap: [Int: String] = [
-        1: "market1",
-        2: "market2",
-        3: "market3",
-        4: "market4",
-        5: "market4",
-        6: "market4",
-        7: "market4",
-        8: "market4",
-        9: "market4",
-        10: "market4",
-        11: "market4",
-        12: "market4",
-        13: "market4",
-        14: "market4",
-        15: "market4",
-        16: "market4",
-        17: "market4",
-        18: "market4",
-        19: "market4",
-        20: "market4",
+        1: "market1", //용두시장
+        2: "market2", //서울악령시장
+        3: "market3", //경동광성상가
+        4: "market4", //경동시장
+        5: "market4", //청량리수산시장
+        6: "market4", //청량리종합시장
+        7: "market4", //청량종합도매시장
+        8: "market4", //청량리농수산물시장
+        9: "market4", //동서시장
+        10: "market4", //청량리청과물시장
+        11: "market4", //청량리전통시장
+        12: "market4", //동부시장
+        13: "market4", //답십리건축자재시장
+        14: "market4", //회기시장
+        15: "market4", //전농로터리시장
+        16: "market4", //답십리시장
+        17: "market4", //답십리현대시장
+        18: "market4", //이문제일시장
+        19: "market4", //이경시장
+        20: "market4", //전곡시장
     ]
     private let defaultAsset = "market_default"
     

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import Combine
 
 private struct MarketRecommendRequest: Encodable {
     let q1: String
@@ -36,7 +36,7 @@ struct MarketRecommendDTO: Decodable {
 
 struct MarketRecommendResponse: Decodable {
     let responseDto: MarketRecommendDTO?
-    let error: Int?
+    let error: FlexibleError?
     let success: Bool
 }
 
@@ -48,18 +48,9 @@ final class MarketRecommendVM: ObservableObject {
 
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
     private var apiURL: URL {
-        base.appendingPathComponent("api")
-            .appendingPathComponent("market")
-            .appendingPathComponent("recommend")
-            .appendingPathComponent("")
+        base.appendingPathComponent("api/market/recommend/", isDirectory: false)
     }
 
-    private func prettyJSON(_ data: Data) -> String? {
-        guard let obj = try? JSONSerialization.jsonObject(with: data),
-              let data2 = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
-              let s = String(data: data2, encoding: .utf8) else { return nil }
-        return s
-    }
     private func log(_ items: Any...) {
         print("[MarketRecommendVM]", items.map { "\($0)" }.joined(separator: " "))
     }
@@ -68,19 +59,21 @@ final class MarketRecommendVM: ObservableObject {
         errorMessage = nil
         result = nil
 
-        let reqBody = MarketRecommendRequest(q1: q1, q2: q2, q3: q3, q4: q4)
-        log("\(q1) \(q2) \(q3) \(q4)")
+        log("POST /market/recommend q1=\(q1) q2=\(q2) q3=\(q3) q4=\(q4)")
 
         var req = URLRequest(url: apiURL)
         req.httpMethod = "POST"
+        req.timeoutInterval = 15
         req.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
 
         do {
-            req.httpBody = try JSONEncoder().encode(reqBody)
+            req.httpBody = try JSONEncoder().encode(
+                MarketRecommendRequest(q1: q1, q2: q2, q3: q3, q4: q4)
+            )
         } catch {
             errorMessage = "요청 인코딩 실패: \(error.localizedDescription)"
-            log("인코딩 실패:", error.localizedDescription)
+            log("\(errorMessage!)")
             return
         }
 
@@ -88,23 +81,29 @@ final class MarketRecommendVM: ObservableObject {
         defer { isLoading = false }
 
         do {
-            log("POST \(apiURL.absoluteString)")
             let (data, resp) = try await URLSession.shared.data(for: req)
-            if let http = resp as? HTTPURLResponse { log("status:", http.statusCode) }
+            let status = (resp as? HTTPURLResponse)?.statusCode ?? -1
 
-            if let pretty = prettyJSON(data) { log("↩︎ JSON\n\(pretty)") }
+            // ② 상태코드
+            log("status:", status)
 
-            let dec = JSONDecoder()
-            let res = try dec.decode(MarketRecommendResponse.self, from: data)
+            guard (200...299).contains(status) else {
+                errorMessage = "HTTP \(status)"
+                log("실패:", errorMessage!)
+                return
+            }
+
+            let res = try JSONDecoder().decode(MarketRecommendResponse.self, from: data)
 
             guard res.success, let dto = res.responseDto else {
-                errorMessage = "추천 실패 (error: \(res.error ?? -1))"
-                log("실패:", errorMessage ?? "")
+                errorMessage = res.error?.text ?? "추천 결과를 찾을 수 없습니다."
+                log("실패:", errorMessage!)
                 return
             }
 
             self.result = dto
-            log("추천 성공 | market:", dto.top1Market, "| address:", dto.marketAddress)
+            log("성공:", dto.top1Market, "|", dto.marketAddress)
+
         } catch {
             errorMessage = error.localizedDescription
             log("네트워크/디코딩 에러:", error.localizedDescription)

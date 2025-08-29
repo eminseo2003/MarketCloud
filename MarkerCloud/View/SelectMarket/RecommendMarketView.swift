@@ -106,9 +106,9 @@ struct RecommendMarketView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(spacing: 16) {
-                                MultiOptionRow(title: "먹거리 탐방", selections: $Answer4)
+                                MultiOptionRow(title: "먹거리탐방", selections: $Answer4)
                                 MultiOptionRow(title: "장보기", selections: $Answer4)
-                                MultiOptionRow(title: "구경·산책", selections: $Answer4)
+                                MultiOptionRow(title: "구경산책", selections: $Answer4)
                                 MultiOptionRow(title: "데이트", selections: $Answer4)
                             }
                             .padding()

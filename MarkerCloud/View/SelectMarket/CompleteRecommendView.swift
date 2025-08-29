@@ -19,35 +19,38 @@ struct CompleteRecommendView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                VStack(alignment: .center, spacing: 16) {
-                    VStack(alignment: .center, spacing: 24) {
-                        VStack {
-                            LazyVGrid(columns: [GridItem()], spacing: 8) {
-                                MarketRecommandImage(assetName: vm.assetName(forMarketName: topMarketName))
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .center, spacing: 16) {
+                        VStack(alignment: .center, spacing: 24) {
+                            VStack {
+                                LazyVGrid(columns: [GridItem()], spacing: 8) {
+                                    MarketRecommandImage(assetName: vm.assetName(forMarketName: topMarketName))
+                                }
+                                
                             }
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                             
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("추천 드리는 시장은 \(topMarketName)이에요")
+                                    .font(.title3).bold()
+                                    .foregroundStyle(.primary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                
+                                Text("시장 주소: \(topMarketAddress)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("추천 드리는 시장은 \(topMarketName)이에요")
-                                .font(.title3).bold()
-                                .foregroundStyle(.primary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            
-                            Text("시장 주소: \(topMarketAddress)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(UIColor.systemBackground))
+                        )
                     }
                     .padding(16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color(UIColor.systemBackground))
-                    )
                 }
-                .padding(16)
+                
                 Spacer()
                 HStack(spacing: 10) {
                     Button(action: {
@@ -94,7 +97,7 @@ struct MarketRecommandImage: View {
     let assetName: String
 
     var body: some View {
-        Image("market1")
+        Image(assetName)
             .resizable()
             .scaledToFill()
             .frame(maxWidth: .infinity)

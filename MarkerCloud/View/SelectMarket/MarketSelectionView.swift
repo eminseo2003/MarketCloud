@@ -105,7 +105,7 @@ struct MarketSelectionView: View {
                             .frame(maxWidth: .infinity)
                             .background(Color("Main"))
                             .cornerRadius(10)
-                    }.disabled(selectedChoice == 0)
+                    }.disabled(selectedChoice == nil)
                 }
                 .padding()
                 .navigationDestination(item: $route) { route in
