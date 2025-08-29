@@ -10,7 +10,7 @@ import SwiftUI
 struct MarketSelectionView: View {
     @Binding var selectedMarketID: Int
     @StateObject private var vm = MarketListVM()
-    
+
     @State private var selectedChoice: Int? = nil
     @State private var route: Route? = nil
     
@@ -117,13 +117,10 @@ struct MarketSelectionView: View {
             
         }
         .task {
-            await vm.fetch()
-        }
+            await vm.fetch()        }
         .refreshable {
             await vm.fetch()
         }
-        
-        
     }
 }
 

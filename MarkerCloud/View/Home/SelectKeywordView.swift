@@ -8,14 +8,27 @@
 import SwiftUI
 
 struct SelectKeywordView: View {
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var keywordVM = KeywordVM()
+    @StateObject private var recommendVM = KeywordMarketVM()
+    @StateObject private var vm = MarketListVM()
 
     @State private var selectedKeyword: String? = nil
 
-    @State private var selectedIndex: Int? = nil
     @State private var isShuffling = false
-    @State private var showSparkle = false
+    @Binding var selectedMarketID: Int
+    
+    private var hasRecommendation: Bool {
+        recommendVM.result != nil
+    }
 
+    private func resetRecommendation() {
+        selectedKeyword = nil
+        recommendVM.result = nil
+        isShuffling = false
+        Task { await keywordVM.fetch() }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
@@ -28,158 +41,209 @@ struct SelectKeywordView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            // 본문
-            Group {
-                if keywordVM.isLoading {
-                    ProgressView().padding(.top, 12)
-                } else if let err = keywordVM.errorMessage {
-                    VStack(spacing: 8) {
-                        Text("불러오기 실패").font(.headline)
-                        Text(err).font(.caption).foregroundStyle(.secondary)
-                        Button("다시 시도") { Task { await keywordVM.fetch() } }
-                    }
-                } else if displayedKeywords.isEmpty {
-                    Text("표시할 키워드가 없습니다.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 12)
-                } else {
-                    VStack(spacing: 12) {
-                        ForEach(Array(displayedKeywords.enumerated()), id: \.offset) { i, word in
-                            Button {
-                                selectedKeyword = word
-                            } label: {
-                                keywordChip(
-                                    text: word,
-                                    isSelected: selectedIndex == i,
-                                    isShuffling: isShuffling
-                                )
+            ScrollView {
+                
+                Group {
+                    if keywordVM.isLoading {
+                        ProgressView().padding(.top, 12)
+                    } else if let err = keywordVM.errorMessage {
+                        VStack(spacing: 8) {
+                            Text("불러오기 실패").font(.headline)
+                            Text(err).font(.caption).foregroundStyle(.secondary)
+                            Button("다시 시도") { Task { await keywordVM.fetch() } }
+                        }
+                    } else if displayedKeywords.isEmpty {
+                        Text("표시할 키워드가 없습니다.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 12)
+                    } else {
+                        VStack(spacing: 12) {
+                            ForEach(Array(displayedKeywords.enumerated()), id: \.offset) { i, word in
+                                Button {
+                                    selectedKeyword = word
+                                } label: {
+                                    keywordChip(
+                                        text: word,
+                                        isSelected: selectedKeyword == word
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(isShuffling)
                             }
-                            .buttonStyle(.plain)
-                            .disabled(isShuffling)
+                            Spacer()
+                            Group {
+                                    if recommendVM.isLoading {
+                                        HStack(spacing: 8) {
+                                            ProgressView()
+                                            Text("생성중...")
+                                        }
+                                        .padding(.vertical, 12)
+                                    } else if let err = recommendVM.errorMessage {
+                                        VStack(spacing: 6) {
+                                            Text("추천 실패").font(.subheadline).bold()
+                                            Text(err).font(.caption).foregroundStyle(.secondary)
+                                            Button("다시 시도") {
+                                                guard let k = selectedKeyword ?? displayedKeywords.first else { return }
+                                                Task { await recommendVM.fetch(keywordName: k) }
+                                            }
+                                            .font(.caption)
+                                        }
+                                        .padding(.vertical, 8)
+                                    } else if let r = recommendVM.result {
+                                        VStack(alignment: .center, spacing: 16) {
+                                            VStack(alignment: .leading, spacing: 24) {
+                                                VStack {
+                                                    LazyVGrid(columns: [GridItem()], spacing: 8) {
+                                                        MarketRecommandImage(assetName: vm.assetName(forMarketName: r.marketName)) //얘가 항상 defaultimage로 들어가고 있어
+                                                    }
+                                                    
+                                                }
+                                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                                
+                                                VStack(alignment: .leading, spacing: 8) {
+                                                    Text("오늘의 시장 추천: \(r.marketName)")
+                                                        .font(.title3).bold()
+                                                        .foregroundStyle(.primary)
+                                                        .fixedSize(horizontal: false, vertical: true)
+                                                    
+                                                    Text("\(r.description)")
+                                                        .font(.subheadline)
+                                                        .foregroundStyle(.secondary)
+                                                        .fixedSize(horizontal: false, vertical: true)
+                                                }
+                                            }
+                                            .padding(.vertical, 16)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                                    .fill(Color(UIColor.systemBackground))
+                                            )
+                                        }
+                                    }
+                                }
                         }
                     }
-                    .padding(.top, 6)
                 }
-            }
 
+                
+            }
+            .scrollIndicators(.hidden)
             Spacer(minLength: 8)
 
             HStack(spacing: 12) {
-                Button {
-                    Task { await spinPick() }
-                } label: {
-                    Label("랜덤 뽑기", systemImage: "dice.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(OutlineCTA())
-                .disabled(isShuffling || displayedKeywords.isEmpty)
+                if hasRecommendation {
+                    Button {
+                                resetRecommendation()
+                        
+                            } label: {
+                                Label("다시 뽑기", systemImage: "arrow.counterclockwise")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(OutlineCTA())
 
-                Button {
-                    
-                } label: {
-                    Label("이 키워드로", systemImage: "wand.and.stars")
-                        .frame(maxWidth: .infinity)
+                            Button {
+                                guard let r = recommendVM.result else { return }
+                                let code = vm.marketCode(forMarketName: r.marketName)
+                                if code != 0 {
+                                    selectedMarketID = code
+                                    dismiss()
+                                } else {
+                                    
+                                }
+                            } label: {
+                                Label("추천 시장 둘러보기", systemImage: "location.viewfinder")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(FilledCTA())
+                } else {
+                    Button {
+                        Task { await spinPick() }
+                    } label: {
+                        Label("랜덤 뽑기", systemImage: "dice.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(OutlineCTA())
+                    .disabled(isShuffling || displayedKeywords.isEmpty)
+
+                    Button {
+                        guard let keyword = selectedKeyword else { return }
+                        recommendVM.result = nil
+                        Task {
+                            await recommendVM.fetch(keywordName: keyword)
+                            if let r = recommendVM.result {
+                                print("추천 시장:", r.marketName)
+                                // selectedMarketID = r.marketId  // 필요 시 여기서 라우팅/저장
+                            }
+                        }
+                    } label: {
+                        Label("이 키워드로", systemImage: "wand.and.stars")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(FilledCTA())
+                    .disabled(selectedKeyword == nil || isShuffling)
                 }
-                .buttonStyle(FilledCTA())
-                .disabled(selectedIndex == nil || isShuffling)
+                
             }
         }
-        .task { await keywordVM.fetch() }
+        .task {
+            await keywordVM.fetch()
+            await vm.fetch()
+        }
         .padding(20)
         .background(
             ZStack {
                 Color(uiColor: .systemBackground)
-                if showSparkle {
-                    Image(systemName: "sparkles")
-                        .font(.largeTitle)
-                        .opacity(0.18)
-                        .scaleEffect(1.3)
-                        .transition(.opacity)
-                }
             }
             .ignoresSafeArea(edges: .bottom)
         )
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: selectedIndex)
-        .animation(.easeInOut, value: isShuffling)
     }
 
     private var displayedKeywords: [String] {
         Array(keywordVM.keywords.prefix(3))
     }
 
-//    private func select(_ i: Int) {
-//        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-//        selectedIndex = i
-//    }
-//
-//    private func confirm() {
-//        guard let i = selectedIndex, displayedKeywords.indices.contains(i) else { return }
-//        let chosen = displayedKeywords[i]
-//        UINotificationFeedbackGenerator().notificationOccurred(.success)
-//        withAnimation(.easeInOut(duration: 0.35)) { showSparkle = true }
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-//            withAnimation { showSparkle = false }
-//            onConfirm?(chosen)
-//        }
-//    }
-
     private func spinPick() async {
-        guard !displayedKeywords.isEmpty else { return }
-        isShuffling = true
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-
-        var delay: Double = 0.08
-        let rounds = 10
-        for step in 0..<(rounds + Int.random(in: 3...6)) {
-            let i = step % displayedKeywords.count
-            await MainActor.run { selectedIndex = i }
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            delay *= 1.15
-        }
-
-        await MainActor.run {
-            selectedIndex = Int.random(in: 0..<displayedKeywords.count)
-            isShuffling = false
-        }
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-    }
-
-
-    private func keywordChip(text: String, isSelected: Bool, isShuffling: Bool) -> some View {
-        HStack {
-            Text(text)
-                .font(.headline)
-                .foregroundStyle(isSelected ? .white : .primary)
-            Spacer()
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.white)
+            guard !displayedKeywords.isEmpty else { return }
+            isShuffling = true
+            var delay: Double = 0.08
+            let rounds = 10
+            for step in 0..<(rounds + Int.random(in: 3...6)) {
+                let w = displayedKeywords[step % displayedKeywords.count]
+                await MainActor.run { selectedKeyword = w }
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                delay *= 1.15
+            }
+            await MainActor.run {
+                selectedKeyword = displayedKeywords.randomElement()
+                isShuffling = false
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity)
-        .background(
-            Group {
+
+
+    private func keywordChip(text: String, isSelected: Bool) -> some View {
+            HStack {
+                Text(text)
+                    .font(.headline)
+                    .foregroundStyle(isSelected ? .white : .primary)
+                Spacer()
                 if isSelected {
-                    LinearGradient(
-                        colors: [Color("Main"), Color("Main").opacity(0.85)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    )
-                } else {
-                    Color(uiColor: .secondarySystemBackground)
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.white)
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity)
+            .background(
+                isSelected
+                ? AnyShapeStyle(LinearGradient(
+                    colors: [Color("Main"), Color("Main").opacity(0.85)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing))
+                : AnyShapeStyle(Color(uiColor: .secondarySystemBackground))
+            )
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(isSelected ? Color.clear : Color.black.opacity(0.06), lineWidth: 1)
-        )
-        .scaleEffect(isSelected ? 1.02 : 1.0)
-        .rotation3DEffect(.degrees(isShuffling ? 7 : 0), axis: (x: 0, y: 1, z: 0))
-        .shadow(color: isSelected ? Color("Main").opacity(0.25) : .clear, radius: 10, x: 0, y: 6)
-        .contentShape(Rectangle())
-    }
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(isSelected ? .clear : .black.opacity(0.06), lineWidth: 1)
+            )
+        }
 }

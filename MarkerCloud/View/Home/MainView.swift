@@ -139,7 +139,7 @@ struct MainView: View {
             //            }
             .navigationDestination(item: $route) { route in
                 if route == .todayMarket {
-                    SelectKeywordView()
+                    SelectKeywordView(selectedMarketID: $selectedMarketID)
                 }
             }
             .navigationDestination(item: $pushStore) { id in
