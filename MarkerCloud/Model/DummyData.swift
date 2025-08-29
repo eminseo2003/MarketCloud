@@ -14,11 +14,11 @@ let kDummyVideoURL = URL(string:
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
 )!
 enum DummyUserIDs {
-    static let user1 = "123"
-    static let user2 = "234"
-    static let user3 = "345"
-    static let user4 = "456"
-    static let user5 = "567"
+    static let user1 = 123
+    static let user2 = 234
+    static let user3 = 345
+    static let user4 = 456
+    static let user5 = 567
 
     static let all = [user1, user2, user3, user4, user5]
 }
@@ -65,16 +65,16 @@ let dummyUsers: [User] = [
 ]
 
 enum DummyMarketIDs {
-    static let marketOne = UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
-    static let marketTwo = UUID(uuidString: "11111111-1111-1111-1111-111111111112")!
-    static let marketThree = UUID(uuidString: "11111111-1111-1111-1111-111111111113")!
-    static let marketFour = UUID(uuidString: "11111111-1111-1111-1111-111111111114")!
-    static let marketFive = UUID(uuidString: "11111111-1111-1111-1111-111111111115")!
-    static let marketSix = UUID(uuidString: "11111111-1111-1111-1111-111111111116")!
-    static let marketSeven = UUID(uuidString: "11111111-1111-1111-1111-111111111117")!
-    static let marketEight = UUID(uuidString: "11111111-1111-1111-1111-111111111118")!
-    static let marketNine = UUID(uuidString: "11111111-1111-1111-1111-111111111119")!
-    static let marketTen = UUID(uuidString: "11111111-1111-1111-1111-111111111120")!
+    static let marketOne = 1
+    static let marketTwo = 2
+    static let marketThree = 3
+    static let marketFour = 4
+    static let marketFive = 5
+    static let marketSix = 6
+    static let marketSeven = 7
+    static let marketEight = 8
+    static let marketNine = 9
+    static let marketTen = 10
 }
 let dummyMarkets: [Market] = [
     Market(
@@ -362,29 +362,29 @@ enum DummyReviewIDs {
 
     static let all: [String] = [review1, review2, review3, review4, review5, review6]
 }
-let sampleReviews: [Review] = [
-    Review(
-        id: DummyReviewIDs.review1,
-        userId: DummyUserIDs.user1,
-        feedId: DummyFeedIDs.feed1,
-        content: "가격도 좋고 맛있어요!",
-        imageURL: kDummyImageURL,
-        rating: 5,
-        createdAt: Date(),
-        serverId: nil, serverUserId: nil, serverFeedId: nil
-    ),
-Review(
-    id: DummyReviewIDs.review2,
-    userId: DummyUserIDs.user2,
-    feedId: DummyFeedIDs.feed2,
-        content: "배송이 빨라요",
-        imageURL: kDummyImageURL,
-        rating: 4,
-        createdAt: Date(),
-        serverId: nil, serverUserId: nil, serverFeedId: nil
-    )
-
-]
+//let sampleReviews: [Review] = [
+//    Review(
+//        id: DummyReviewIDs.review1,
+//        userId: DummyUserIDs.user1,
+//        feedId: DummyFeedIDs.feed1,
+//        content: "가격도 좋고 맛있어요!",
+//        imageURL: kDummyImageURL,
+//        rating: 5,
+//        createdAt: Date(),
+//        serverId: nil, serverUserId: nil, serverFeedId: nil
+//    ),
+//Review(
+//    id: DummyReviewIDs.review2,
+//    userId: DummyUserIDs.user2,
+//    feedId: DummyFeedIDs.feed2,
+//        content: "배송이 빨라요",
+//        imageURL: kDummyImageURL,
+//        rating: 4,
+//        createdAt: Date(),
+//        serverId: nil, serverUserId: nil, serverFeedId: nil
+//    )
+//
+//]
 
 struct LocalTime: Codable, Hashable, Comparable {
     var hour: Int     // 0...23

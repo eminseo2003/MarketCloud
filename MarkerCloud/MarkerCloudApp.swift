@@ -10,24 +10,24 @@ import SwiftUI
 
 @main
 struct MarkerCloudApp: App {
-    @AppStorage("selectedMarketID") private var selectedMarketID: String = ""
-    @AppStorage("currentUserID") private var currentUserID: String = ""
+    @AppStorage("selectedMarketID") private var selectedMarketID: Int = -1
+    @AppStorage("currentUserID") private var currentUserID: Int = -1
     var body: some Scene {
         WindowGroup {
-            RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
-            //ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            //RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
         }
     }
 }
 struct RootRouterView: View {
-    @Binding var selectedMarketID: String
-    @Binding var currentUserID: String
+    @Binding var selectedMarketID: Int
+    @Binding var currentUserID: Int
     
     var body: some View {
         Group {
-            if currentUserID.isEmpty {
+            if currentUserID == -1 {
                 StartView(currentUserID: $currentUserID)
-            } else if selectedMarketID.isEmpty {
+            } else if selectedMarketID == -1 {
                 MarketSelectionView(selectedMarketID: $selectedMarketID)
             } else {
                 ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)

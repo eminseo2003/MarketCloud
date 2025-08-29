@@ -12,7 +12,7 @@ struct VideoView: View {
     @ObservedObject var videoVM: VideoFeedVM
     @State private var page: Int? = 0
     @State private var lastActive: Int = 0
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     
     var body: some View {
             ScrollView(.vertical) {

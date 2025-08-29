@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Binding var selectedMarketID: String
-    @Binding var currentUserID: String
+    @Binding var selectedMarketID: Int
+    @Binding var currentUserID: Int
     @State private var selectedTab: Int = 0
     
     var body: some View {
@@ -22,7 +22,7 @@ struct ContentView: View {
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
             
-            AICreateView(selectedMarketID: $selectedMarketID)
+            AICreateView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             

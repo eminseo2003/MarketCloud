@@ -8,7 +8,7 @@
 import Foundation
 
 struct MarketItemDTO: Decodable {
-    let marketCode: String
+    let marketCode: Int
     let marketName: String
 }
 
@@ -25,7 +25,7 @@ struct MarketListResponse: Decodable {
 // UI에 쓰기 편한 카드 모델 (Asset 이름 포함)
 struct MarketCardUI: Identifiable, Hashable {
     let id = UUID()
-    let code: String
+    let code: Int
     let name: String
     let imageAssetName: String
 }
@@ -41,11 +41,11 @@ final class MarketListVM: ObservableObject {
         base.appendingPathComponent("api/market/")
     }
 
-    private let assetMap: [String: String] = [
-        "MKT001": "market1",
-        "MKT002": "market2",
-        "MKT003": "market3",
-        "MKT004": "market4"
+    private let assetMap: [Int: String] = [
+        1: "market1",
+        2: "market2",
+        3: "market3",
+        4: "market4"
     ]
     private let defaultAsset = "market_default"
     
@@ -53,13 +53,13 @@ final class MarketListVM: ObservableObject {
             markets.first { $0.name == name }?.imageAssetName ?? defaultAsset
         }
 
-        func marketCode(forMarketName name: String) -> String {
-            markets.first { $0.name == name }?.code ?? ""
+    func marketCode(forMarketName name: String) -> Int {
+            markets.first { $0.name == name }?.code ?? 0
         }
 
-    private func assetName(for code: String) -> String {
-        assetMap[code] ?? defaultAsset
-    }
+    private func assetName(for code: Int) -> String {
+            assetMap[code] ?? defaultAsset
+        }
 
     private func prettyJSON(_ data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data),

@@ -8,7 +8,7 @@
 import Foundation
 
 struct Market: Identifiable, Codable, Hashable {
-    let id: UUID
+    let id: Int
     let marketName: String
     let imageName: URL
     let memo: String

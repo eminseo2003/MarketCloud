@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @Binding var selectedMarketID: String
-    @Binding var currentUserID: String
+    @Binding var selectedMarketID: Int
+    @Binding var currentUserID: Int
     
     var currentUser: User? {
             dummyUsers.first { $0.id == currentUserID }

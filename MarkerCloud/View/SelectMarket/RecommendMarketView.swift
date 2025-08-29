@@ -24,7 +24,7 @@ enum RecommendRoute: Identifiable, Equatable, Hashable {
 
 struct RecommendMarketView: View {
     @StateObject private var vm = MarketRecommendVM()
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     @State private var route: RecommendRoute? = nil
     @State var Answer1: String? = nil
     @State var Answer2: String? = nil

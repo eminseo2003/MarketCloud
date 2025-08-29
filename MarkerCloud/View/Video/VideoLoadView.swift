@@ -10,7 +10,7 @@ import AVKit
 
 struct VideoLoadView: View {
     @StateObject private var videoVM = VideoFeedVM()
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     var body: some View {
         Group {
             if videoVM.isLoading {

@@ -9,14 +9,14 @@ import Foundation
 import SwiftUI
 
 struct User: Identifiable {
-    let id: String
+    let id: Int
     let password: String
     let name: String
     let email: String?
     let createdAt: Date
     let imgUrl: URL
 
-    init(id: String,
+    init(id: Int,
          password: String,
          name: String,
          email: String?,

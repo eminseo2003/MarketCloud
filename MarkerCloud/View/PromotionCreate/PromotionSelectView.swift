@@ -22,6 +22,7 @@ struct PromotionSelectView: View {
     ]
     @State private var route: Route? = nil
     var hasSelection: Bool { selectedPromotion != nil }
+    @Binding var currentUserID: Int
     
     var body: some View {
         NavigationStack {
@@ -82,7 +83,7 @@ struct PromotionSelectView: View {
                 }
                 .padding()
                 .navigationDestination(item: $pushPromotion) { promo in
-                    PromotionMethodSelectView(promotion: promo)
+                    PromotionMethodSelectView(promotion: promo, currentUserID: $currentUserID)
                 }
             }
             

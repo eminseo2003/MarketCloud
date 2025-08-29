@@ -19,14 +19,13 @@ struct MainView: View {
     //var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
     
     
-    @Binding var selectedMarketID: String
-    @Binding var currentUserID: String
-    private var marketInt: Int { Int(selectedMarketID) ?? 1 }
+    @Binding var selectedMarketID: Int
+    @Binding var currentUserID: Int
     
     @State private var selectedTab: StoreTab = .all
-    private var selectedMarketUUID: UUID? {
-        UUID(uuidString: selectedMarketID)
-    }
+//    private var selectedMarketUUID: UUID? {
+//        UUID(uuidString: selectedMarketID)
+//    }
     //    private var storesInSelectedMarket: [Store] {
     //        guard let id = selectedMarketUUID else { return [] }
     //        return dummyStores.filter { $0.marketId == id }
@@ -52,19 +51,15 @@ struct MainView: View {
                     Menu {
                         ForEach(dummyMarkets) { market in
                             Button(market.marketName) {
-                                selectedMarketID = market.id.uuidString
+                                selectedMarketID = market.id
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text({
-                                if let id = selectedMarketUUID,
-                                   let m = dummyMarkets.first(where: { $0.id == id }) {
-                                    return m.marketName
-                                } else {
-                                    return "시장 선택"
-                                }
-                            }())
+                            Text(
+                                dummyMarkets.first(where: { $0.id == selectedMarketID })?.marketName
+                                ?? "시장 선택"
+                            )
                             Image(systemName: "chevron.down")
                         }
                         .font(.caption)

@@ -11,14 +11,16 @@ struct AICreateView: View {
     var hasStore: Bool = false
     var ismypage: Bool = false
     
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
+    @Binding var currentUserID: Int
+    
     var body: some View {
         VStack(spacing: 0) {
             
             if hasStore {
-                PromotionSelectView()
+                PromotionSelectView(currentUserID: $currentUserID)
             } else {
-                NoStoreView(ismypage: ismypage)
+                NoStoreView(ismypage: ismypage, currentUserID: $currentUserID)
             }
             
         }

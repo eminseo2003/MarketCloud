@@ -24,6 +24,7 @@ struct PromotionMethodSelectView: View {
     ]
     @State private var isCreateViewShow = false
     var hasSelection: Bool { selectedMethod != nil }
+    @Binding var currentUserID: Int
     
     var body: some View {
         NavigationStack {
@@ -76,17 +77,20 @@ struct PromotionMethodSelectView: View {
                         if promotion.name == "점포"{
                             CreateStoreView(
                                 feedType: mapFeedType(from: promotion.name),
-                                method: pushMethod?.mediaType ?? .image
+                                method: pushMethod?.mediaType ?? .image,
+                                currentUserID: $currentUserID
                             )
                         } else if promotion.name == "상품"{
                             CreateProductView(
                                 feedType: mapFeedType(from: promotion.name),
-                                method: pushMethod?.mediaType ?? .image
+                                method: pushMethod?.mediaType ?? .image,
+                                currentUserID: $currentUserID
                             )
                         } else {
                             CreateEventView(
                                 feedType: mapFeedType(from: promotion.name),
-                                method: pushMethod?.mediaType ?? .image
+                                method: pushMethod?.mediaType ?? .image,
+                                currentUserID: $currentUserID
                             )
                         }
                     }

@@ -18,7 +18,7 @@ struct PopularSection: Identifiable {
     let items: [Item]
 }
 struct SearchView: View {
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     @State private var route: Route? = nil
     //    private var firstStore: Store? {

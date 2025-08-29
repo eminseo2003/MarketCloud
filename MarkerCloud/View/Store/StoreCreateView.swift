@@ -29,7 +29,7 @@ struct StoreCreateView: View {
     @State private var showLookupAlert = false
     @State private var lookupAlertMessage = ""
     @FocusState private var isTextFieldFocused: Bool
-    
+    @Binding var currentUserID: Int
     var body: some View {
         Form {
             Section(header: Text("점포명")) {
@@ -212,7 +212,7 @@ struct StoreCreateView: View {
             }
         }
         .navigationDestination(item: $pushPromotion) { promo in
-            PromotionMethodSelectView(promotion: promo)
+            PromotionMethodSelectView(promotion: promo, currentUserID: $currentUserID)
         }
         .alert("알림", isPresented: $showLookupAlert) {
             Button("확인", role: .cancel) { }

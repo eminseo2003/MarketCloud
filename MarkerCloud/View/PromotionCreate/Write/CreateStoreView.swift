@@ -24,6 +24,7 @@ enum CreateRoute: Identifiable, Hashable {
 struct CreateStoreView: View {
     let feedType: FeedType
     let method: MediaType
+    @Binding var currentUserID: Int
     
     @Environment(\.dismiss) var dismiss
     @StateObject private var vm = StoreFeedGenerateVM()

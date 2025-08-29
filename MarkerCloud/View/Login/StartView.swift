@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StartView: View {
-    @Binding var currentUserID: String
+    @Binding var currentUserID: Int
     
     @State private var route: Route? = nil
     var body: some View {

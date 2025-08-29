@@ -15,7 +15,7 @@ struct LoginRequest: Encodable {
 }
 
 struct LoginResponseDTO: Decodable {
-    let id: String
+    let id: Int
     let uno: Int?
 }
 

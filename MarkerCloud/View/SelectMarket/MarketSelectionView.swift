@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct MarketSelectionView: View {
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     @StateObject private var vm = MarketListVM()
     
-    @State private var selectedChoice: String? = nil
+    @State private var selectedChoice: Int? = nil
     @State private var route: Route? = nil
     
     let columns = [
@@ -105,7 +105,7 @@ struct MarketSelectionView: View {
                             .frame(maxWidth: .infinity)
                             .background(Color("Main"))
                             .cornerRadius(10)
-                    }.disabled(selectedChoice == nil)
+                    }.disabled(selectedChoice == 0)
                 }
                 .padding()
                 .navigationDestination(item: $route) { route in

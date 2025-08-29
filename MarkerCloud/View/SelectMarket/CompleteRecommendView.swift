@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CompleteRecommendView: View {
     @State private var route: Route? = nil
-    @Binding var selectedMarketID: String
+    @Binding var selectedMarketID: Int
     @StateObject private var vm = MarketListVM()
     
     let topMarketName: String
