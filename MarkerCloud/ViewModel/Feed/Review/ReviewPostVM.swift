@@ -26,8 +26,9 @@ final class ReviewPostVM: ObservableObject {
     
     private func postURL(_ feedId: Int) -> URL {
         base.appendingPathComponent("api")
-            .appendingPathComponent("review")
+            .appendingPathComponent("feed")
             .appendingPathComponent(String(feedId))
+            .appendingPathComponent("reviews")
     }
 
     func submitReview(

@@ -50,8 +50,9 @@ final class ReviewVM: ObservableObject {
         
         let url = base
             .appendingPathComponent("api")
-            .appendingPathComponent("review")
+            .appendingPathComponent("feed")
             .appendingPathComponent(String(feedId))
+            .appendingPathComponent("reviews")
         
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
