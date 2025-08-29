@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "dog.png",
+      "filename" : "market2.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "dog 1.png",
+      "filename" : "market2 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "dog 2.png",
+      "filename" : "market2 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

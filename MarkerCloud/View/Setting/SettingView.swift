@@ -23,7 +23,7 @@ struct SettingsView: View {
 //    }
 
     @State private var route: Route? = nil
-    
+    @State private var showLogoutAlert = false
     var body: some View {
         NavigationStack {
             ZStack {
@@ -101,7 +101,9 @@ struct SettingsView: View {
                                                 iconTint: .green, title: "리뷰")
                                 }
                             }
-                            Button(action: {}) {
+                            Button(action: {
+                                showLogoutAlert = true
+                            }) {
                                 Text("로그아웃")
                                     .font(.headline)
                                     .foregroundStyle(.red)
@@ -132,6 +134,14 @@ struct SettingsView: View {
                     
                 }
                 
+            }
+            .alert("로그아웃 하시겠어요?", isPresented: $showLogoutAlert) {
+                Button("취소", role: .cancel) { }
+                Button("로그아웃", role: .destructive) {
+                    logout()
+                }
+            } message: {
+                Text("저장된 사용자 정보가 초기화됩니다.")
             }
             .navigationDestination(item: $route) { route in
                 if route == .changeProfile {
@@ -193,5 +203,10 @@ struct SettingsView: View {
             .padding(.vertical, 10)
             .padding(.horizontal, 10)
         }
+    }
+    private func logout() {
+        currentUserID = -1
+        selectedMarketID = -1
+        route = nil
     }
 }

@@ -144,12 +144,12 @@ struct MarketCardView: View {
                 .grayscale(isSelected ? 0 : 1)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color("Main") : .clear, lineWidth: 3)
+                        .stroke(isSelected ? Color(.gray) : .clear, lineWidth: 5)
                 )
                 .cornerRadius(12)
                 .overlay( // 텍스트 가독성용 그라데이션
                     LinearGradient(
-                        gradient: Gradient(colors: [.black.opacity(0.0), .black.opacity(0.5)]),
+                        gradient: Gradient(colors: [.black.opacity(0.0), .black.opacity(0.3)]),
                         startPoint: .top, endPoint: .bottom
                     )
                     .cornerRadius(12)
