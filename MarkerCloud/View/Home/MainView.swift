@@ -16,6 +16,7 @@ enum StoreTab: String, CaseIterable, Identifiable {
 }
 struct MainView: View {
     @StateObject private var feedVM = FeedViewModel()
+    @StateObject private var marketVm = MarketListVM()
     //var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
     
     
@@ -49,15 +50,15 @@ struct MainView: View {
                         .bold(true)
                     Spacer()
                     Menu {
-                        ForEach(dummyMarkets) { market in
-                            Button(market.marketName) {
-                                selectedMarketID = market.id
+                        ForEach(marketVm.markets) { market in
+                            Button(market.name) {
+                                selectedMarketID = market.code
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Text(
-                                dummyMarkets.first(where: { $0.id == selectedMarketID })?.marketName
+                                marketVm.markets.first(where: { $0.code == selectedMarketID })?.name
                                 ?? "시장 선택"
                             )
                             Image(systemName: "chevron.down")
@@ -85,7 +86,10 @@ struct MainView: View {
                             Text("불러오기 실패").font(.headline)
                             Text(err).foregroundColor(.secondary).font(.caption)
                             Button("다시 시도") {
-                                Task { await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID) }
+                                Task {
+                                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                                    //await feedVM.fetch(marketId: selectedMarketID)
+                                }
                             }
                         }
                         .padding(.vertical, 24)
@@ -113,12 +117,18 @@ struct MainView: View {
                 .task {
                     // 최초 로드 시 실행
                     await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    //await feedVM.fetch(marketId: selectedMarketID)
+                    await marketVm.fetch()
                 }
                 .refreshable {
                     await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    //await feedVM.fetch(marketId: selectedMarketID)
                 }
                 .onChange(of: selectedMarketID) { oldValue, newValue in
-                    Task { await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID) }
+                    Task {
+                        await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                        //await feedVM.fetch(marketId: selectedMarketID)
+                    }
                 }
                 Spacer()
                 

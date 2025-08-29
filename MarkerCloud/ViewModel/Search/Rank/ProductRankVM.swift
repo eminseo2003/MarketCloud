@@ -20,7 +20,7 @@ private struct ProductRankListDTO: Decodable {
 struct PopularProduct: Identifiable, Hashable {
     let id = UUID()
     let rank: Int
-    let name: String
+    let productName: String
     let imageURL: URL?
     let likeCount: Int
 }
@@ -65,7 +65,7 @@ final class ProductRankVM: ObservableObject {
             products = decoded.responseDto.rankings.map {
                 PopularProduct(
                     rank: $0.rank,
-                    name: $0.productName,
+                    productName: $0.productName,
                     imageURL: URL(string: $0.mediaUrl),
                     likeCount: $0.like_count
                 )

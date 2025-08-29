@@ -87,10 +87,10 @@ struct SearchView: View {
                             ) {
                                 LazyHStack(spacing: 12) {
                                     ForEach(storeRankVM.stores) { s in
-                                        StoreBubbleView(name: s.name, url: s.imageURL)
+                                        StoreBubbleView(name: s.storeName, url: s.imageURL)
                                             .onTapGesture {
                                                 // 점포 상세로 이동
-                                                print("tapped store:", s.name)
+                                                print("tapped store:", s.storeName)
                                             }
                                     }
                                 }
@@ -143,7 +143,7 @@ struct SearchView: View {
                             ) {
                                 LazyHStack(spacing: 12) {
                                     ForEach(productRankVM.products) { p in
-                                        MediaThumbCard(title: p.name, url: p.imageURL, likeCount: p.likeCount)
+                                        MediaThumbCard(title: p.productName, url: p.imageURL, likeCount: p.likeCount)
                                     }
                                 }
                                 .padding(.horizontal)
@@ -226,9 +226,8 @@ struct SearchView: View {
                                 }
                                 .padding(.horizontal)
                             } else {
-                                TrendingKeywordsView(keywords: searchRankVM.keywords)
+                                TrendingKeywordsView(keywords: searchRankVM.rankings, searchText: $searchText, route: $route)
                             }
-                            
                             Spacer()
                         }
                     }
@@ -290,22 +289,30 @@ private struct StoreBubbleView: View {
     
     var body: some View {
         VStack {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                        .frame(width: 56, height: 56)
-                case .success(let image):
-                    image.resizable().scaledToFill()
-                        .frame(width: 56, height: 56)
-                        .clipShape(Circle())
-                case .failure:
-                    Circle().fill(Color(.systemGray5))
-                        .overlay(Image(systemName: "photo").imageScale(.small))
-                        .frame(width: 56, height: 56)
-                @unknown default:
-                    EmptyView()
+            if let url {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            Circle().fill(Color(.systemGray5))
+                            ProgressView()
+                        }.frame(width: 56, height: 56)
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+                    case .failure:
+                        Circle().fill(Color(.systemGray5))
+                            .overlay(Image(systemName: "photo").imageScale(.small))
+                            .frame(width: 56, height: 56)
+                    @unknown default:
+                        EmptyView()
+                    }
                 }
+            } else {
+                Circle().fill(Color(.systemGray5))
+                    .overlay(Image(systemName: "photo"))
+                    .frame(width: 56, height: 56)
             }
             Text(name)
                 .font(.caption2)
@@ -350,25 +357,31 @@ struct MediaThumbCard: View {
             .clipped()
             .clipShape(RoundedRectangle(cornerRadius: 12))
             
-            Text(title)
-                .font(.caption)
-                .lineLimit(1)
-                .frame(width: 140, alignment: .leading)
-            
-            if let like = likeCount {
-                HStack(spacing: 4) {
-                    Image(systemName: "heart.fill").font(.caption2)
-                    Text("\(like)")
-                        .font(.caption2)
+            HStack {
+                if let like = likeCount {
+                    HStack(spacing: 4) {
+                        Image(systemName: "heart.fill").font(.caption2)
+                        Text("\(like)")
+                            .font(.caption2)
+                    }
+                    .foregroundColor(.secondary)
                 }
-                .foregroundColor(.secondary)
+                Spacer()
+                Text(title)
+                    .font(.caption)
+                    .lineLimit(1)
+                    .frame(width: 140, alignment: .leading)
             }
+            
+            
         }
     }
 }
 
 private struct TrendingKeywordsView: View {
     let keywords: [String]
+    @Binding var searchText: String
+    @Binding var route: Route?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -385,23 +398,30 @@ private struct TrendingKeywordsView: View {
             
             VStack(spacing: 8) {
                 ForEach(Array(keywords.enumerated()), id: \.offset) { idx, keyword in
-                    HStack(spacing: 8) {
-                        // 순위 뱃지
-                        Text("\(idx + 1)")
-                            .font(.subheadline).bold()
-                            .frame(width: 28, height: 28)
-                            .background(
-                                Circle().fill(Color(uiColor: .secondarySystemBackground))
-                            )
-                        
-                        Text(keyword)
-                            .font(.body).bold()
-                            .lineLimit(1)
-                        
-                        Spacer()
+                    Button(action: {
+                        self.searchText = keyword
+                        route = .searchResult
+                    }) {
+                        HStack(spacing: 8) {
+                            Text("\(idx + 1)")
+                                .font(.subheadline).bold()
+                                .frame(width: 28, height: 28)
+                                .background(
+                                    Circle().fill(Color(uiColor: .secondarySystemBackground))
+                                )
+                                .foregroundColor(.primary)
+                            
+                            Text(keyword)
+                                .font(.body).bold()
+                                .lineLimit(1)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                        }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 12)
                     }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 12)
+                    
                 }
             }
         }
@@ -416,7 +436,6 @@ struct SearchViewSectionHeader: View {
         HStack {
             Text(title)
                 .font(.headline)
-            
         }
         .padding(.horizontal)
         .padding(.top)

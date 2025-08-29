@@ -10,14 +10,14 @@ import Foundation
 struct PopularStore: Identifiable, Hashable {
     let id = UUID()
     let rank: Int
-    let name: String
+    let storeName: String
     let imageURL: URL?
 }
 
 private struct StoreRankItemDTO: Decodable {
     let rank: Int
     let storeName: String
-    let imgUrl: String
+    let imgUrl: String?
 }
 private struct StoreRankListDTO: Decodable {
     let rankings: [StoreRankItemDTO]
@@ -63,8 +63,9 @@ final class StoreRankVM: ObservableObject {
             stores = decoded.responseDto.rankings.map {
                 PopularStore(
                     rank: $0.rank,
-                    name: $0.storeName,
-                    imageURL: URL(string: $0.imgUrl)
+                    storeName: $0.storeName,
+                    imageURL: $0.imgUrl.flatMap { URL(string: $0) }
+
                 )
             }
             print("[StoreRankVM] loaded:", stores.count)

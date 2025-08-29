@@ -9,7 +9,7 @@ import Foundation
 
 private struct SearchRankItemDTO: Decodable {
     let rank: Int
-    let searchName: String
+    let keyword: String
 }
 
 private struct SearchRankListDTO: Decodable {
@@ -18,7 +18,7 @@ private struct SearchRankListDTO: Decodable {
 
 @MainActor
 final class SearchRankVM: ObservableObject {
-    @Published var keywords: [String] = []
+    @Published var rankings: [String] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -53,12 +53,12 @@ final class SearchRankVM: ObservableObject {
                 return
             }
 
-            self.keywords = decoded.responseDto.rankings
+            self.rankings = decoded.responseDto.rankings
                 .sorted { $0.rank < $1.rank }
                 .prefix(limit)
-                .map { $0.searchName }
+                .map { $0.keyword }
 
-            rlog("SearchRankVM", "loaded:", keywords.count, "|", keywords.joined(separator: ", "))
+            rlog("SearchRankVM", "loaded:", rankings.count, "|", rankings.joined(separator: ", "))
         } catch {
             errorMessage = error.localizedDescription
             rlog("SearchRankVM", "error:", error.localizedDescription)
