@@ -87,8 +87,8 @@ struct MainView: View {
                             Text(err).foregroundColor(.secondary).font(.caption)
                             Button("다시 시도") {
                                 Task {
-                                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                                    //await feedVM.fetch(marketId: selectedMarketID)
+                                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                                    await feedVM.fetch(marketId: selectedMarketID)
                                 }
                             }
                         }
@@ -116,18 +116,18 @@ struct MainView: View {
                 }
                 .task {
                     // 최초 로드 시 실행
-                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    //await feedVM.fetch(marketId: selectedMarketID)
+                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    await feedVM.fetch(marketId: selectedMarketID)
                     await marketVm.fetch()
                 }
                 .refreshable {
-                    await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    //await feedVM.fetch(marketId: selectedMarketID)
+                    //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                    await feedVM.fetch(marketId: selectedMarketID)
                 }
                 .onChange(of: selectedMarketID) { oldValue, newValue in
                     Task {
-                        await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                        //await feedVM.fetch(marketId: selectedMarketID)
+                        //await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
+                        await feedVM.fetch(marketId: selectedMarketID)
                     }
                 }
                 Spacer()

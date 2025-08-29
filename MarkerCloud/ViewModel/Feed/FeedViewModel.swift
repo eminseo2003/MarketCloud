@@ -50,19 +50,21 @@ final class FeedViewModel: ObservableObject {
 
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 
-    private func makeURL(marketId: Int, userId: Int) -> URL {
+    private func makeURL(marketId: Int) -> URL {
+    //private func makeURL(marketId: Int, userId: Int) -> URL {
         base.appendingPathComponent("api")
             .appendingPathComponent("feed")
             .appendingPathComponent(String(marketId))
-            .appendingPathComponent(String(userId))
+            //.appendingPathComponent(String(userId))
     }
-
-    func fetch(marketId: Int, userId: Int) async {
+    func fetch(marketId: Int) async {
+    //func fetch(marketId: Int, userId: Int) async {
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
 
-        let url = makeURL(marketId: marketId, userId: userId)
+        let url = makeURL(marketId: marketId)
+        //let url = makeURL(marketId: marketId, userId: userId)
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         req.setValue("application/json", forHTTPHeaderField: "Accept")

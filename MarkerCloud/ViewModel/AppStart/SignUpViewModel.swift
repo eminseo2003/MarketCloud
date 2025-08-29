@@ -33,19 +33,24 @@ final class SignUpViewModel: ObservableObject {
     @Published var canSubmit: Bool = false
     @Published var errorMessage: String?
     @Published var successMessage: String?
+    @Published var validationMessage: String?
     
     private var bag = Set<AnyCancellable>()
     
     init() {
         Publishers.CombineLatest3($userId, $password, $username)
-            .map { id, pw, name in
-                return id.trimmingCharacters(in: .whitespacesAndNewlines).count >= 3 &&
-                pw.count >= 8 &&
-                name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            .map { [weak self] id, pw, name -> (Bool, String?) in
+                self?.validate(id: id, pw: pw, name: name) ?? (false, nil)
             }
-            .assign(to: \.canSubmit, on: self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] ok, msg in
+                self?.canSubmit = ok
+                self?.validationMessage = msg
+                if ok { self?.errorMessage = nil }
+            }
             .store(in: &bag)
     }
+
     
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
     
@@ -54,10 +59,36 @@ final class SignUpViewModel: ObservableObject {
             .appendingPathComponent("user")
             .appendingPathComponent("register")
     }
-    
+    private static func isValidEmail(_ s: String) -> Bool {
+        let pattern = #"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$"#
+        return s.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
+    private func validate(id: String, pw: String, name: String) -> (ok: Bool, message: String?) {
+        let idT = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        let nameT = name.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if nameT.isEmpty {
+            return (false, "이름을 입력해 주세요.")
+        }
+        if !Self.isValidEmail(idT) {
+            return (false, "올바른 이메일 형식이 아닙니다.")
+        }
+        if pw.count < 8 {
+            return (false, "비밀번호는 8자 이상 입력해 주세요.")
+        }
+        return (true, nil)
+    }
+
     func register() {
         errorMessage = nil
         successMessage = nil
+        
+        let v = validate(id: userId, pw: password, name: username)
+            guard v.ok else {
+                validationMessage = v.message
+                return
+            }
         
         guard canSubmit else {
             errorMessage = "입력값을 확인해 주세요."

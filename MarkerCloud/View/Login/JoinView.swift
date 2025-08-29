@@ -14,6 +14,9 @@ struct JoinView: View {
     
     @StateObject private var vm = SignUpViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showErrorAlert = false
+    @State private var showValidationAlert = false
+    @State private var validationAlertMessage: String?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -96,6 +99,25 @@ struct JoinView: View {
             
             VStack(spacing: 12) {
                 Button {
+                    let nameT = vm.username.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if nameT.isEmpty {
+                            validationAlertMessage = "이름을 입력해 주세요."
+                            showValidationAlert = true
+                            hideKeyboard()
+                            return
+                        }
+                        if !vm.userId.isValidEmail {
+                            validationAlertMessage = "올바른 이메일 형식이 아닙니다."
+                            showValidationAlert = true
+                            hideKeyboard()
+                            return
+                        }
+                        if vm.password.count < 8 {
+                            validationAlertMessage = "비밀번호는 8자 이상 입력해 주세요."
+                            showValidationAlert = true
+                            hideKeyboard()
+                            return
+                        }
                     vm.register()
                 } label: {
                     HStack {
@@ -104,10 +126,11 @@ struct JoinView: View {
                     }
                 }
                 .buttonStyle(FilledCTA())
-                .disabled(!vm.canSubmit || vm.isLoading)
-                if let err = vm.errorMessage {
-                    Text(err).foregroundColor(.red)
-                }
+                .disabled(vm.isLoading)
+                //.disabled(!vm.canSubmit || vm.isLoading)
+                //if let vmsg = vm.validationMessage { Text(vmsg).foregroundColor(.red) }
+                //if let err  = vm.errorMessage      { Text(err).foregroundColor(.red) }
+
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
@@ -126,17 +149,31 @@ struct JoinView: View {
                 hideKeyboard()
             }
         }
+        .onChange(of: vm.errorMessage) { newValue in
+            if newValue != nil {
+                showErrorAlert = true
+                hideKeyboard()
+            }
+        }
+        .alert("입력값을 확인해 주세요", isPresented: $showValidationAlert, actions: {
+            Button("확인", role: .cancel) { }
+        }, message: {
+            Text(vm.validationMessage ?? "필수 입력값을 확인해 주세요.")
+        })
+
         .alert("회원가입 완료", isPresented: $showSuccessAlert, actions: {
             Button("확인") {
-                // (선택) 입력값 초기화가 필요하면 ViewModel에서 초기화
-                // vm.reset() 등을 만들거나 성공 시 필드 비우기
-                // 여기서는 화면을 닫고 싶으면:
-                dismiss()   // ← 이전 화면으로 돌아가기 (원치 않으면 제거)
+                dismiss()
             }
         }, message: {
             Text(vm.successMessage ?? "회원가입이 정상적으로 처리되었습니다.")
         })
-        
+        .alert("회원가입 실패", isPresented: $showErrorAlert, actions: {
+            Button("확인", role: .cancel) { }
+        }, message: {
+            Text(vm.errorMessage ?? "알 수 없는 오류가 발생했습니다.")
+        })
+
     }
     private func hideKeyboard() {
         focus = nil
