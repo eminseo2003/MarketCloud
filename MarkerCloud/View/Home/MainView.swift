@@ -17,20 +17,12 @@ enum StoreTab: String, CaseIterable, Identifiable {
 struct MainView: View {
     @StateObject private var feedVM = FeedViewModel()
     @StateObject private var marketVm = MarketListVM()
-    //var imageFeeds: [Feed] { dummyFeed.filter { $0.mediaType == .image } }
     
     
     @Binding var selectedMarketID: Int
     @Binding var currentUserID: Int
     
     @State private var selectedTab: StoreTab = .all
-//    private var selectedMarketUUID: UUID? {
-//        UUID(uuidString: selectedMarketID)
-//    }
-    //    private var storesInSelectedMarket: [Store] {
-    //        guard let id = selectedMarketUUID else { return [] }
-    //        return dummyStores.filter { $0.marketId == id }
-    //    }
     @State private var pushStoreName: String? = nil
     let columns = [
         GridItem(.flexible())
@@ -100,23 +92,12 @@ struct MainView: View {
                     } else {
                         LazyVStack(spacing: 12) {
                             ForEach(filteredFeedIndices, id: \.self) { i in
-                                FeedCardView(feed: $feedVM.feeds[i], pushStoreName: $pushStoreName)
+                                FeedCardView(feed: $feedVM.feeds[i], pushStoreName: $pushStoreName, currentUserID: currentUserID)
                             }
                         }
                         //.padding(.horizontal)
 
                     }
-                    //                    LazyVGrid(columns: columns, spacing: 8) {
-                    //                        VStack(spacing: 16) {
-                    //                            ForEach(storesInSelectedMarket) { store in
-                    //                                ForEach(feeds(for: store)) { feed in
-                    //                                    FeedCardView(feed: feed, store: store, pushStore: $pushStore)
-                    //                                }
-                    //                            }
-                    //
-                    //                        }
-                    //                        .padding(.horizontal)
-                    //                    }
                     
                 }
                 .task {

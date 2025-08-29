@@ -31,7 +31,8 @@ struct SearchView: View {
     @StateObject private var eventRankVM  = EventRankVM()
     @StateObject private var searchRankVM  = SearchRankVM()
     
-    //@State private var pushStore: Store? = nil
+    @State private var pushStore: Int? = nil
+    @State private var pushStoreName: String? = nil
     @State private var selectedFeed: Feed? = nil
     @State private var selectedSectionTitle: String? = nil
     @FocusState private var isTextFieldFocused: Bool
@@ -89,7 +90,8 @@ struct SearchView: View {
                                     ForEach(storeRankVM.stores) { s in
                                         StoreBubbleView(name: s.storeName, url: s.imageURL)
                                             .onTapGesture {
-                                                // 점포 상세로 이동
+                                                pushStore = 1
+                                                pushStoreName = s.storeName
                                                 print("tapped store:", s.storeName)
                                             }
                                     }
@@ -206,12 +208,15 @@ struct SearchView: View {
                         }
                     }
                     //점포 상세로 이동
-                    //                    .navigationDestination(item: $selectedFeed) { feed in
-                    //                        //FeedView(feed: feed)
-                    //                    }
-                    //                    .navigationDestination(item: $pushStore) { store in
-                    //                        //StoreProfileView(store: store)
-                    //                    }
+//                    .navigationDestination(item: $selectedFeed) { feed in
+//                        //FeedView(feed: feed)
+//                    }
+                    .navigationDestination(item: $pushStore) { store in
+                        if let storeId = pushStore, let storeName = pushStoreName {
+                            
+                            StoreProfileView(storeId: storeId, storeName: storeName)
+                        }
+                    }
                 } else {
                     ScrollView {
                         VStack {

@@ -144,11 +144,12 @@ private let _reviewFullFormatter: DateFormatter = {
 func formatReviewDate(_ date: Date?) -> String {
     guard let date = date else { return "" }
     let cal = Calendar(identifier: .gregorian)
-    if cal.isDateInToday(date) {
-        return "오늘 " + _reviewTimeFormatter.string(from: date)
-    } else if cal.isDateInYesterday(date) {
-        return "어제 " + _reviewTimeFormatter.string(from: date)
-    } else {
-        return _reviewFullFormatter.string(from: date)
-    }
+//    if cal.isDateInToday(date) {
+//        return "오늘 " + _reviewTimeFormatter.string(from: date)
+//    } else if cal.isDateInYesterday(date) {
+//        return "어제 " + _reviewTimeFormatter.string(from: date)
+//    } else {
+//        return _reviewFullFormatter.string(from: date)
+//    }
+    return _reviewFullFormatter.string(from: date)
 }
