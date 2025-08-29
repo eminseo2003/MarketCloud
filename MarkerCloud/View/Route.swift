@@ -12,6 +12,7 @@ enum Route: Hashable, Identifiable {
     case join
     case recommendMarket //시장 추천
     case selextMarket //시장 선택
+    case todayMarket
     case pushPromotion
     case searchResult //검색 결과
     case moreStore //점포 더보기

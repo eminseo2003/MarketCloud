@@ -18,7 +18,7 @@ struct ContentView: View {
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             
-            SearchView(selectedMarketID: $selectedMarketID)
+            SearchView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
             
@@ -26,7 +26,7 @@ struct ContentView: View {
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             
-            VideoLoadView(selectedMarketID: $selectedMarketID)
+            VideoLoadView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
 

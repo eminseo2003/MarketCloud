@@ -9,6 +9,7 @@ import Foundation
 
 struct Feed: Identifiable, Hashable {
     let id: Int
+    let storeId: Int
     let storeName: String
     let storeImageURL: URL?
     let createdAt: Date
@@ -23,6 +24,7 @@ struct Feed: Identifiable, Hashable {
 
 private struct FeedItemDTO: Decodable {
     let feedId: Int
+    let storeId: Int
     let storeName: String
     let storeImageUrl: String?
     let createdAt: String
@@ -104,6 +106,7 @@ final class FeedViewModel: ObservableObject {
                 let mainImgURL  = urlOpt(from: item.feedImageUrl) ?? fallbackURL
                 return Feed(
                         id: item.feedId,
+                        storeId: item.storeId,
                         storeName: item.storeName,
                         storeImageURL: storeImgURL,
                         createdAt: parseAPIDate(item.createdAt),

@@ -19,9 +19,10 @@ private struct StoreFeedPreviewDTO: Decodable {
 
 private struct StoreProfileDTO: Decodable {
     let storeImg: String?
-    let followerCount: Int
+    var followerCount: Int
     let totalLikedCount: Int
     let isMyStore: Bool
+    var isSubscribed: Bool
     let storeDescript: String
     let storeAddress: String
     let storePhoneNumber: String
@@ -50,9 +51,10 @@ struct StoreFeedPreviewUI: Identifiable, Hashable {
 
 struct StoreProfileUI: Hashable {
     let imageURL: URL?
-    let followerCount: Int
+    var followerCount: Int
     let totalLikedCount: Int
     let isMyStore: Bool
+    var isSubscribed: Bool
     let description: String
     let address: String
     let phoneNumber: String
@@ -73,16 +75,17 @@ final class StoreProfileVM: ObservableObject {
 
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 
-    func fetch(storeId: Int) async {
+    func fetch(storeId: Int, userId: Int) async {
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
 
         let url = base
             .appendingPathComponent("api")
-            .appendingPathComponent("store")
+            .appendingPathComponent("stores")
             .appendingPathComponent("profile")
             .appendingPathComponent(String(storeId))
+            .appendingPathComponent(String(userId))
 
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
@@ -118,6 +121,7 @@ final class StoreProfileVM: ObservableObject {
                 followerCount: dto.followerCount,
                 totalLikedCount: dto.totalLikedCount,
                 isMyStore: dto.isMyStore,
+                isSubscribed: dto.isSubscribed,
                 description: dto.storeDescript,
                 address: dto.storeAddress,
                 phoneNumber: dto.storePhoneNumber,

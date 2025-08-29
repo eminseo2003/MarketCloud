@@ -12,13 +12,15 @@ struct FeedCardView: View {
     @State private var isCommentSheetPresented = false
     @Binding var pushStoreName: String?
     @StateObject private var likeVM = FeedLikeVM()
-    let currentUserID: Int
     
+    let currentUserID: Int
+    @Binding var pushStore: Int?
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             
             Button {
                 pushStoreName = feed.storeName
+                pushStore = feed.storeId
             } label: {
                 HStack {
                     AsyncImage(url: feed.storeImageURL) { image in
@@ -61,18 +63,15 @@ struct FeedCardView: View {
             HStack(spacing: 12) {
                 HStack(spacing: 4) {
                     Button {
-                        // 1) 옵티미스틱 UI
                         feed.isLiked.toggle()
                         feed.likeCount += feed.isLiked ? 1 : -1
                         if feed.likeCount < 0 { feed.likeCount = 0 }
                         
                          Task {
                             if let dto = await likeVM.toggle(feedId: feed.id, userId: currentUserID) {
-                                // 서버 값으로 최종 동기화
                                 feed.isLiked = dto.isLiked
                                 feed.likeCount = dto.likesCount
                             } else {
-                                // 실패 시 되돌리기(선택)
                                 feed.isLiked.toggle()
                                 feed.likeCount += feed.isLiked ? 1 : -1
                             }

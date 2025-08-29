@@ -143,7 +143,7 @@ private let _reviewFullFormatter: DateFormatter = {
 
 func formatReviewDate(_ date: Date?) -> String {
     guard let date = date else { return "" }
-    let cal = Calendar(identifier: .gregorian)
+    //let cal = Calendar(identifier: .gregorian)
 //    if cal.isDateInToday(date) {
 //        return "오늘 " + _reviewTimeFormatter.string(from: date)
 //    } else if cal.isDateInYesterday(date) {

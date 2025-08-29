@@ -18,15 +18,17 @@ struct MainView: View {
     @StateObject private var feedVM = FeedViewModel()
     @StateObject private var marketVm = MarketListVM()
     
-    
+    @State private var route: Route? = nil
     @Binding var selectedMarketID: Int
     @Binding var currentUserID: Int
     
     @State private var selectedTab: StoreTab = .all
     @State private var pushStoreName: String? = nil
+    @State private var pushStore: Int? = nil
     let columns = [
         GridItem(.flexible())
     ]
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -84,36 +86,49 @@ struct MainView: View {
                             Button("다시 시도") {
                                 Task {
                                     await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                                    //await feedVM.fetch(marketId: selectedMarketID)
                                 }
                             }
                         }
                         .padding(.vertical, 24)
                     } else {
+                        let insertAfter = 1
                         LazyVStack(spacing: 12) {
-                            ForEach(filteredFeedIndices, id: \.self) { i in
-                                FeedCardView(feed: $feedVM.feeds[i], pushStoreName: $pushStoreName, currentUserID: currentUserID)
+                            let indices = filteredFeedIndices
+                            ForEach(Array(indices.enumerated()), id: \.element) { (pos, i) in
+                                FeedCardView(feed: $feedVM.feeds[i], pushStoreName: $pushStoreName, currentUserID: currentUserID, pushStore: $pushStore)
+                                
+                                if pos == insertAfter {
+                                    Button(action: {
+                                        route = .todayMarket
+                                    }) {
+                                        MainRowButton(title: "오늘의 시장 추천받기",
+                                                  value: "🍀",
+                                                  icon: "chevron.right")
+                                        .padding(16)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                                .fill(Color(uiColor: .systemGray6))
+                                        )
+                                        .shadow(color: .black.opacity(0.05), radius: 8, y: 2)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 16)
+                                    }
+                                    
+                                }
                             }
                         }
-                        //.padding(.horizontal)
-
                     }
-                    
                 }
                 .task {
-                    // 최초 로드 시 실행
                     await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    //await feedVM.fetch(marketId: selectedMarketID)
                     await marketVm.fetch()
                 }
                 .refreshable {
                     await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                    //await feedVM.fetch(marketId: selectedMarketID)
                 }
                 .onChange(of: selectedMarketID) { oldValue, newValue in
                     Task {
                         await feedVM.fetch(marketId: selectedMarketID, userId: currentUserID)
-                        //await feedVM.fetch(marketId: selectedMarketID)
                     }
                 }
                 Spacer()
@@ -122,6 +137,18 @@ struct MainView: View {
             //            .navigationDestination(item: $pushStore) { store in
             //                StoreProfileView(store: store)
             //            }
+            .navigationDestination(item: $route) { route in
+                if route == .todayMarket {
+                    SelectKeywordView()
+                }
+            }
+            .navigationDestination(item: $pushStore) { id in
+                if let storeId = pushStore {
+                    StoreProfileView(storeId: id, currentUserID: currentUserID)
+                } else {
+                    Text("잘못된 점포입니다.")
+                }
+            }
         }
         
     }
@@ -136,6 +163,34 @@ struct MainView: View {
             }
         }
     }
-
 }
 
+struct MainRowButton: View {
+    let title: String
+    let value: String
+    let icon: String?
+    private let iconWidth: CGFloat = 12
+    
+    var body: some View {
+        HStack {
+            Text(title).font(.body).bold().foregroundColor(.primary)
+            Spacer(minLength: 12)
+            Text(value)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+            if let icon {
+                Image(systemName: icon)
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+                    .frame(width: iconWidth, alignment: .trailing)
+            } else {
+                Color.clear.frame(width: iconWidth)
+            }
+            
+        }
+        .frame(minHeight: 46)
+        .contentShape(Rectangle())
+        .padding(.vertical, 6)
+    }
+}

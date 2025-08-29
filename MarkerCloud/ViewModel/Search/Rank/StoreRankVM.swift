@@ -9,6 +9,7 @@ import Foundation
 
 struct PopularStore: Identifiable, Hashable {
     let id = UUID()
+    let storeId: Int
     let rank: Int
     let storeName: String
     let imageURL: URL?
@@ -16,6 +17,7 @@ struct PopularStore: Identifiable, Hashable {
 
 private struct StoreRankItemDTO: Decodable {
     let rank: Int
+    let storeId: Int
     let storeName: String
     let imgUrl: String?
 }
@@ -62,6 +64,7 @@ final class StoreRankVM: ObservableObject {
 
             stores = decoded.responseDto.rankings.map {
                 PopularStore(
+                    storeId: $0.storeId,
                     rank: $0.rank,
                     storeName: $0.storeName,
                     imageURL: $0.imgUrl.flatMap { URL(string: $0) }

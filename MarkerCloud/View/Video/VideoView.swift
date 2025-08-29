@@ -13,7 +13,8 @@ struct VideoView: View {
     @State private var page: Int? = 0
     @State private var lastActive: Int = 0
     @Binding var selectedMarketID: Int
-    
+    @Binding var currentUserID: Int
+
     var body: some View {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 0) {
@@ -22,7 +23,7 @@ struct VideoView: View {
                         let activeIndex = page ?? lastActive
                         let isActive = (activeIndex == index)
 
-                        VideoPostFullScreenView(video: item, isActive: isActive)
+                        VideoPostFullScreenView(video: item, isActive: isActive, currentUserID: $currentUserID)
                             .id(index)
                             .containerRelativeFrame(.vertical, count: 1, spacing: 0)
                             .background(Color.black)
@@ -33,13 +34,13 @@ struct VideoView: View {
                                 print("[VideoView] cell \(index) onDisappear")
                             }
                             .onChange(of: isActive, initial: true) { _, newValue in
-                                print("[VideoView] cell \(index) isActive -> \(newValue)")
                                 if newValue {
-                                    print("[VideoView] cell \(index) became ACTIVE url=\(item.url?.absoluteString ?? "nil")")
+                                    print("[VideoView] cell \(index) became ACTIVE url=\(item.url.absoluteString)")
                                 } else {
                                     print("[VideoView] cell \(index) became INACTIVE")
                                 }
                             }
+
                     }
                 }
                 .scrollTargetLayout()

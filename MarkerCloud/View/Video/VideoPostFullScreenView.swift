@@ -23,13 +23,9 @@ struct VideoPostFullScreenView: View {
     @State private var userPaused = false
     @State private var showHUD = false
     
-//    private var store: Store? {
-//        dummyStores.first { $0.id == feed.storeId }
-//    }
-//    private var storeProfileURL: URL? {
-//        store?.profileImageURL
-//    }
-    
+    @State private var pushStore: Int? = nil
+    @Binding var currentUserID: Int
+
     var body: some View {
         ZStack {
             if let player {
@@ -51,8 +47,9 @@ struct VideoPostFullScreenView: View {
                                 .font(.body)
                                 .bold(true)
                                 .foregroundColor(.white)
+                                .lineLimit(1)
                             
-                            Text(formattedDate(video.createdAt ?? Date()))
+                            Text(formattedDate(video.createdAt))
                                 .font(.caption)
                                 .foregroundColor(.white)
                             Spacer()
@@ -65,23 +62,28 @@ struct VideoPostFullScreenView: View {
                     }
                     Spacer()
                     VStack(spacing: 16) {
-                        if let url = video.storeImageURL {
-                            AsyncImage(url: url) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 32, height: 32)
-                                    .clipShape(Circle())
-                            } placeholder: {
+                        Button(action: {
+                            pushStore = video.storeId
+                        }) {
+                            if let url = video.storeImageURL {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 32, height: 32)
+                                        .clipShape(Circle())
+                                } placeholder: {
+                                    Circle()
+                                        .fill(Color("Main").opacity(0.3))
+                                        .frame(width: 32, height: 32)
+                                }
+                            } else {
                                 Circle()
                                     .fill(Color("Main").opacity(0.3))
                                     .frame(width: 32, height: 32)
                             }
-                        } else {
-                            Circle()
-                                .fill(Color("Main").opacity(0.3))
-                                .frame(width: 32, height: 32)
                         }
+                        
                         
                         VStack(spacing: 2) {
                             Button(action: {
@@ -96,18 +98,25 @@ struct VideoPostFullScreenView: View {
                                 .font(.footnote)
                                 .foregroundColor(.white)
                         }
-                        Button(action: {
-                            isCommentSheetPresented = true
-                        }) {
-                            Image(systemName: "bubble")
-                                .frame(width: 32, height: 32)
+                        VStack(spacing: 2) {
+                            Button(action: {
+                                isCommentSheetPresented = true
+                            }) {
+                                Image(systemName: "bubble")
+                                    .frame(width: 32, height: 32)
+                                    .foregroundColor(.white)
+                            }
+                            .sheet(isPresented: $isCommentSheetPresented) {
+                                CommentSheetView(feedId: video.id)
+                                    presentationDetents([.medium])
+                                
+                            }
+                            Text("\(video.reviewCount)")
+                                .font(.footnote)
                                 .foregroundColor(.white)
                         }
-                        .sheet(isPresented: $isCommentSheetPresented) {
-                            //CommentSheetView(reviews: feed.reviews, feed: feed)
-                                //.presentationDetents([.medium])
-                            
-                        }
+                        
+                        
                     }
                     .padding(.bottom, 80)
                 }

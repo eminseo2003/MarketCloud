@@ -9,13 +9,15 @@ import SwiftUI
 
 struct StoreProfileView: View {
     @StateObject private var vm = StoreProfileVM()
+    @StateObject private var subVM = StoreSubscribeVM()
+
+    
     let storeId: Int
-    let storeName: String
+    let currentUserID: Int
     @State private var selectedTab: StoreTab = .all
     private let grid = Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .top), count: 3)
     @State private var isInfoExpanded = false
     @State private var route: Route? = nil
-    @State private var isMyStore: Bool = true
     @State private var isFollowed: Bool = true
     
     private func filteredFeeds(from feeds: [StoreFeedPreviewUI]) -> [StoreFeedPreviewUI] {
@@ -36,59 +38,46 @@ struct StoreProfileView: View {
                 VStack(spacing: 8) {
                     Text("불러오기 실패").font(.headline)
                     Text(err).foregroundColor(.secondary).font(.caption)
-                    Button("다시 시도") { Task { await vm.fetch(storeId: storeId) } }
+                    Button("다시 시도") { Task { await vm.fetch(storeId: storeId, userId: currentUserID) } }
                 }
                 .padding(.vertical, 24)
             } else if let p = vm.profile {
                 VStack(spacing: 16) {
                     VStack(alignment: .leading, spacing: 12) {
-                        HStack(alignment: .center, spacing: 16) {
-                            AsyncImage(url: p.imageURL) { phase in
-                                switch phase {
-                                case .success(let img):
-                                    img.resizable().scaledToFill()
-                                default:
-                                    Circle().fill(Color(uiColor: .systemGray5))
-                                }
-                            }
-                            .frame(width: 96, height: 96)
-                            .clipShape(Circle())
-                            
-                            VStack(spacing: 12) {
-                                HStack(spacing: 30) {
-                                    VStack(spacing: 4) {
-                                        Text("\(p.followerCount)")
-                                            .font(.subheadline).bold()
-                                        Text("구독")
-                                            .font(.subheadline).foregroundColor(.secondary)
-                                    }
-                                    VStack(spacing: 4) {
-                                        Text("\(p.totalLikedCount)")
-                                            .font(.subheadline).bold()
-                                        Text("좋아요")
-                                            .font(.subheadline).foregroundColor(.secondary)
+                        VStack {
+                            HStack(alignment: .center, spacing: 16) {
+                                AsyncImage(url: p.imageURL) { phase in
+                                    switch phase {
+                                    case .success(let img):
+                                        img.resizable().scaledToFill()
+                                    default:
+                                        Circle().fill(Color(uiColor: .systemGray5))
                                     }
                                 }
+                                .frame(width: 96, height: 96)
+                                .clipShape(Circle())
                                 
-                                if isMyStore == true {
-                                    Button {
-                                        route = .changeStoreInfo
-                                    } label: {
-                                        Text("점포 편집")
-                                            .font(.callout).bold()
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity)
-                                            .padding(.vertical, 10)
-                                            .background(RoundedRectangle(cornerRadius: 12).fill(Color("Main")))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .frame(maxWidth: .infinity)
-                                } else {
-                                    if isFollowed {
-                                        Button {
-                                            isFollowed.toggle()
-                                        } label: {
+                                VStack(spacing: 12) {
+                                    HStack(spacing: 30) {
+                                        VStack(spacing: 4) {
+                                            Text("\(p.followerCount)")
+                                                .font(.subheadline).bold()
                                             Text("구독")
+                                                .font(.subheadline).foregroundColor(.secondary)
+                                        }
+                                        VStack(spacing: 4) {
+                                            Text("\(p.totalLikedCount)")
+                                                .font(.subheadline).bold()
+                                            Text("좋아요")
+                                                .font(.subheadline).foregroundColor(.secondary)
+                                        }
+                                    }
+                                    
+                                    if p.isMyStore == true {
+                                        Button {
+                                            route = .changeStoreInfo
+                                        } label: {
+                                            Text("점포 편집")
                                                 .font(.callout).bold()
                                                 .foregroundColor(.white)
                                                 .frame(maxWidth: .infinity)
@@ -99,61 +88,88 @@ struct StoreProfileView: View {
                                         .frame(maxWidth: .infinity)
                                     } else {
                                         Button {
-                                            isFollowed.toggle()
+                                            guard currentUserID > 0, !subVM.isLoading(storeId: storeId) else { return }
+
+                                            // 1) 옵티미스틱 UI
+                                            let beforeSub   = vm.profile?.isSubscribed ?? false
+                                            let beforeCount = vm.profile?.followerCount ?? 0
+
+                                            vm.profile?.isSubscribed.toggle()
+                                            vm.profile?.followerCount = max(0, beforeCount + (beforeSub ? -1 : 1))
+
+                                            // 2) 서버 동기화
+                                            Task {
+                                                if let dto = await subVM.toggle(storeId: storeId, userId: currentUserID) {
+                                                    // 서버 값으로 최종 동기화 (옵셔널이면 옵티미스틱 유지)
+                                                    if let v = dto.isSubscribed   { vm.profile?.isSubscribed  = v }
+                                                    if let c = dto.followersCount { vm.profile?.followerCount = max(0, c) }
+                                                } else {
+                                                    // 실패 시 롤백
+                                                    vm.profile?.isSubscribed  = beforeSub
+                                                    vm.profile?.followerCount = beforeCount
+                                                }
+                                            }
                                         } label: {
-                                            Text("구독 취소")
+                                            Text((vm.profile?.isSubscribed ?? false) ? "구독 취소" : "구독")
                                                 .font(.callout).bold()
-                                                .foregroundColor(Color("Main"))
+                                                .foregroundColor((vm.profile?.isSubscribed ?? false) ? Color("Main") : .white)
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 10)
-                                                .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
-                                                .overlay(
+                                                .background(
                                                     RoundedRectangle(cornerRadius: 12)
-                                                        .stroke(Color("Main"), lineWidth: 1)
+                                                        .fill((vm.profile?.isSubscribed ?? false) ? Color.white : Color("Main"))
+                                                )
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                                        .stroke(Color("Main"), lineWidth: 1.2)
                                                 )
                                         }
+                                        .disabled(subVM.isLoading(storeId: storeId))
                                         .buttonStyle(.plain)
-                                        .frame(maxWidth: .infinity)
+
                                     }
+
                                 }
-                                
+                                .padding(.vertical)
                             }
-                            .padding(.vertical)
-                        }
-                        
-                        
-                        
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("점포 소개")
-                                .font(.subheadline).bold()
-                                .foregroundColor(.primary)
-                            if !p.description.isEmpty {
-                                Text(p.description)
-                                    .font(.subheadline)
+                            
+                            
+                            
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("점포 소개")
+                                    .font(.subheadline).bold()
                                     .foregroundColor(.primary)
+                                if !p.description.isEmpty {
+                                    Text(p.description)
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    
+                                    
+                                    
+                                }
+                                Divider()
+                                    .background(Color.secondary.opacity(0.15))
+                                    .padding(.vertical, 1)
                                 
-                                
-                                
-                            }
-                            Divider().background(Color.secondary.opacity(0.15))
-                            
-                            if isInfoExpanded {
-                                extraStoreInfo(p)
-                                    .animation(.easeInOut, value: isInfoExpanded)
-                                    .padding(.top, 4)
-                                
-                                infoToggleButton(title: "점포 정보 접기") {
-                                    withAnimation(.easeInOut) {
-                                        isInfoExpanded = false
+                                if isInfoExpanded {
+                                    extraStoreInfo(p)
+                                        .animation(.easeInOut, value: isInfoExpanded)
+                                        .padding(.top, 4)
+                                    
+                                    infoToggleButton(title: "점포 정보 접기") {
+                                        withAnimation(.easeInOut) {
+                                            isInfoExpanded = false
+                                        }
+                                    }
+                                } else {
+                                    infoToggleButton(title: "점포 정보 더보기") {
+                                        withAnimation(.easeInOut) { isInfoExpanded = true }
                                     }
                                 }
-                            } else {
-                                infoToggleButton(title: "점포 정보 더보기") {
-                                    withAnimation(.easeInOut) { isInfoExpanded = true }
-                                }
+                                
                             }
-                            
                         }
+                        
                         .padding(16)
                         .background(
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -195,9 +211,7 @@ struct StoreProfileView: View {
         }
         
             .background(Color(uiColor: .systemGray6).ignoresSafeArea())
-            .navigationTitle(storeName)
-            .navigationBarTitleDisplayMode(.inline)
-            .task { await vm.fetch(storeId: storeId) }
+            .task { await vm.fetch(storeId: storeId, userId: currentUserID) }
         //        .navigationDestination(item: $selectedFeed) { feed in
         //            if feed.promoKind == .product {
         //                FeedView(feed: feed)

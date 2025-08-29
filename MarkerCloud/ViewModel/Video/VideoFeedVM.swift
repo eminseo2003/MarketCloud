@@ -8,10 +8,11 @@
 import Foundation
 
 struct VideoItemUI: Identifiable, Hashable {
-    let id: String
+    let id: Int
+    let storeId: Int
     let name: String
-    let url: URL?
-    let createdAt: Date?
+    let url: URL
+    let createdAt: Date
     let content: String
     let storeImageURL: URL?
     let likeCount: Int
@@ -19,12 +20,13 @@ struct VideoItemUI: Identifiable, Hashable {
 }
 
 private struct VideoItemDTO: Decodable {
-    let videoId: String
+    let videoId: Int
+    let storeId: Int
     let videoName: String
     let videoUrl: String
     let createdAt: String
     let videoContent: String
-    let storeImage: String
+    let storeImage: String?
     let videoLikeCount: Int
     let videoReviewCount: Int
 }
@@ -47,6 +49,16 @@ final class VideoFeedVM: ObservableObject {
 
     private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
     private var apiURL: URL { base.appendingPathComponent("api/video/") }
+    private let fallbackURL = URL(string: "https://example.com")!
+
+    private func urlRequired(_ s: String) -> URL {
+        URL(string: s.trimmingCharacters(in: .whitespacesAndNewlines)) ?? fallbackURL
+    }
+
+    private func urlOptional(_ s: String?) -> URL? {
+        guard let t = s?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty else { return nil }
+        return URL(string: t)
+    }
 
     func fetch() async {
         errorMessage = nil
@@ -79,15 +91,17 @@ final class VideoFeedVM: ObservableObject {
             self.videos = decoded.responseDto.videoList.map { dto in
                 VideoItemUI(
                     id: dto.videoId,
+                    storeId: dto.storeId,
                     name: dto.videoName,
-                    url: URL(string: dto.videoUrl),
-                    createdAt: parseISO(dto.createdAt),
+                    url: urlRequired(dto.videoUrl),
+                    createdAt: parseISO(dto.createdAt) ?? Date(),
                     content: dto.videoContent,
-                    storeImageURL: URL(string: dto.storeImage),
+                    storeImageURL: urlOptional(dto.storeImage),
                     likeCount: dto.videoLikeCount,
                     reviewCount: dto.videoReviewCount
                 )
             }
+
 
             log("loaded videos:", videos.count)
         } catch {
