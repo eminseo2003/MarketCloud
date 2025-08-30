@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
-
+import FirebaseCore
 
 @main
 struct MarkerCloudApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @AppStorage("selectedMarketID") private var selectedMarketID: Int = -1
     @AppStorage("currentUserID") private var currentUserID: Int = -1
     var body: some Scene {
@@ -34,4 +35,13 @@ struct RootRouterView: View {
             }
         }
     }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+
+    return true
+  }
 }

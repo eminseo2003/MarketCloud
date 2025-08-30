@@ -89,6 +89,7 @@ final class StoreFeedUpLoadVM: ObservableObject {
 
             guard (200..<300).contains(code) else {
                 errorMessage = "업로드 실패 (status \(code))"
+                return log(errorMessage)
             }
             done = true
             log("게시 성공")
