@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct StartView: View {
     @Binding var currentUserID: Int
-    
+    @StateObject private var auth = AuthService()
     @State private var route: Route? = nil
     var body: some View {
         NavigationStack {
@@ -27,24 +28,29 @@ struct StartView: View {
                     VStack(spacing: 16) {
                         Spacer()
                         Button(action: {
-                            route = .login
+                            
                         }) {
                             ZStack {
-                                Text("로그인")
+                                Text("카카오로 시작하기")
+                                    .foregroundColor(.primary)
                                 HStack {
-                                    Image(systemName: "lock.fill")
+                                    Image("kakaologo")
                                     Spacer()
                                 }.padding()
                             }
-                        }.buttonStyle(FilledCTA())
+                        }.buttonStyle(OutlineCTA())
                         Button(action: {
-                            route = .join
+                            let vc = UIApplication.topViewController()
+                            auth.signInWithGoogle(presenting: vc) { user in
+                                guard user != nil else { return }
+                                //route = .login
+                            }
                         }) {
                             ZStack {
-                                Text("회원가입")
+                                Text("구글로 시작하기")
+                                    .foregroundColor(.primary)
                                 HStack {
-                                    
-                                    Image(systemName: "person.badge.plus.fill")
+                                    Image("googlelogo")
                                     Spacer()
                                 }.padding()
                             }
@@ -53,6 +59,16 @@ struct StartView: View {
                     .padding(.horizontal, 32)
                     .padding(.bottom, 100)
                 }
+            }
+            .overlay(alignment: .bottom) {
+                if auth.isLoading {
+                    ProgressView().padding(.bottom, 40)
+                }
+            }
+            .alert("로그인 오류", isPresented: .constant(auth.errorMessage != nil)) {
+                Button("확인") { auth.errorMessage = nil }
+            } message: {
+                Text(auth.errorMessage ?? "")
             }
             .navigationDestination(item: $route) { route in
                 if route == .login {
@@ -65,6 +81,26 @@ struct StartView: View {
         
     }
 }
+
+
+extension UIApplication {
+    static func topViewController(base: UIViewController? = UIApplication.shared.connectedScenes
+        .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+        .first?.rootViewController) -> UIViewController? {
+            
+            if let nav = base as? UINavigationController {
+                return topViewController(base: nav.visibleViewController)
+            }
+            if let tab = base as? UITabBarController {
+                return topViewController(base: tab.selectedViewController)
+            }
+            if let presented = base?.presentedViewController {
+                return topViewController(base: presented)
+            }
+            return base
+        }
+}
+
 
 extension Color {
     init(hex: String) {

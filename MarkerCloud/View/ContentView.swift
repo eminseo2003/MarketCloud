@@ -30,7 +30,8 @@ struct ContentView: View {
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
 
-            SettingsView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            Text("Text 5")
+            //SettingsView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
                 .tabItem { Label("마이페이지", systemImage: "person.crop.circle") }
                 .tag(4)
         }

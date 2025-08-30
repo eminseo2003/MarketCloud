@@ -11,7 +11,27 @@
 			<string>GoogleSignIn</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.787183992553-5hs7spo1e9526jgposkheo8kan1h7ep0</string>
+				<string>com.googleusercontent.apps.275349349367-l7nipdpejao25fsqhs7vhjcjom339lne</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>FirebaseAuth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-275349349367:ios:ed1e49705810b1cb11c4f2</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>FirebaseAuth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>marketcloud</string>
 			</array>
 		</dict>
 	</array>

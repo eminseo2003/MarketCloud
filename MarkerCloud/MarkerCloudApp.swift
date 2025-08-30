@@ -7,23 +7,27 @@
 
 import SwiftUI
 import FirebaseCore
+import GoogleSignIn
+import FirebaseAuth
 
 @main
 struct MarkerCloudApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
     @AppStorage("selectedMarketID") private var selectedMarketID: Int = -1
-    @AppStorage("currentUserID") private var currentUserID: Int = -1
+    @AppStorage("currentUserID")  private var currentUserID:  Int = -1
+
     var body: some Scene {
         WindowGroup {
             RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
-            //ContentView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
         }
     }
 }
+
 struct RootRouterView: View {
     @Binding var selectedMarketID: Int
     @Binding var currentUserID: Int
-    
+
     var body: some View {
         Group {
             if currentUserID == -1 {
@@ -35,13 +39,4 @@ struct RootRouterView: View {
             }
         }
     }
-}
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-
-    return true
-  }
 }

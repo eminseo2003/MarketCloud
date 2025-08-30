@@ -27,42 +27,42 @@ fileprivate func date(_ y: Int, _ m: Int, _ d: Int) -> Date {
     comp.year = y; comp.month = m; comp.day = d
     return Calendar.current.date(from: comp) ?? Date()
 }
-let dummyUsers: [User] = [
-    User(id: DummyUserIDs.user1,
-         password: "pw1234!",
-         name: "김가을",
-         email: "fall.kim@example.com",
-         createdAt: date(2024, 9, 12),
-         imgUrl: kDummyImageURL),
-
-    User(id: DummyUserIDs.user2,
-         password: "pw5678!",
-         name: "이봄",
-         email: "spring.lee@example.com",
-         createdAt: date(2024, 10, 3),
-         imgUrl: kDummyImageURL),
-
-    User(id: DummyUserIDs.user3,
-         password: "pwabcd12",
-         name: "박여름",
-         email: nil, // 이메일 없는 케이스
-         createdAt: date(2025, 1, 8),
-         imgUrl: kDummyImageURL),
-
-    User(id: DummyUserIDs.user4,
-         password: "pw!market",
-         name: "최동해",
-         email: "east.choi@example.com",
-         createdAt: date(2025, 3, 21),
-         imgUrl: kDummyImageURL),
-
-    User(id: DummyUserIDs.user5,
-         password: "pw99@@",
-         name: "정겨울",
-         email: "winter.jeong@example.com",
-         createdAt: date(2025, 6, 2),
-         imgUrl: kDummyImageURL)
-]
+//let dummyUsers: [User] = [
+//    User(id: DummyUserIDs.user1,
+//         password: "pw1234!",
+//         name: "김가을",
+//         email: "fall.kim@example.com",
+//         createdAt: date(2024, 9, 12),
+//         imgUrl: kDummyImageURL),
+//
+//    User(id: DummyUserIDs.user2,
+//         password: "pw5678!",
+//         name: "이봄",
+//         email: "spring.lee@example.com",
+//         createdAt: date(2024, 10, 3),
+//         imgUrl: kDummyImageURL),
+//
+//    User(id: DummyUserIDs.user3,
+//         password: "pwabcd12",
+//         name: "박여름",
+//         email: nil, // 이메일 없는 케이스
+//         createdAt: date(2025, 1, 8),
+//         imgUrl: kDummyImageURL),
+//
+//    User(id: DummyUserIDs.user4,
+//         password: "pw!market",
+//         name: "최동해",
+//         email: "east.choi@example.com",
+//         createdAt: date(2025, 3, 21),
+//         imgUrl: kDummyImageURL),
+//
+//    User(id: DummyUserIDs.user5,
+//         password: "pw99@@",
+//         name: "정겨울",
+//         email: "winter.jeong@example.com",
+//         createdAt: date(2025, 6, 2),
+//         imgUrl: kDummyImageURL)
+//]
 
 enum DummyMarketIDs {
     static let marketOne = 1
