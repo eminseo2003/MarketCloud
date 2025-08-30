@@ -35,8 +35,16 @@ final class StoreFeedGenerateVM: ObservableObject {
             .appendingPathComponent("feed")
             .appendingPathComponent("generate")
     }
+    private lazy var session: URLSession = {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 120          // 요청 타임아웃(기본 60)
+            config.timeoutIntervalForResource = 600         // 리소스 타임아웃(기본 7일이지만 명시)
+            config.waitsForConnectivity = true              // 네트워크 복구 대기
+            config.allowsExpensiveNetworkAccess = true      // 셀룰러/5G 허용
+            config.allowsConstrainedNetworkAccess = true    // 저데이터모드에서도 허용
+            return URLSession(configuration: config)
+        }()
     
-    // ✅ mediaType이 "image"든 "video"든, 이미지는 늘 storeImage로 보냄
     func uploadStoreFeed(
         feedType: String,          // "store" | "product" | "event"
         mediaType: String,         // "image" | "video"
@@ -45,16 +53,13 @@ final class StoreFeedGenerateVM: ObservableObject {
         image: UIImage
     ) async {
         let t0 = CFAbsoluteTimeGetCurrent()
-        log("▶️ uploadStoreFeed(image) called",
-            "| feedType:", feedType, "| mediaType:", mediaType,
-            "| userId:", userId, "| descLen:", storeDescription.count)
         
         guard let data = image.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"
-            log("❌ 이미지 인코딩 실패")
+            log("이미지 인코딩 실패")
             return
         }
-        log("📦 image data size:", data.count, "bytes")
+        log("image data size:", data.count, "bytes")
         
         let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let mt = mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -62,7 +67,7 @@ final class StoreFeedGenerateVM: ObservableObject {
         await uploadStoreFeed(
             feedType: ft,
             mediaType: mt,
-            userId: userId,
+            hostId: userId,
             storeDescription: storeDescription,
             mediaData: data,
             fileName: "image.jpg",
@@ -76,7 +81,7 @@ final class StoreFeedGenerateVM: ObservableObject {
     func uploadStoreFeed(
         feedType: String,
         mediaType: String,
-        userId: Int,
+        hostId: Int,
         storeDescription: String,
         mediaData: Data,
         fileName: String,
@@ -85,17 +90,18 @@ final class StoreFeedGenerateVM: ObservableObject {
         let t0 = CFAbsoluteTimeGetCurrent()
         var req = URLRequest(url: generateURL)
         req.httpMethod = "POST"
+        req.timeoutInterval = 120
         let boundary = "Boundary-\(UUID().uuidString)"
         req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
         
         // 입력 파라미터 로그
-        log("🌐 POST", generateURL.absoluteString)
-        log("🔖 headers:", ["Content-Type": "multipart/form-data; boundary=\(boundary)",
+        log("POST", generateURL.absoluteString)
+        log("headers:", ["Content-Type": "multipart/form-data; boundary=\(boundary)",
                             "ngrok-skip-browser-warning": "1"])
-        log("📝 fields → feedType:", feedType, "| mediaType:", mediaType,
-            "| userId:", userId, "| descLen:", storeDescription.count)
-        log("📎 file → name:", fileName, "| mime:", mimeType, "| size:", mediaData.count, "bytes")
+        log("fields → feedType:", feedType, "| mediaType:", mediaType,
+            "| hostId:", hostId, "| descLen:", storeDescription.count)
+        log("file → name:", fileName, "| mime:", mimeType, "| size:", mediaData.count, "bytes")
         
         var body = Data()
         func addField(_ name: String, _ value: String) {
@@ -112,13 +118,13 @@ final class StoreFeedGenerateVM: ObservableObject {
         
         let allowedFT = ["store","product","event"]
         let allowedMT = ["image","video"]
-        guard allowedFT.contains(feedType) else { errorMessage = "feedType 값이 올바르지 않습니다."; log("❌ invalid feedType:", feedType); return }
-        guard allowedMT.contains(mediaType) else { errorMessage = "mediaType 값이 올바르지 않습니다."; log("❌ invalid mediaType:", mediaType); return }
+        guard allowedFT.contains(feedType) else { errorMessage = "feedType 값이 올바르지 않습니다."; log("invalid feedType:", feedType); return }
+        guard allowedMT.contains(mediaType) else { errorMessage = "mediaType 값이 올바르지 않습니다."; log("invalid mediaType:", mediaType); return }
         
         // 텍스트 필드
         addField("feedType", feedType)
         addField("mediaType", mediaType)
-        addFieldNumber("userId", userId)
+        addFieldNumber("hostId", hostId)
         addField("storeDescription", storeDescription)
         
         // 파일(이미지는 항상 storeImage로 첨부)
@@ -130,18 +136,18 @@ final class StoreFeedGenerateVM: ObservableObject {
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         
         req.httpBody = body
-        log("📤 payload size:", body.count, "bytes")
+        log("payload size:", body.count, "bytes")
         
         isUploading = true
         defer {
             isUploading = false
-            log("⏱️ elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
+            log("elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
         }
         
         do {
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            log("📡 status:", code)
+            let (data, resp) = try await session.upload(for: req, from: body) // ⬅️ 여기만 교체
+                        let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
+            log("status:", code)
             
             if let pretty = prettyJSON(data) {
                 log("↩︎ JSON response:\n\(pretty)")

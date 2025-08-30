@@ -61,9 +61,9 @@ final class EventFeedGenerateVM: ObservableObject {
             "| start:", eventStartAt, "| end:", eventEndAt)
 
         guard let data = image.jpegData(compressionQuality: 0.9) else {
-            errorMessage = "이미지 인코딩 실패"; log("❌ 이미지 인코딩 실패"); return
+            errorMessage = "이미지 인코딩 실패"; log("이미지 인코딩 실패"); return
         }
-        log("📦 image data size:", data.count, "bytes")
+        log("image data size:", data.count, "bytes")
 
         // (옵션) 시작/종료 유효성 체크
         guard eventEndAt >= eventStartAt else {

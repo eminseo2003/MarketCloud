@@ -107,19 +107,15 @@ final class ReviewVM: ObservableObject {
             log("성공 | avgScore:", avgScore, "| reviews:", reviews.count)
         } catch let DecodingError.keyNotFound(key, ctx) {
             errorMessage = "디코딩 실패(key): \(key.stringValue) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
-            log("❌", errorMessage!)
         } catch let DecodingError.typeMismatch(type, ctx) {
             errorMessage = "디코딩 실패(type): \(type) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
-            log("❌", errorMessage!)
         } catch let DecodingError.valueNotFound(type, ctx) {
             errorMessage = "디코딩 실패(value): \(type) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
-            log("❌", errorMessage!)
         } catch let DecodingError.dataCorrupted(ctx) {
             errorMessage = "디코딩 실패(data): \(ctx.debugDescription)"
-            log("❌", errorMessage!)
         } catch {
             errorMessage = error.localizedDescription
-            log("❌ 네트워크/기타 에러:", error.localizedDescription)
+            log("네트워크/기타 에러:", error.localizedDescription)
         }
     }
     

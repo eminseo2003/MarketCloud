@@ -15,7 +15,7 @@ private struct FeedDetailDTO: Decodable {
     let feedTitle: String
     let feedContent: String
     let feedImageUrl: String
-    let feedType: String            // "점포", "상품", "이벤트"
+    let feedType: String
     let feedLikeCount: Int
     let feedReviewCount: Int
 }
@@ -102,17 +102,14 @@ final class FeedDetailVM: ObservableObject {
                 reviewCount: dto.feedReviewCount
             )
             self.detail = ui
-            log("✅ 성공 | id:", ui.id, "| store:", ui.storeName)
+            log("성공 | id:", ui.id, "| store:", ui.storeName)
 
         } catch let DecodingError.keyNotFound(key, ctx) {
             errorMessage = "디코딩 실패(키 누락): \(key.stringValue) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
-            log("❌", errorMessage!)
         } catch let DecodingError.typeMismatch(type, ctx) {
             errorMessage = "디코딩 실패(타입 불일치): \(type) @ \(ctx.codingPath.map(\.stringValue).joined(separator: "."))"
-            log("❌", errorMessage!)
         } catch {
             errorMessage = error.localizedDescription
-            log("❌", error.localizedDescription)
         }
     }
 

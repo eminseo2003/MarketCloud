@@ -264,21 +264,14 @@ private struct StoreBubbleView: View {
         }
     }
 }
-
 struct MediaThumbCard: View {
     let title: String
     let url: URL?
     let likeCount: Int?
-    
-    init(title: String, url: URL?, likeCount: Int? = nil) {
-        self.title = title
-        self.url = url
-        self.likeCount = likeCount
-    }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            AsyncImage(url: url) { phase in
+            AsyncImage(url: url, transaction: .init(animation: .default)) { phase in
                 switch phase {
                 case .empty:
                     ZStack {
@@ -287,10 +280,26 @@ struct MediaThumbCard: View {
                     }
                 case .success(let image):
                     image.resizable().scaledToFill()
-                case .failure:
+                case .failure(let error):
                     ZStack {
                         Rectangle().fill(Color(.systemGray6))
-                        Image(systemName: "photo").imageScale(.large)
+                        VStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle").imageScale(.large)
+                            Text("이미지 로드 실패")
+                                .font(.caption2)
+                            if let u = url {
+                                // 디버그: 실제 URL 찍어보기
+                                Text(u.absoluteString)
+                                    .font(.caption2)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .onAppear {
+                        print("[MediaThumbCard] image load failed for:", url?.absoluteString ?? "nil",
+                              "| error:", error.localizedDescription)
                     }
                 @unknown default:
                     EmptyView()
@@ -299,28 +308,93 @@ struct MediaThumbCard: View {
             .frame(width: 160, height: 160)
             .clipped()
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            
+            .onAppear {
+                if let u = url { debugFetchImage(u) }
+            }
+
+
             HStack {
                 if let like = likeCount {
                     HStack(spacing: 4) {
                         Image(systemName: "heart.fill").font(.caption2)
-                        Text("\(like)")
-                            .font(.caption2)
+                        Text("\(like)").font(.caption2)
                     }
                     .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text(title)
-                    .font(.caption)
-                    .lineLimit(1)
-                
+                Text(title).font(.caption).lineLimit(1)
             }
             .frame(width: 160, alignment: .center)
-            
-            
+        }
+        .onAppear {
+            print("[MediaThumbCard] url =", url?.absoluteString ?? "nil")
         }
     }
 }
+private func debugFetchImage(_ url: URL) {
+    Task {
+        do {
+            let (data, resp) = try await URLSession.shared.data(from: url)
+            let http = resp as? HTTPURLResponse
+            print("[IMG DEBUG] status=", http?.statusCode ?? -1,
+                  "mime=", http?.mimeType ?? "nil",
+                  "bytes=", data.count)
+        } catch {
+            print("[IMG DEBUG] error:", error.localizedDescription)
+        }
+    }
+}
+
+//struct MediaThumbCard: View {
+//    let title: String
+//    let url: URL?
+//    let likeCount: Int?
+//    
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 12) {
+//            AsyncImage(url: url) { phase in
+//                switch phase {
+//                case .empty:
+//                    ZStack {
+//                        Rectangle().fill(Color(.systemGray6))
+//                        ProgressView()
+//                    }
+//                case .success(let image):
+//                    image.resizable().scaledToFill()
+//                case .failure:
+//                    ZStack {
+//                        Rectangle().fill(Color(.systemGray6))
+//                        Image(systemName: "photo").imageScale(.large)
+//                    }
+//                @unknown default:
+//                    EmptyView()
+//                }
+//            }
+//            .frame(width: 160, height: 160)
+//            .clipped()
+//            .clipShape(RoundedRectangle(cornerRadius: 12))
+//            
+//            HStack {
+//                if let like = likeCount {
+//                    HStack(spacing: 4) {
+//                        Image(systemName: "heart.fill").font(.caption2)
+//                        Text("\(like)")
+//                            .font(.caption2)
+//                    }
+//                    .foregroundColor(.secondary)
+//                }
+//                Spacer()
+//                Text(title)
+//                    .font(.caption)
+//                    .lineLimit(1)
+//                
+//            }
+//            .frame(width: 160, alignment: .center)
+//            
+//            
+//        }
+//    }
+//}
 
 private struct TrendingKeywordsView: View {
     let keywords: [String]

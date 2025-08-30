@@ -37,11 +37,6 @@ final class ProductFeedUpLoadVM: ObservableObject {
         feedMediaUrl: String,
         feedBody: String
     ) async {
-        log("▶️ post start | feedType:", feedType,
-            "| mediaType:", mediaType,
-            "| userId:", userId,
-            "| name:", productName,
-            "| categoryId:", categoryId)
         
         guard let dataImg = productImage.jpegData(compressionQuality: 0.9) else {
             errorMessage = "이미지 인코딩 실패"
@@ -89,14 +84,11 @@ final class ProductFeedUpLoadVM: ObservableObject {
         defer { isUploading = false }
         
         do {
-            log("🌐 POST \(publishURL.absoluteString) | payload:", body.count, "bytes")
             let (data, resp) = try await URLSession.shared.data(for: req)
             let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            log("📡 status:", code)
             
             guard (200..<300).contains(code) else {
                 errorMessage = "업로드 실패 (status \(code))"
-                log("⚠️", errorMessage ?? "")
                 return
             }
             

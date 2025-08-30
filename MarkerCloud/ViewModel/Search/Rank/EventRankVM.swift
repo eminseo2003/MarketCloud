@@ -69,7 +69,7 @@ final class EventRankVM: ObservableObject {
                     feedId: $0.feedId,
                     rank: $0.rank,
                     name: $0.eventName,
-                    imageURL: URL(string: $0.imgUrl),
+                    imageURL: safeURL(from: $0.imgUrl),
                     likeCount: $0.like_count
                 )
             }
@@ -79,4 +79,25 @@ final class EventRankVM: ObservableObject {
             print("[EventRankVM] 에러", error.localizedDescription)
         }
     }
+}
+// 어디 공용 파일에 두고 쓰세요.
+func safeURL(from raw: String?) -> URL? {
+    guard var s = raw?.trimmingCharacters(in: .whitespacesAndNewlines),
+          !s.isEmpty else { return nil }
+
+    // 흔한 실수: 백슬래시 이스케이프가 섞여 있을 때
+    s = s.replacingOccurrences(of: "\\/", with: "/")
+
+    // 1차 시도
+    if let u = URL(string: s) { return u }
+
+    // 한글/공백 등 인코딩 시도
+    // #, %, / 는 유지하고 나머지만 인코딩
+    var allowed = CharacterSet.urlQueryAllowed
+    allowed.insert(charactersIn: "#%/")
+    if let enc = s.addingPercentEncoding(withAllowedCharacters: allowed),
+       let u2 = URL(string: enc) {
+        return u2
+    }
+    return nil
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AICreateView: View {
-    var hasStore: Bool = false
+    var hasStore: Bool = true
     var ismypage: Bool = false
     
     @Binding var selectedMarketID: Int

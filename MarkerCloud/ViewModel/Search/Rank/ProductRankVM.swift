@@ -69,7 +69,7 @@ final class ProductRankVM: ObservableObject {
                     feedId: $0.feedId,
                     rank: $0.rank,
                     productName: $0.productName,
-                    imageURL: URL(string: $0.mediaUrl),
+                    imageURL: safeURL(from: $0.mediaUrl),
                     likeCount: $0.like_count
                 )
             }

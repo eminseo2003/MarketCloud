@@ -71,11 +71,10 @@ final class KeywordVM: ObservableObject {
                 .filter { !$0.isEmpty }
 
             self.keywords = Array(NSOrderedSet(array: list)) as? [String] ?? list
-            log("✅ loaded keywords:", self.keywords.joined(separator: ", "))
+            log("loaded keywords:", self.keywords.joined(separator: ", "))
 
         } catch {
             errorMessage = error.localizedDescription
-            log("❌", error.localizedDescription)
         }
     }
 

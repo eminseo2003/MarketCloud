@@ -20,7 +20,7 @@ final class ProductFeedGenerateVM: ObservableObject {
     private func log(_ items: Any...) {
         guard enableLog else { return }
         let msg = items.map { "\($0)" }.joined(separator: " ")
-        print("🧩 [FeedUploadVM]", msg)
+        print("[FeedUploadVM]", msg)
     }
     private func prettyJSON(_ data: Data) -> String? {
         guard let obj = try? JSONSerialization.jsonObject(with: data),
@@ -51,9 +51,9 @@ final class ProductFeedGenerateVM: ObservableObject {
             "| descLen:", productDescription.count)
 
         guard let data = image.jpegData(compressionQuality: 0.9) else {
-            errorMessage = "이미지 인코딩 실패"; log("❌ 이미지 인코딩 실패"); return
+            errorMessage = "이미지 인코딩 실패"; log("이미지 인코딩 실패"); return
         }
-        log("📦 image data size:", data.count, "bytes")
+        log("image data size:", data.count, "bytes")
 
         var req = URLRequest(url: generateURL)
         req.httpMethod = "POST"
@@ -93,19 +93,19 @@ final class ProductFeedGenerateVM: ObservableObject {
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
         req.httpBody = body
-        log("🌐 POST \(generateURL.absoluteString)")
-        log("📤 payload size:", body.count, "bytes")
+        log("POST \(generateURL.absoluteString)")
+        log("payload size:", body.count, "bytes")
 
         isUploading = true
         defer {
             isUploading = false
-            log("⏱️ elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
+            log("elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
         }
 
         do {
             let (data, resp) = try await URLSession.shared.data(for: req)
             let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            log("📡 status:", code)
+            log("status:", code)
 
             if let pretty = prettyJSON(data) {
                 log("↩︎ JSON response:\n\(pretty)")

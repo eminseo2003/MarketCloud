@@ -31,7 +31,7 @@ struct CreateStoreView: View {
     @State private var createRoute: CreateRoute? = nil
     
     @State private var storeIdText: String = "1"
-    @State private var storeName: String = "점포 명"
+    @State private var storeName: String = "하나축산"
     @State private var storeScript: String = ""
     let maxCharacters = 500
     @State private var photoItem: PhotosPickerItem?

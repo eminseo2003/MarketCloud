@@ -42,7 +42,9 @@ struct StoreCreateDoneView: View {
                     if let url = URL(string: mediaUrl) {
                         AsyncImage(url: url) { img in
                             img.resizable().scaledToFit()
-                        } placeholder: { ProgressView() }
+                        } placeholder: {
+                            ProgressView()
+                        }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color(.systemGray6))

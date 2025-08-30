@@ -90,6 +90,9 @@ struct CompleteRecommendView: View {
             .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("시장추천받기")
             .navigationBarTitleDisplayMode(.inline)
+            .task {
+                await vm.fetch()
+            }
         }
     }
 }

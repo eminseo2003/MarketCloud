@@ -45,12 +45,6 @@ final class EventFeedUpLoadVM: ObservableObject {
             feedBody: String
         ) async {
             let t0 = CFAbsoluteTimeGetCurrent()
-            log("▶️ post start | feedType:", feedType,
-                "| mediaType:", mediaType,
-                "| userId:", userId,
-                "| name:", eventName,
-                "| start:", serverDateString(eventStartAt),
-                "| end:", serverDateString(eventEndAt))
 
             // 기본 유효성 체크
             let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -118,24 +112,19 @@ final class EventFeedUpLoadVM: ObservableObject {
             isUploading = true
             defer {
                 isUploading = false
-                log("⏱️ elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
             }
 
             do {
-                log("🌐 POST \(publishURL.absoluteString) | payload:", body.count, "bytes")
                 let (data, resp) = try await URLSession.shared.data(for: req)
                 let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-                log("📡 status:", code)
 
                 // 필요 시 서버 응답 로깅
                 if let s = String(data: data, encoding: .utf8), !s.isEmpty {
-                    log("↩︎ server says:", s)
                 }
 
                 // 성공 판정
                 guard (200..<300).contains(code) else {
                     errorMessage = "업로드 실패 (status \(code))"
-                    log("⚠️", errorMessage ?? "")
                     return
                 }
                 done = true
