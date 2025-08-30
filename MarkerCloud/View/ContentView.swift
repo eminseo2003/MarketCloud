@@ -9,24 +9,29 @@ import SwiftUI
 
 struct ContentView: View {
     @Binding var selectedMarketID: Int
-    @Binding var currentUserID: Int
+    let appUser: AppUser?
     @State private var selectedTab: Int = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            Text("Text 5")
+            //MainView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             
-            SearchView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            Text("Text 5")
+            //SearchView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
             
-            AICreateView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            
+            Text("Text 5")
+            //AICreateView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             
-            VideoLoadView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            Text("Text 5")
+            //VideoLoadView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("영상", systemImage: "play.rectangle") }
                 .tag(3)
 

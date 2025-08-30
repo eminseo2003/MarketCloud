@@ -9,9 +9,7 @@ import SwiftUI
 import UIKit
 
 struct StartView: View {
-    @Binding var currentUserID: Int
     @StateObject private var auth = AuthService()
-    @State private var route: Route? = nil
     var body: some View {
         NavigationStack {
             VStack {
@@ -69,13 +67,6 @@ struct StartView: View {
                 Button("확인") { auth.errorMessage = nil }
             } message: {
                 Text(auth.errorMessage ?? "")
-            }
-            .navigationDestination(item: $route) { route in
-                if route == .login {
-                    LoginView(currentUserID: $currentUserID)
-                } else if route == .join {
-                    JoinView()
-                }
             }
         }
         
