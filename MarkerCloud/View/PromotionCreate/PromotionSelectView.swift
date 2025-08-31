@@ -82,9 +82,9 @@ struct PromotionSelectView: View {
                     .disabled(!hasSelection)
                 }
                 .padding()
-                .navigationDestination(item: $pushPromotion) { promo in
-                    PromotionMethodSelectView(promotion: promo, currentUserID: $currentUserID)
-                }
+//                .navigationDestination(item: $pushPromotion) { promo in
+//                    PromotionMethodSelectView(promotion: promo, currentUserID: $currentUserID)
+//                }
             }
             
         }

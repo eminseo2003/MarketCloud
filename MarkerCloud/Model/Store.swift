@@ -7,6 +7,8 @@
 
 import Foundation
 
+import Foundation
+
 enum StoreCategory: Int, Codable, CaseIterable, Identifiable, Hashable {
     case restaurant = 1
     case sideDishes = 2
@@ -63,61 +65,32 @@ enum PaymentMethod: Int, CaseIterable, Identifiable, Codable, Hashable {
     
     var displayName: String {
         switch self {
-        case .onnuriVoucher:     return "온누리 상품권"
+        case .onnuriVoucher:     return "온누리상품권"
         case .zeropay:           return "제로페이"
-        case .livelihoodCoupon:  return "민생회복 소비쿠폰"
+        case .livelihoodCoupon:  return "민생회복쿠폰"
         }
     }
 }
-//struct Store: Codable, Identifiable {
-//    let id: UUID
-//    let storeName: String
-//    let profileImageURL: URL?
-//    var marketId: UUID
-//    
-//    var categoryId: Int?
-//    
-//    var category: StoreCategory? {
-//        get { categoryId.flatMap(StoreCategory.init(rawValue:)) }
-//        set { categoryId = newValue?.rawValue }
-//    }
-//    var tel: String?
-//    var dayOpenTime: Date?
-//    var dayCloseTime: Date?
-//    var weekendOpenTime: Date?
-//    var weekendCloseTime: Date?
-//    var address: String?
-//    var paymentMethods: Set<PaymentMethod> = []
-//    var description: String?
-//    
-//    var feeds: [Feed] = []
-//}
-
-extension Set where Element == PaymentMethod {
-    var summary: String {
-        if self.isEmpty { return "없음" }
-        return self
-            .sorted { $0.rawValue < $1.rawValue }
-            .map { $0.displayName }
-            .joined(separator: ", ")
+struct Store: Identifiable {
+    let id: UUID
+    let storeName: String
+    let profileImageURL: URL?
+    var marketId: UUID
+    
+    var categoryId: Int?
+    
+    var category: StoreCategory? {
+        get { categoryId.flatMap(StoreCategory.init(rawValue:)) }
+        set { categoryId = newValue?.rawValue }
     }
-
-    /// 최대 N개만 보여주고 나머지는 “외 n개”로 처리하고 싶을 때 사용
-    func summary(limit: Int) -> String {
-        if self.isEmpty { return "없음" }
-        let sorted = self.sorted { $0.rawValue < $1.rawValue }
-        if sorted.count <= limit {
-            return sorted.map { $0.displayName }.joined(separator: ", ")
-        } else {
-            let head = sorted.prefix(limit).map { $0.displayName }.joined(separator: ", ")
-            return "\(head) 외 \(sorted.count - limit)개"
-        }
-    }
-
-    /// 선택 토글 편의 함수 (UI 바인딩용)
-    mutating func toggle(_ method: PaymentMethod) {
-        if contains(method) { remove(method) } else { insert(method) }
-    }
+    var tel: String?
+    var dayOpenTime: Date?
+    var dayCloseTime: Date?
+    var weekendOpenTime: Date?
+    var weekendCloseTime: Date?
+    var address: String?
+    var paymentMethods: Set<PaymentMethod> = []
+    var description: String?
+    
+    var feeds: [Feed] = []
 }
-
-

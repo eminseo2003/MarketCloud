@@ -14,8 +14,8 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            Text("Text 5")
-            //MainView(selectedMarketID: $selectedMarketID, appUser: appUser)
+            //Text("Text 5")
+            MainView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             
@@ -25,8 +25,8 @@ struct ContentView: View {
                 .tag(1)
             
             
-            Text("Text 5")
-            //AICreateView(selectedMarketID: $selectedMarketID, appUser: appUser)
+            //Text("Text 5")
+            AICreateView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("작성", systemImage: "plus.circle") }
                 .tag(2)
             

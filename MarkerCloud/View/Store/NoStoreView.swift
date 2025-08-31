@@ -12,7 +12,7 @@ struct NoStoreView: View {
         @State private var route: Route? = nil
     
     let ismypage: Bool
-    @Binding var currentUserID: Int
+    let appUser: AppUser?
     
         var body: some View {
             NavigationStack {
@@ -67,7 +67,7 @@ struct NoStoreView: View {
                     .background(Color(uiColor: .systemGray6).ignoresSafeArea())
                 .navigationDestination(item: $route) { route in
                     if route == .firstStoreCreate {
-                        StoreCreateView(storeDetail: storeDetail, currentUserID: $currentUserID)
+                        //StoreCreateView(storeDetail: storeDetail, appUser: appUser)
                     }
                 }
             }

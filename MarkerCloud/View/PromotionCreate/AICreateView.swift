@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct AICreateView: View {
-    var hasStore: Bool = true
+    var hasStore: Bool = false
     var ismypage: Bool = false
     
     @Binding var selectedMarketID: Int
-    @Binding var currentUserID: Int
+    let appUser: AppUser?
     
     var body: some View {
         VStack(spacing: 0) {
             
             if hasStore {
-                PromotionSelectView(currentUserID: $currentUserID)
+                //PromotionSelectView(appUser: appUser)
             } else {
-                NoStoreView(ismypage: ismypage, currentUserID: $currentUserID)
+                NoStoreView(ismypage: ismypage, appUser: appUser)
             }
             
         }

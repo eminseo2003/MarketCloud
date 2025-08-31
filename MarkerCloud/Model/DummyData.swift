@@ -13,69 +13,6 @@ let kDummyImageURL = URL(string:
 let kDummyVideoURL = URL(string:
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
 )!
-enum DummyUserIDs {
-    static let user1 = 123
-    static let user2 = 234
-    static let user3 = 345
-    static let user4 = 456
-    static let user5 = 567
-
-    static let all = [user1, user2, user3, user4, user5]
-}
-fileprivate func date(_ y: Int, _ m: Int, _ d: Int) -> Date {
-    var comp = DateComponents()
-    comp.year = y; comp.month = m; comp.day = d
-    return Calendar.current.date(from: comp) ?? Date()
-}
-//let dummyUsers: [User] = [
-//    User(id: DummyUserIDs.user1,
-//         password: "pw1234!",
-//         name: "김가을",
-//         email: "fall.kim@example.com",
-//         createdAt: date(2024, 9, 12),
-//         imgUrl: kDummyImageURL),
-//
-//    User(id: DummyUserIDs.user2,
-//         password: "pw5678!",
-//         name: "이봄",
-//         email: "spring.lee@example.com",
-//         createdAt: date(2024, 10, 3),
-//         imgUrl: kDummyImageURL),
-//
-//    User(id: DummyUserIDs.user3,
-//         password: "pwabcd12",
-//         name: "박여름",
-//         email: nil, // 이메일 없는 케이스
-//         createdAt: date(2025, 1, 8),
-//         imgUrl: kDummyImageURL),
-//
-//    User(id: DummyUserIDs.user4,
-//         password: "pw!market",
-//         name: "최동해",
-//         email: "east.choi@example.com",
-//         createdAt: date(2025, 3, 21),
-//         imgUrl: kDummyImageURL),
-//
-//    User(id: DummyUserIDs.user5,
-//         password: "pw99@@",
-//         name: "정겨울",
-//         email: "winter.jeong@example.com",
-//         createdAt: date(2025, 6, 2),
-//         imgUrl: kDummyImageURL)
-//]
-
-enum DummyMarketIDs {
-    static let marketOne = 1
-    static let marketTwo = 2
-    static let marketThree = 3
-    static let marketFour = 4
-    static let marketFive = 5
-    static let marketSix = 6
-    static let marketSeven = 7
-    static let marketEight = 8
-    static let marketNine = 9
-    static let marketTen = 10
-}
 
 fileprivate func time(_ hour: Int, _ minute: Int) -> Date? {
     Calendar.current.date(from: DateComponents(hour: hour, minute: minute))
