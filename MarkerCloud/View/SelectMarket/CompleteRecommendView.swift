@@ -20,8 +20,8 @@ struct CompleteRecommendView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .center, spacing: 16) {
-                        VStack(alignment: .center, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 24) {
                             VStack {
                                 LazyVGrid(columns: [GridItem()], spacing: 8) {
                                     MarketRecommandImage(assetName: vm.assetName(forMarketName: topMarketName))
@@ -41,6 +41,7 @@ struct CompleteRecommendView: View {
                                     .foregroundStyle(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(16)
                         .background(
@@ -90,9 +91,7 @@ struct CompleteRecommendView: View {
             .background(Color(UIColor.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("시장추천받기")
             .navigationBarTitleDisplayMode(.inline)
-            .task {
-                await vm.load()
-            }
+            .onAppear { vm.load() }
         }
     }
 }

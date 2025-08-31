@@ -119,17 +119,19 @@ struct RecommendMarketView: View {
                 Spacer()
                 VStack {
                     Button {
-                        Task {
-                            await vm.recommend(q1: Answer1 ?? "",
-                                               q2: Answer2 ?? "",
-                                               q3: Answer3 ?? "",
-                                               q4: Answer4)
-                            if let dto = vm.result {
-                                route = .selectComplete(name: dto.top1Market,
-                                                        address: dto.marketAddress)
-                            }
-                        }
+                        vm.run(
+                            q1: Answer1 ?? "",
+                            q2: Answer2 ?? "",
+                            q3: Answer3 ?? "",
+                            q4: Answer4.joined(separator: ",")
+                        )
                         
+                        if let top = vm.results.first {
+                            route = .selectComplete(
+                                name: top.marketName,
+                                address: top.address
+                            )
+                        }
                     } label: {
                         Text("완료")
                             .fontWeight(.bold)
