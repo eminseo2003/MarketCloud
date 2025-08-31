@@ -11,6 +11,15 @@ import Combine
 
 @MainActor
 final class SessionStore: ObservableObject {
+
+    enum Phase {
+        case loading
+        case signedOut
+        case needsProfile
+        case signedIn(AppUser)
+    }
+
+    @Published var phase: Phase = .loading
     @Published var authUser: User?
     @Published var appUser: AppUser?
     @Published var isLoading = true
@@ -21,38 +30,104 @@ final class SessionStore: ObservableObject {
     init() { start() }
 
     func start() {
+        isLoading = true
         authHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            guard let self else { return }
-            self.authUser = user
-            self.bindUserDoc(for: user?.uid)
+            Task { @MainActor in
+                await self?.handleAuthChange(user)
+            }
         }
     }
 
-    private func bindUserDoc(for uid: String?) {
-        userListener?.remove(); userListener = nil
+    private func stopUserListener() {
+        userListener?.remove()
+        userListener = nil
+    }
+
+    private func resetStateForSignOut() {
+        stopUserListener()
+        authUser = nil
         appUser = nil
         isLoading = false
+        phase = .signedOut
+    }
 
-        guard let uid else { return }
+    private func listenUserDoc(uid: String) {
+        stopUserListener()
+        appUser = nil
+        isLoading = true
+        phase = .loading
 
         userListener = AppUser.docRef(uid: uid).addSnapshotListener { [weak self] snap, err in
             Task { @MainActor in
+                guard let self else { return }
+
                 if let err = err {
-                    print("user doc listen error: \(err)")
+                    print("user doc listen error:", err)
+                    self.isLoading = false
+                    self.phase = .needsProfile
                     return
                 }
-                do {
-                    self?.appUser = try snap?.data(as: AppUser.self)
-                } catch {
-                    print("decode error: \(error)")
+                guard let snap = snap else {
+                    self.isLoading = false
+                    self.phase = .needsProfile
+                    return
                 }
+                guard snap.exists else {
+                    self.isLoading = false
+                    self.appUser = nil
+                    self.phase = .needsProfile
+                    return
+                }
+
+                do {
+                    let user = try snap.data(as: AppUser.self)
+                    self.appUser = user
+                    self.isLoading = false
+                    self.phase = .signedIn(user)
+                } catch {
+                    print("decode error:", error)
+                    self.appUser = nil
+                    self.isLoading = false
+                    self.phase = .needsProfile
+                }
+            }
+        }
+    }
+
+    private func handleAuthChange(_ user: User?) async {
+        guard let user else {
+            resetStateForSignOut()
+            return
+        }
+
+        await refreshAuthUser(user)
+
+        if let current = Auth.auth().currentUser {
+            self.authUser = current
+            listenUserDoc(uid: current.uid)
+        } else {
+            resetStateForSignOut()
+        }
+    }
+
+    private func refreshAuthUser(_ user: User) async {
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            user.reload { error in
+                if let ns = error as NSError? {
+                    if ns.code == AuthErrorCode.userNotFound.rawValue ||
+                       ns.code == AuthErrorCode.userDisabled.rawValue ||
+                       ns.code == AuthErrorCode.userTokenExpired.rawValue {
+                        try? Auth.auth().signOut()
+                    }
+                }
+                cont.resume()
             }
         }
     }
 
     func signOut() {
         try? Auth.auth().signOut()
-        bindUserDoc(for: nil)
+        resetStateForSignOut()
     }
 
     deinit {

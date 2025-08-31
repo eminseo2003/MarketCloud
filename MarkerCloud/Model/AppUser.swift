@@ -15,6 +15,7 @@ struct AppUser: Identifiable, Codable, Hashable {
     var userName: String
     var profileURL: URL?
     var provider: String
+    var storeIds: [String] = []
 
     @ServerTimestamp var createdAt: Timestamp?
     @ServerTimestamp var updatedAt: Timestamp?
@@ -31,6 +32,7 @@ extension AppUser {
         self.userName = firebaseUser.displayName ?? ""
         self.profileURL = firebaseUser.photoURL
         self.provider = provider
+        self.storeIds = []
         self.createdAt = nil
         self.updatedAt = nil
     }
