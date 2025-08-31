@@ -91,7 +91,7 @@ struct CompleteRecommendView: View {
             .navigationTitle("시장추천받기")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                await vm.fetch()
+                await vm.load()
             }
         }
     }

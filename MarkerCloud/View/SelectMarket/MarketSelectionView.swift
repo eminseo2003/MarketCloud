@@ -10,9 +10,11 @@ import SwiftUI
 struct MarketSelectionView: View {
     @Binding var selectedMarketID: Int
     @StateObject private var vm = MarketListVM()
-
+    
     @State private var selectedChoice: Int? = nil
     @State private var route: Route? = nil
+    
+    @FocusState private var isTextFieldFocused: Bool
     
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -39,39 +41,45 @@ struct MarketSelectionView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                Group {
-                    if vm.isLoading {
-                        ProgressView().padding()
-                    } else if let err = vm.errorMessage {
-                        VStack(spacing: 8) {
-                            Text("불러오기 실패").font(.headline)
-                            Text(err).foregroundColor(.secondary)
-                            Button("다시 시도") {
-                                Task { await vm.fetch() }
-                            }
-                        }
-                        .padding()
-                    } else {
-                        ScrollView {
-                            LazyVGrid(columns: columns, spacing: 16) {
-                                ForEach(vm.markets) { market in
-                                    Button {
-                                        selectedChoice = market.code
-                                    } label: {
-                                        MarketCardView(
-                                            name: market.name,
-                                            assetName: market.imageAssetName,
-                                            isSelected: selectedChoice == market.code
-                                        )
-                                        .aspectRatio(1, contentMode: .fit)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal)
-                            
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(Color("Main"))
+                        .bold(true)
+                    TextField("시장명/주소를 입력하세요", text: $vm.searchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .focused($isTextFieldFocused)
+                    if !vm.searchText.isEmpty {
+                        Button {
+                            vm.searchText = ""
+                            isTextFieldFocused = false
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
                         }
                     }
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                .padding(.bottom)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(vm.filteredMarkets) { market in
+                            Button {
+                                selectedChoice = market.id
+                            } label: {
+                                MarketCardView(
+                                    name: market.marketName,
+                                    assetName: market.marketImg,
+                                    isSelected: selectedChoice == market.id
+                                )
+                                .aspectRatio(1, contentMode: .fit)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal)
                     
                 }
                 
@@ -116,11 +124,7 @@ struct MarketSelectionView: View {
             }
             
         }
-        .task {
-            await vm.fetch()        }
-        .refreshable {
-            await vm.fetch()
-        }
+        .onAppear { vm.load() }
     }
 }
 
@@ -144,7 +148,7 @@ struct MarketCardView: View {
                         .stroke(isSelected ? Color(.gray) : .clear, lineWidth: 5)
                 )
                 .cornerRadius(12)
-                .overlay( // 텍스트 가독성용 그라데이션
+                .overlay(
                     LinearGradient(
                         gradient: Gradient(colors: [.black.opacity(0.0), .black.opacity(0.3)]),
                         startPoint: .top, endPoint: .bottom
