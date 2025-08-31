@@ -5,132 +5,93 @@
 //  Created by 이민서 on 8/28/25.
 //
 
-import Foundation
+import FirebaseFirestore
+import FirebaseStorage
 
-struct StoreCreateRequest: Encodable {
-    let storeName: String
-    let categoryId: Int
-    let phoneNumber: String
-    let weekdayStart: String
-    let weekdayEnd: String
-    let weekendStart: String
-    let weekendEnd: String
-    let address: String
-    let paymentMethods: [String]
-    let storeDescript: String
-}
 
-struct StoreCreateResultDTO: Decodable {}
-
-struct StoreCreateResponse: Decodable {
-    let responseDto: StoreCreateResultDTO?
-    let error: String?
-    let success: Bool
-}
-
-@MainActor
 final class StoreCreateVM: ObservableObject {
-    
-    @Published var isSubmitting = false
-    @Published var errorMessage: String?
+    @Published var isLoading = false
     @Published var done = false
-    
-    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-    
-    private var createURL: URL {
-        base.appendingPathComponent("api/store")
-    }
-    
-    private func prettyJSON(_ data: Data) -> String? {
-        guard let obj = try? JSONSerialization.jsonObject(with: data),
-              let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
-              let s = String(data: d, encoding: .utf8) else { return nil }
-        return s
-    }
-    
-    private func log(_ items: Any...) {
-        print("[StoreCreateVM]", items.map { "\($0)" }.joined(separator: " "))
-    }
-    
+    @Published var errorMessage: String?
+
+    /// Firestore + Storage 업로드
+    @MainActor
     func createStore(
         storeName: String,
         categoryId: Int,
-        phoneNumber: String,
-        weekdayStart: String,
-        weekdayEnd: String,
-        weekendStart: String,
-        weekendEnd: String,
-        address: String,
-        paymentMethods: [String],
-        storeDescript: String
+        phoneNumber: String?,
+        weekdayStart: Date?,
+        weekdayEnd: Date?,
+        weekendStart: Date?,
+        weekendEnd: Date?,
+        address: String?,
+        paymentMethods: [String],   // ["온누리 상품권", ...]
+        storeDescript: String?,
+        marketId: Int? = nil,     // 필요 시 전달. 없으면 필드 생략
+        image: UIImage? = nil       // 선택 이미지(없으면 nil)
     ) async {
+
+        isLoading = true
         errorMessage = nil
         done = false
-        isSubmitting = true
-        defer { isSubmitting = false }
-        
-        let payload = StoreCreateRequest(
-            storeName: storeName,
-            categoryId: categoryId,
-            phoneNumber: phoneNumber,
-            weekdayStart: weekdayStart,
-            weekdayEnd: weekdayEnd,
-            weekendStart: weekendStart,
-            weekendEnd: weekendEnd,
-            address: address,
-            paymentMethods: paymentMethods,
-            storeDescript: storeDescript
-        )
-        
-        var req = URLRequest(url: createURL)
-        req.httpMethod = "POST"
-        req.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
-        
-        do {
-            let body = try JSONEncoder().encode(payload)
-            req.httpBody = body
-            
-            log("POST \(createURL.absoluteString)")
-            log("payload bytes:", body.count)
-            if let pretty = prettyJSON(body) { log("📝 payload JSON:\n\(pretty)") }
-            
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            log("status:", code)
-            log("resp bytes:", data.count)
-            
-            guard (200...299).contains(code) else {
-                errorMessage = "HTTP \(code)"
-                log("실패:", errorMessage!)
-                return
-            }
-            
-            guard !data.isEmpty else {
-                done = true
-                log("성공(본문 없음)")
-                return
-            }
-            
+
+        // 1) 문서 id는 UUID 문자열로
+        let storeId = UUID().uuidString
+
+        // 2) 이미지가 있으면 Storage에 업로드 → downloadURL
+        var profileImageURLString: String? = nil
+        if let img = image, let data = img.jpegData(compressionQuality: 0.85) {
             do {
-                let decoded = try JSONDecoder().decode(StoreCreateResponse.self, from: data)
-                guard decoded.success else {
-                    errorMessage = decoded.error ?? "서버 오류"
-                    log("생성 실패:", errorMessage ?? "")
-                    return
-                }
-                done = true
-                log("생성 성공 (decoded)")
+                let path = "stores/\(storeId)/profile.jpg"
+                let ref = Storage.storage().reference(withPath: path)
+                let meta = StorageMetadata()
+                meta.contentType = "image/jpeg"
+
+                // Firebase 10+ 는 async/await 지원
+                _ = try await ref.putDataAsync(data, metadata: meta)
+                let url = try await ref.downloadURL()
+                profileImageURLString = url.absoluteString
             } catch {
-                done = true
-                log("생성 성공(디코딩 생략) raw:", String(data: data, encoding: .utf8) ?? "\(data.count) bytes")
+                // 이미지 실패는 문서 생성 자체를 막진 않음
+                print("Storage upload error:", error)
             }
-            
-            
-        } catch {
-            errorMessage = error.localizedDescription
-            log("네트워크 에러:", error.localizedDescription)
         }
+
+        // 3) Firestore에 저장할 payload 구성 (nil은 넣지 않기)
+        var payload: [String: Any] = [
+            "id": storeId,
+            "storeName": storeName,
+            "categoryId": categoryId,
+            "payment_methods": paymentMethods,            // 문자열 그대로 저장 (간단)
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+
+        func put(_ key: String, _ value: Any?) {
+            if let v = value { payload[key] = v }
+        }
+
+        put("phoneNumber", phoneNumber)
+        put("address", address)
+        put("storeDescript", storeDescript)
+        put("weekdayStart", weekdayStart)
+        put("weekdayEnd", weekdayEnd)
+        put("weekendStart", weekendStart)
+        put("weekendEnd", weekendEnd)
+        put("profileImageURLString", profileImageURLString)
+        if let marketId { put("marketId", marketId) }   // 필요 시만 저장
+
+        // 4) Firestore 저장
+        do {
+            try await Firestore.firestore()
+                .collection("stores")
+                .document(storeId)
+                .setData(payload)
+
+            done = true
+        } catch {
+            errorMessage = "저장에 실패했어요: \(error.localizedDescription)"
+        }
+
+        isLoading = false
     }
 }

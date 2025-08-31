@@ -5,8 +5,8 @@
 ////  Created by 이민서 on 8/14/25.
 ////
 //
-//import SwiftUI
-//import PhotosUI
+import SwiftUI
+import PhotosUI
 //
 //struct CreateProductView: View {
 //    //let feedType: FeedType
@@ -218,55 +218,55 @@
 //        
 //    }
 //}
-//struct TagChip: View {
-//    let title: String
-//    let isSelected: Bool
-//    var body: some View {
-//        Text(title)
-//            .font(.subheadline)
-//            .fontWeight(isSelected ? .bold : .regular)
-//            .padding(.horizontal, 12)
-//            .padding(.vertical, 8)
-//            .background(Capsule().fill(isSelected ? Color(.systemGray3) : Color(.systemGray5)))
-//            .foregroundColor(.black)
-//    }
-//}
-//struct FlowLayout: Layout {
-//    var spacing: CGFloat = 8
-//    var lineSpacing: CGFloat = 8
-//    
-//    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-//        let maxWidth = proposal.width ?? .infinity
-//        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
-//        for v in subviews {
-//            let s = v.sizeThatFits(.unspecified)
-//            if x + s.width > maxWidth {
-//                x = 0
-//                y += rowH + lineSpacing
-//                rowH = 0
-//            }
-//            x += s.width + spacing
-//            rowH = max(rowH, s.height)
-//        }
-//        return CGSize(width: maxWidth, height: y + rowH)
-//    }
-//    
-//    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-//        let maxWidth = bounds.width
-//        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
-//        for v in subviews {
-//            let s = v.sizeThatFits(.unspecified)
-//            if x + s.width > maxWidth {
-//                x = 0
-//                y += rowH + lineSpacing
-//                rowH = 0
-//            }
-//            v.place(
-//                at: CGPoint(x: bounds.minX + x, y: bounds.minY + y),
-//                proposal: ProposedViewSize(width: s.width, height: s.height)
-//            )
-//            x += s.width + spacing
-//            rowH = max(rowH, s.height)
-//        }
-//    }
-//}
+struct TagChip: View {
+    let title: String
+    let isSelected: Bool
+    var body: some View {
+        Text(title)
+            .font(.subheadline)
+            .fontWeight(isSelected ? .bold : .regular)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(isSelected ? Color(.systemGray3) : Color(.systemGray5)))
+            .foregroundColor(.black)
+    }
+}
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    var lineSpacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x + s.width > maxWidth {
+                x = 0
+                y += rowH + lineSpacing
+                rowH = 0
+            }
+            x += s.width + spacing
+            rowH = max(rowH, s.height)
+        }
+        return CGSize(width: maxWidth, height: y + rowH)
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let maxWidth = bounds.width
+        var x: CGFloat = 0, y: CGFloat = 0, rowH: CGFloat = 0
+        for v in subviews {
+            let s = v.sizeThatFits(.unspecified)
+            if x + s.width > maxWidth {
+                x = 0
+                y += rowH + lineSpacing
+                rowH = 0
+            }
+            v.place(
+                at: CGPoint(x: bounds.minX + x, y: bounds.minY + y),
+                proposal: ProposedViewSize(width: s.width, height: s.height)
+            )
+            x += s.width + spacing
+            rowH = max(rowH, s.height)
+        }
+    }
+}

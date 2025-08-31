@@ -20,7 +20,7 @@ struct AICreateView: View {
             if hasStore {
                 //PromotionSelectView(appUser: appUser)
             } else {
-                NoStoreView(ismypage: ismypage, appUser: appUser)
+                NoStoreView(ismypage: ismypage, appUser: appUser, selectedMarketID: $selectedMarketID)
             }
             
         }
