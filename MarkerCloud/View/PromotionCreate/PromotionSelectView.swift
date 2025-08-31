@@ -22,8 +22,7 @@ struct PromotionSelectView: View {
     ]
     @State private var route: Route? = nil
     var hasSelection: Bool { selectedPromotion != nil }
-    @Binding var currentUserID: Int
-    
+    let appUser: AppUser?
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
