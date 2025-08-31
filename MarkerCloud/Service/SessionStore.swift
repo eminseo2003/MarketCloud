@@ -56,6 +56,8 @@ final class SessionStore: ObservableObject {
         appUser = nil
         isLoading = true
         phase = .loading
+        
+        print("[SessionStore] listenUserDoc(uid=\(uid))")
 
         userListener = AppUser.docRef(uid: uid).addSnapshotListener { [weak self] snap, err in
             Task { @MainActor in
@@ -84,6 +86,8 @@ final class SessionStore: ObservableObject {
                     self.appUser = user
                     self.isLoading = false
                     self.phase = .signedIn(user)
+                    let fbUid = self.authUser?.uid ?? "nil"
+                    print("[SessionStore] AppUser loaded → AppUser.id=\(user.id) / Firebase uid=\(fbUid)")
                 } catch {
                     print("decode error:", error)
                     self.appUser = nil

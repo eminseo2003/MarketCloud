@@ -28,19 +28,16 @@ final class StoreCreateVM: ObservableObject {
         paymentMethods: [String],
         storeDescript: String?,
         marketId: Int? = nil,
-        image: UIImage? = nil
+        image: UIImage? = nil,
+        ownerId: String,
+        userDocId: String
     ) async {
         isLoading = true
         errorMessage = nil
         done = false
         
-        guard let uid = Auth.auth().currentUser?.uid else {
-            await MainActor.run {
-                isLoading = false
-                errorMessage = "로그인이 필요합니다."
-            }
-            return
-        }
+        let authUid = Auth.auth().currentUser?.uid
+        print("[StoreCreateVM] createStore() auth.currentUser=\(authUid ?? "nil"), ownerId=\(ownerId), userDocId=\(userDocId)")
         
         do {
             let db = Firestore.firestore()
@@ -61,7 +58,7 @@ final class StoreCreateVM: ObservableObject {
                 "storeName": storeName,
                 "categoryId": categoryId,
                 "paymentMethods": paymentMethods,
-                "createdBy": uid,
+                "createdBy": ownerId,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp()
             ]
@@ -80,7 +77,8 @@ final class StoreCreateVM: ObservableObject {
             let storeRef = db.collection("stores").document(storeId)
             try await storeRef.setData(payload)
             
-            let userRef = db.collection("users").document(uid)
+            let userDocIdToUse = userDocId ?? ownerId
+            let userRef = db.collection("users").document(userDocIdToUse)
             try await userRef.setData([
                 "storeIds": FieldValue.arrayUnion([storeId]),
                 "updatedAt": FieldValue.serverTimestamp()

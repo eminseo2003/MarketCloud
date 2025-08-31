@@ -16,11 +16,10 @@ struct MarkerCloudApp: App {
     @StateObject private var session = SessionStore()
     
     @AppStorage("selectedMarketID") private var selectedMarketID: Int = -1
-    @AppStorage("currentUserID")  private var currentUserID:  Int = -1
     
     var body: some Scene {
         WindowGroup {
-            RootRouterView(selectedMarketID: $selectedMarketID, currentUserID: $currentUserID)
+            RootRouterView(selectedMarketID: $selectedMarketID)
                 .environmentObject(session)
         }
     }
@@ -29,7 +28,6 @@ struct MarkerCloudApp: App {
 struct RootRouterView: View {
     @EnvironmentObject var session: SessionStore
     @Binding var selectedMarketID: Int
-    @Binding var currentUserID: Int
     
     var body: some View {
         Group {
@@ -40,6 +38,6 @@ struct RootRouterView: View {
             } else {
                 ContentView(selectedMarketID: $selectedMarketID, appUser: session.appUser)
             }
-        }
+        }.environmentObject(session)
     }
 }

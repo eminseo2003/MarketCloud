@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import FirebaseAuth
 
 struct StoreCreateView: View {
     @Environment(\.dismiss) var dismiss
@@ -191,6 +192,21 @@ struct StoreCreateView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("등록") {
                     Task {
+                        let name = storeName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !name.isEmpty else {
+                            lookupAlertMessage = "점포명을 입력해주세요."
+                            showLookupAlert = true
+                            return
+                        }
+                        
+                        print("[StoreCreateView] appUser.id=\(appUser?.id ?? "nil"), auth.uid=\(Auth.auth().currentUser?.uid ?? "nil")")
+
+                                    guard let ownerId = appUser?.id ?? Auth.auth().currentUser?.uid else {
+                                        lookupAlertMessage = "로그인이 필요합니다."
+                                        showLookupAlert = true
+                                        return
+                                    }
+                                    let userDocId = ownerId
                         let phone = storeDetail.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
                         let addr  = storeDetail.roadAddress.trimmingCharacters(in: .whitespacesAndNewlines)
                         let desc  = storeDetail.storeDescription.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -207,7 +223,9 @@ struct StoreCreateView: View {
                             paymentMethods: storeDetail.usesVouchers,
                             storeDescript: desc.isEmpty ? nil : desc,
                             marketId: selectedMarketID,
-                            image: selectedStoreImage.first
+                            image: selectedStoreImage.first,
+                            ownerId: ownerId,
+                            userDocId: userDocId
                         )
 
                         if createVm.done {

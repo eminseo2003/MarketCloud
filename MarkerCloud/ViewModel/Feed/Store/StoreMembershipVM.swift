@@ -6,8 +6,7 @@
 //
 
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
+import OSLog
 
 @MainActor
 final class StoreMembershipVM: ObservableObject {
@@ -15,12 +14,20 @@ final class StoreMembershipVM: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    func refresh(uid: String?, marketId: Int) async {
+    func refresh(appUserId: String?, marketId: Int) async {
         isLoading = true; errorMessage = nil
         defer { isLoading = false }
-        do {
-            let ok = await StoreMembershipService.userHasStore(in: marketId, uid: uid)
-            self.hasStore = ok
+
+        print("[MembershipVM] refresh(appUserId: \(appUserId ?? "nil"), marketId: \(marketId))")
+
+        guard let appUserId else {
+            print("[MembershipVM] appUserId is nil → skip query")
+            self.hasStore = false
+            return
         }
+
+        let ok = await StoreMembershipService.userHasStore(in: marketId, ownerId: appUserId)
+        print("[MembershipVM] userHasStore result = \(ok)")
+        self.hasStore = ok
     }
 }

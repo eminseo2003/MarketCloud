@@ -10,19 +10,21 @@ import FirebaseAuth
 import FirebaseFirestore
 
 enum StoreMembershipService {
-    static func userHasStore(in marketId: Int, uid: String? = Auth.auth().currentUser?.uid) async -> Bool {
-        guard let uid else { return false }
+    static func userHasStore(in marketId: Int, ownerId: String) async -> Bool {
         do {
             let db = Firestore.firestore()
             let snap = try await db.collection("stores")
-                .whereField("createdBy", isEqualTo: uid)
+                .whereField("createdBy", isEqualTo: ownerId)
                 .whereField("marketId", isEqualTo: marketId)
                 .limit(to: 1)
                 .getDocuments()
+            print("[MembershipService] query count =", snap.documents.count)
             return !snap.documents.isEmpty
         } catch {
-            print("hasStore query error:", error)
+            print("[MembershipService] query error:", error)
             return false
         }
     }
 }
+
+
