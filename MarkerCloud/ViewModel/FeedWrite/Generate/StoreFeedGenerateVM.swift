@@ -5,8 +5,6 @@
 //  Created by 이민서 on 8/27/25.
 //
 
-// StoreFeedGenerateVM.swift
-
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
@@ -101,6 +99,7 @@ final class StoreFeedGenerateVM: ObservableObject {
                 "mediaUrl": inputImageURL.absoluteString,
                 "body": aiBody,
                 "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
                 "marketId": marketId,
                 "userId": userId,
                 "storeInfo": [
@@ -122,6 +121,7 @@ final class StoreFeedGenerateVM: ObservableObject {
                 "mediaUrl": inputImageURL.absoluteString,
                 "body": aiBody,
                 "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
                 "marketId": marketId,
                 "userId": userId,
                 "storeInfo": [
