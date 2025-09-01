@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 @MainActor
 final class StoreHeaderVM: ObservableObject {
@@ -56,5 +57,50 @@ final class StoreVM: ObservableObject {
         self.paymentMethods = store.paymentMethods
         self.storeDescript = store.storeDescript
         self.feeds = store.feeds
+    }
+}
+@MainActor
+final class StoreStatsVM: ObservableObject {
+    @Published var totalLikes = 0
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    private let db = Firestore.firestore()
+
+    func refresh(storeId: String) async {
+        guard !storeId.isEmpty else {
+            totalLikes = 0
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
+        do {
+            let feedSnap = try await db.collection("feeds")
+                .whereField("storeId", isEqualTo: storeId)
+                .getDocuments()
+
+            let feedIds: [String] = feedSnap.documents.map { $0.documentID }
+
+            var sum = 0
+            try await withThrowingTaskGroup(of: Int.self) { group in
+                for fid in feedIds {
+                    group.addTask { [db] in
+                        let q = db.collection("feedLikes").whereField("feedId", isEqualTo: fid)
+                        let agg = try await q.count.getAggregation(source: .server)
+                        return Int(truncating: agg.count)
+                    }
+                }
+                for try await c in group {
+                    sum += c
+                }
+            }
+
+            self.totalLikes = sum
+        } catch {
+            self.errorMessage = error.localizedDescription
+            self.totalLikes = 0
+        }
     }
 }

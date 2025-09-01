@@ -10,6 +10,7 @@ import SwiftUI
 struct StoreProfileView: View {
     @StateObject private var storeVm = StoreVM()
     @StateObject private var ownVM = StoreOwnershipVM()
+    @StateObject private var statsVM = StoreStatsVM()
     //@StateObject private var subVM = StoreSubscribeVM()
     
     let storeId: String
@@ -67,9 +68,12 @@ struct StoreProfileView: View {
                                                 .font(.subheadline).foregroundColor(.secondary)
                                         }
                                         VStack(spacing: 4) {
-                                            Text("234")
-                                            //Text("\(p.totalLikedCount)")
-                                                .font(.subheadline).bold()
+                                            if statsVM.isLoading {
+                                                Text("…").font(.subheadline).bold()
+                                            } else {
+                                                Text("\(statsVM.totalLikes)")
+                                                    .font(.subheadline).bold()
+                                            }
                                             Text("좋아요")
                                                 .font(.subheadline).foregroundColor(.secondary)
                                         }
@@ -211,7 +215,7 @@ struct StoreProfileView: View {
                             .pickerStyle(.segmented)
                             LazyVGrid(columns: grid, spacing: 12) {
                                 ForEach(filteredFeeds(from: storeVm.feeds)) { feed in
-                                    SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed)
+                                    SmallFeedCardView(feed: feed, selectedFeed: $selectedFeed, appUser: appUser)
                                 }
                             }
                             .padding(6)
@@ -237,6 +241,7 @@ struct StoreProfileView: View {
         .task(id: storeId) {
             await ownVM.refresh(storeId: storeId)
             await storeVm.load(storeId: storeId)
+            await statsVM.refresh(storeId: storeId)
         }
         //.task { await vm.fetch(storeId: storeId, userId: currentUserID) }
         //        .navigationDestination(item: $selectedFeed) { feed in
@@ -281,6 +286,8 @@ struct StoreProfileView: View {
 private struct SmallFeedCardView: View {
     let feed: Feed
     @Binding var selectedFeed: Feed?
+    @StateObject private var likeVM = FeedLikeVM()
+    let appUser: AppUser?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -297,9 +304,9 @@ private struct SmallFeedCardView: View {
             }
             
             HStack(spacing: 6) {
-                Image(systemName: "heart").font(.footnote).foregroundColor(.primary)
-                Text("1")
-                //Text("\(feed.likeCount)")
+                Image(systemName: likeVM.isLiked ? "heart.fill" : "heart").font(.footnote)
+                    .foregroundColor(likeVM.isLiked ? Color("Main") :.primary)
+                Text("\(likeVM.likesCount)")
                     .font(.footnote).foregroundColor(.primary)
                 Spacer()
                 Text(feed.title)
@@ -308,6 +315,12 @@ private struct SmallFeedCardView: View {
                     .foregroundColor(.primary)
             }
         }
+        .task {
+            if let uid = appUser?.id {
+                await likeVM.start(feedId: feed.id.uuidString, userId: uid)
+            }
+        }
+        .onDisappear { likeVM.stop() }
     }
 }
 

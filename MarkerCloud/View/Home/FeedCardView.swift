@@ -12,7 +12,7 @@ struct FeedCardView: View {
     @State private var isCommentSheetPresented = false
     @Binding var pushStoreId: String?
     @StateObject private var storeVm = StoreHeaderVM()
-    //@StateObject private var likeVM = FeedLikeVM()
+    @StateObject private var likeVM = FeedLikeVM()
     
     let appUser: AppUser?
     var body: some View {
@@ -46,28 +46,13 @@ struct FeedCardView: View {
             HStack(spacing: 12) {
                 HStack(spacing: 4) {
                     Button {
-//                        feed.isLiked.toggle()
-//                        feed.likeCount += feed.isLiked ? 1 : -1
-//                        if feed.likeCount < 0 { feed.likeCount = 0 }
-//                        
-//                         Task {
-//                            if let dto = await likeVM.toggle(feedId: feed.id, userId: currentUserID) {
-//                                feed.isLiked = dto.isLiked
-//                                feed.likeCount = dto.likesCount
-//                            } else {
-//                                feed.isLiked.toggle()
-//                                feed.likeCount += feed.isLiked ? 1 : -1
-//                            }
-//                        }
+                        Task { await likeVM.toggle() }
                     } label: {
-                        Image(systemName: "heart")
-                        //Image(systemName: feed.isLiked ? "heart.fill" :"heart")
+                        Image(systemName: likeVM.isLiked ? "heart.fill" : "heart")
                             .font(.title3)
-                            .foregroundColor(.primary)
-                            //.foregroundColor(feed.isLiked ? Color("Main") :.primary)
+                            .foregroundColor(likeVM.isLiked ? Color("Main") :.primary)
                     }
-                    Text("0")
-                    //Text("\(feed.likeCount)")
+                    Text("\(likeVM.likesCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -88,6 +73,25 @@ struct FeedCardView: View {
                         .bold()
                 }
                 Spacer()
+                Button {
+                    
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("더보기")
+                    }
+                    .font(.footnote).bold()
+                    .padding(.horizontal,6)
+                    .padding(.vertical,6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(.systemGray6))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(Color(.systemGray4), lineWidth: 0.5)
+                    )
+                    .foregroundColor(.primary)
+                }
             }
             .padding(.vertical, 5)
             .padding(.horizontal)
@@ -102,10 +106,16 @@ struct FeedCardView: View {
         }
         .padding(.bottom, 8)
         .task { await storeVm.load(storeId: feed.storeId) }
-//        .sheet(isPresented: $isCommentSheetPresented) {
-//            CommentSheetView(feedId: feed.id)
-//                .presentationDetents([.medium])
-//        }
+        .task {
+            if let uid = appUser?.id {
+                await likeVM.start(feedId: feed.id, userId: uid)
+            }
+        }
+        .onDisappear { likeVM.stop() }
+        //        .sheet(isPresented: $isCommentSheetPresented) {
+        //            CommentSheetView(feedId: feed.id)
+        //                .presentationDetents([.medium])
+        //        }
     }
 }
 
@@ -135,7 +145,7 @@ func formatDate(from raw: Date) -> String {
 struct StoreAvatarView: View {
     let url: URL?
     var size: CGFloat = 48
-
+    
     var body: some View {
         Group {
             if let url {
@@ -152,7 +162,7 @@ struct StoreAvatarView: View {
         .frame(width: size, height: size)
         .clipShape(Circle())
     }
-
+    
     private var placeholder: some View {
         ZStack {
             Color(.systemGray5)

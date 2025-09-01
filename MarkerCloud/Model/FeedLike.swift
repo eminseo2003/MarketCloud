@@ -6,11 +6,42 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-struct FeedLike: Identifiable, Hashable {
-    let userId: Int64
-    let feedId: Int64
-    var createdAt: Date?
+struct FeedLike: Identifiable, Codable, Hashable {
+    let userId: String
+    let feedId: String
 
-    var id: String { "\(userId)-\(feedId)" }
+    @ServerTimestamp var createdAt: Date?
+
+    var id: String { "\(feedId)-\(userId)" }
+
+    enum CodingKeys: String, CodingKey {
+        case userId, feedId, createdAt
+    }
+
+    init(userId: String, feedId: String, createdAt: Date? = nil) {
+        self.userId = userId
+        self.feedId = feedId
+        self.createdAt = createdAt
+    }
 }
+
+extension FeedLike {
+    static var collection: CollectionReference {
+        Firestore.firestore().collection("feedLikes")
+    }
+
+    var docRef: DocumentReference {
+        Self.collection.document(id)
+    }
+
+    func toCreateDict() -> [String: Any] {
+        [
+            "userId": userId,
+            "feedId": feedId,
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+    }
+}
+
