@@ -12,66 +12,78 @@ import FirebaseAuth
 struct StoreCreateView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var storeDetail: StoreDetail
+    let appUser: AppUser?
+    @Binding var selectedMarketID: Int
+    
+    @StateObject private var createVm = StoreCreateVM()
+    @StateObject private var hasStoreVm = StoreMembershipVM()
+    //    @StateObject private var lookUpVm = StoreLookupVM()
+    @State private var showLookupAlert = false
+    @State private var lookupAlertMessage = ""
+    
+    //점포 이미지
     @State var selectedStoreImage: [UIImage] = []
+    
+    //글자수 제한
     let maxCharacters = 500
+    @FocusState private var isTextFieldFocused: Bool
+    
+    //점포 명
     @State private var storeName: String = ""
+    
+    //점포 카테고리
     private let storePromotion = Promotion(name: "점포", imageName: "loginBackground")
-    @State private var pushPromotion: Promotion? = nil
     @State private var selectedCategory: String = "음식점"
     private var selectedCategoryId: Int? {
         StoreCategory(label: selectedCategory)?.rawValue
     }
     private let categories: [String] =
-        StoreCategory.allCases
-            .sorted { $0.rawValue < $1.rawValue }
-            .map { $0.displayName }
-    @StateObject private var createVm = StoreCreateVM()
-    @StateObject private var lookUpVm = StoreLookupVM()
-    @State private var showLookupAlert = false
-    @State private var lookupAlertMessage = ""
-    @FocusState private var isTextFieldFocused: Bool
-    let appUser: AppUser?
-    @Binding var selectedMarketID: Int
+    StoreCategory.allCases
+        .sorted { $0.rawValue < $1.rawValue }
+        .map { $0.displayName }
+    
+    //피드 생성 route
+    @State private var pushPromotion: Promotion? = nil
     var body: some View {
         Form {
             Section(header: Text("점포명")) {
                 TextField("점포명", text: $storeName)
                     .padding(.trailing, 36)
-                    .overlay(alignment: .trailing) {
-                        Button {
-                            Task {
-                                await lookUpVm.fetch(by: storeName)
-
-                                if let dto = lookUpVm.store {
-                                    if let display = StoreCategory(rawValue: dto.categoryId)?.displayName {
-                                        selectedCategory = display
-                                    }
-                                    storeDetail.phoneNumber = dto.phoneNumber
-                                    storeDetail.weekdayOpen  = fromZTimeString(dto.weekdayStart)
-                                    storeDetail.weekdayClose = fromZTimeString(dto.weekdayEnd)
-                                    storeDetail.weekendOpen  = fromZTimeString(dto.weekendStart)
-                                    storeDetail.weekendClose = fromZTimeString(dto.weekendEnd)
-                                    storeDetail.roadAddress = dto.address
-                                    storeDetail.usesVouchers = dto.paymentMethods
-
-                                    lookupAlertMessage = "조회한 정보로 폼을 채웠어요. 확인 후 수정/저장하세요."
-                                    showLookupAlert = true
-                                } else {
-                                    lookupAlertMessage = lookUpVm.errorMessage ?? "해당 점포 정보를 찾지 못했어요."
-                                    showLookupAlert = true
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                                .imageScale(.medium)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 6)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                //                    .overlay(alignment: .trailing) {
+                //                        Button {
+                //                            Task {
+                //                                await lookUpVm.fetch(by: storeName)
+                //
+                //                                if let dto = lookUpVm.store {
+                //                                    if let display = StoreCategory(rawValue: dto.categoryId)?.displayName {
+                //                                        selectedCategory = display
+                //                                    }
+                //                                    storeDetail.phoneNumber = dto.phoneNumber
+                //                                    storeDetail.weekdayOpen  = fromZTimeString(dto.weekdayStart)
+                //                                    storeDetail.weekdayClose = fromZTimeString(dto.weekdayEnd)
+                //                                    storeDetail.weekendOpen  = fromZTimeString(dto.weekendStart)
+                //                                    storeDetail.weekendClose = fromZTimeString(dto.weekendEnd)
+                //                                    storeDetail.roadAddress = dto.address
+                //                                    storeDetail.usesVouchers = dto.paymentMethods
+                //
+                //                                    lookupAlertMessage = "조회한 정보로 폼을 채웠어요. 확인 후 수정/저장하세요."
+                //                                    showLookupAlert = true
+                //                                } else {
+                //                                    lookupAlertMessage = lookUpVm.errorMessage ?? "해당 점포 정보를 찾지 못했어요."
+                //                                    showLookupAlert = true
+                //                                }
+                //                            }
+                //                        } label: {
+                //                            Image(systemName: "magnifyingglass")
+                //                                .imageScale(.medium)
+                //                                .padding(.horizontal, 8)
+                //                                .padding(.vertical, 6)
+                //                        }
+                //                        .buttonStyle(.plain)
+                //                    }
                     .focused($isTextFieldFocused)
             }
-
+            
             Section(header: Text("업종 구분")) {
                 FlowLayout(spacing: 8, lineSpacing: 10) {
                     ForEach(categories, id: \.self) { cat in
@@ -200,17 +212,17 @@ struct StoreCreateView: View {
                         }
                         
                         print("[StoreCreateView] appUser.id=\(appUser?.id ?? "nil"), auth.uid=\(Auth.auth().currentUser?.uid ?? "nil")")
-
-                                    guard let ownerId = appUser?.id ?? Auth.auth().currentUser?.uid else {
-                                        lookupAlertMessage = "로그인이 필요합니다."
-                                        showLookupAlert = true
-                                        return
-                                    }
-                                    let userDocId = ownerId
+                        
+                        guard let ownerId = appUser?.id ?? Auth.auth().currentUser?.uid else {
+                            lookupAlertMessage = "로그인이 필요합니다."
+                            showLookupAlert = true
+                            return
+                        }
+                        let userDocId = ownerId
                         let phone = storeDetail.phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
                         let addr  = storeDetail.roadAddress.trimmingCharacters(in: .whitespacesAndNewlines)
                         let desc  = storeDetail.storeDescription.trimmingCharacters(in: .whitespacesAndNewlines)
-
+                        
                         await createVm.createStore(
                             storeName: storeName,
                             categoryId: selectedCategoryId ?? 1,
@@ -227,9 +239,9 @@ struct StoreCreateView: View {
                             ownerId: ownerId,
                             userDocId: userDocId
                         )
-
+                        
                         if createVm.done {
-                            pushPromotion = storePromotion
+                            
                         } else if let msg = createVm.errorMessage {
                             lookupAlertMessage = msg
                             showLookupAlert = true
@@ -237,32 +249,28 @@ struct StoreCreateView: View {
                     }
                 }
             }
-
         }
-        .navigationDestination(item: $pushPromotion) { promo in
-            //PromotionMethodSelectView(promotion: promo, appUser: appUser)
-        }
+        .interactiveDismissDisabled(showLookupAlert)
         .alert("알림", isPresented: $showLookupAlert) {
-            Button("확인", role: .cancel) { }
+            Button("확인", role: .cancel) {}
         } message: {
             Text(lookupAlertMessage)
         }
-
+        .onAppear { hasStoreVm.stop() }
     }
-    func fromZTimeString(_ str: String) -> Date {
-        let fmt = DateFormatter()
-        fmt.calendar = Calendar(identifier: .gregorian)
-        fmt.locale   = Locale(identifier: "en_US_POSIX")
-        fmt.timeZone = TimeZone(secondsFromGMT: 0)
-
-        fmt.dateFormat = "HH:mm:ss.SSS'Z'"
-        if let d = fmt.date(from: str) { return d }
-
-        fmt.dateFormat = "HH:mm:ss'Z'"
-        if let d = fmt.date(from: str) { return d }
-
-        fmt.dateFormat = "HH:mm:ss"
-        return fmt.date(from: str) ?? Date()
-    }
-
+//    func fromZTimeString(_ str: String) -> Date {
+//        let fmt = DateFormatter()
+//        fmt.calendar = Calendar(identifier: .gregorian)
+//        fmt.locale   = Locale(identifier: "en_US_POSIX")
+//        fmt.timeZone = TimeZone(secondsFromGMT: 0)
+//        
+//        fmt.dateFormat = "HH:mm:ss.SSS'Z'"
+//        if let d = fmt.date(from: str) { return d }
+//        
+//        fmt.dateFormat = "HH:mm:ss'Z'"
+//        if let d = fmt.date(from: str) { return d }
+//        
+//        fmt.dateFormat = "HH:mm:ss"
+//        return fmt.date(from: str) ?? Date()
+//    }
 }
