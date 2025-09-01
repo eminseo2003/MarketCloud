@@ -24,7 +24,8 @@ struct PromotionMethodSelectView: View {
     ]
     @State private var isCreateViewShow = false
     var hasSelection: Bool { selectedMethod != nil }
-    @Binding var currentUserID: Int
+    let appUser: AppUser?
+    @Binding var selectedMarketID: Int
     
     var body: some View {
         NavigationStack {
@@ -73,29 +74,27 @@ struct PromotionMethodSelectView: View {
                             .cornerRadius(12)
                     }
                     .disabled(!hasSelection)
-//                    .sheet(item: $pushMethod) { method in
-//                        if promotion.name == "점포"{
-//                            CreateStoreView(
-//                                feedType: mapFeedType(from: promotion.name),
-//                                method: pushMethod?.mediaType ?? .image,
-//                                currentUserID: $currentUserID
-//                            )
+                    .sheet(item: $pushMethod) { method in
+                        if promotion.name == "점포"{
+                            CreateStoreView(
+                                feedType: mapFeedType(from: promotion.name),
+                                method: pushMethod?.mediaType ?? .image,
+                                appUser: appUser, selectedMarketID: selectedMarketID
+                            )
 //                        } else if promotion.name == "상품"{
 //                            CreateProductView(
 //                                feedType: mapFeedType(from: promotion.name),
 //                                method: pushMethod?.mediaType ?? .image,
-//                                currentUserID: $currentUserID
+//                                appUser: appUser
 //                            )
 //                        } else {
 //                            CreateEventView(
 //                                feedType: mapFeedType(from: promotion.name),
 //                                method: pushMethod?.mediaType ?? .image,
-//                                currentUserID: $currentUserID
+//                                appUser: appUser
 //                            )
-//                        }
-//                    }
-//                    
-//                    
+                        }
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -104,14 +103,14 @@ struct PromotionMethodSelectView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
     
-//    private func mapFeedType(from name: String) -> FeedType {
-//            switch name {
-//            case "점포":  return .store
-//            case "상품":  return .product
-//            case "이벤트": return .event
-//            default:      return .event
-//            }
-//        }
+    private func mapFeedType(from name: String) -> FeedType {
+            switch name {
+            case "점포":  return .store
+            case "상품":  return .product
+            case "이벤트": return .event
+            default:      return .event
+            }
+        }
     
 }
 

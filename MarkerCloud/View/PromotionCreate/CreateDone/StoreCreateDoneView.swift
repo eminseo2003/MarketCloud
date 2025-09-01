@@ -7,54 +7,48 @@
 
 import SwiftUI
 import AVKit
+import FirebaseFirestore
+import FirebaseStorage
 
 struct StoreCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var vm = StoreFeedUpLoadVM()
     
-    let mediaUrl: String
+    let dto: GenerateDTO
+    let method: MediaType
     
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
     
     @FocusState private var isTextFieldFocused: Bool
-    let method: MediaType
-    let feedType: String
-    let mediaType: String
-    let storeDescription: String
-    let storeImage: UIImage
-    let currentUserID: Int
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, storeDescription: String, storeImage: UIImage, currentUserID: Int) {
-        self.mediaUrl = mediaUrl
+    
+    init(dto: GenerateDTO, method: MediaType) {
+        self.dto = dto
         self.method = method
-        self.feedType = feedType
-        self.mediaType = mediaType
-        self.storeDescription = storeDescription
-        self.storeImage = storeImage
-        self.currentUserID = currentUserID
-        _contentText = State(initialValue: body)
+        _contentText = State(initialValue: dto.feedBody)
     }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
                 if method == .image {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         AsyncImage(url: url) { img in
                             img.resizable().scaledToFit()
                         } placeholder: {
                             ProgressView()
                         }
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                     } else {
                         Text("잘못된 이미지 URL")
                     }
                 } else {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         VideoPlayer(player: AVPlayer(url: url))
                             .frame(minHeight: 220)
                             .padding()
@@ -74,14 +68,6 @@ struct StoreCreateDoneView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .focused($isTextFieldFocused)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("완료") {
-                                isTextFieldFocused = false
-                            }
-                        }
-                    }
                 Spacer()
                 
                 HStack(spacing: 10) {
@@ -101,17 +87,18 @@ struct StoreCreateDoneView: View {
                     
                     Button(action: {
                         Task {
-                            await vm.uploadStoreFeed(
-                                feedType: feedType,
-                                mediaType: mediaType,
-                                userId: currentUserID,
-                                storeDescription: storeDescription,
-                                image: storeImage,
-                                feedMediaUrl: mediaUrl,
-                                    feedBody: contentText
-                            )
-                            showPostAlert = true
-                            
+                            do {
+                                try await Firestore.firestore()
+                                    .collection("feeds").document(dto.id)
+                                    .setData([
+                                        "body": contentText,
+                                        "isPublished": true,
+                                        "updatedAt": FieldValue.serverTimestamp()
+                                    ], merge: true)
+                                showPostAlert = true
+                            } catch {
+                                print("publish error:", error.localizedDescription)
+                            }
                         }
                     }) {
                         Text("게시하기")
@@ -145,7 +132,12 @@ struct StoreCreateDoneView: View {
                             .labelStyle(.iconOnly)
                     }
                 }
-                
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        isTextFieldFocused = false
+                    }
+                }
             }
             .alert("정말 삭제하시겠습니까?", isPresented: $showDeleteAlert) {
                 Button("삭제", role: .destructive) {

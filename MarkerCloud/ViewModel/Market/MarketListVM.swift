@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseCore
 
 private extension String {
     var normalizedForSearch: String {
@@ -26,6 +27,9 @@ final class MarketListVM: ObservableObject {
 
     /// 정적 배열을 메모리로 적재 (네트워크 없음)
     func load() {
+        
+print("[iOS] projectID=\(FirebaseApp.app()?.options.projectID ?? "nil")")
+print("[iOS] storageBucket=\(FirebaseApp.app()?.options.storageBucket ?? "nil")")
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }

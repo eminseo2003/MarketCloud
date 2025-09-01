@@ -10,7 +10,7 @@
 //// API Base
 //private let BASE = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
 //
-//enum FeedType: String, Codable { case store, product, event }
+enum FeedType: String, Codable { case store, product, event }
 //enum MediaType: String, Codable { case image, video }
 //
 //// 서버가 돌려주는 생성 결과가 Feed 하나일 수도/메시지일 수도 있어 유연 파서 준비

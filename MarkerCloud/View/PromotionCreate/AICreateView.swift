@@ -25,7 +25,7 @@ struct AICreateView: View {
             if vm.isLoading {
                 ProgressView("확인 중…")
             } else if vm.hasStore {
-                PromotionSelectView(appUser: appUser)
+                PromotionSelectView(appUser: appUser, selectedMarketID: $selectedMarketID)
             } else {
                 NoStoreView(ismypage: false, appUser: appUser, selectedMarketID: $selectedMarketID)
             }

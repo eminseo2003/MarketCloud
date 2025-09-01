@@ -23,6 +23,8 @@ struct PromotionSelectView: View {
     @State private var route: Route? = nil
     var hasSelection: Bool { selectedPromotion != nil }
     let appUser: AppUser?
+    @Binding var selectedMarketID: Int
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -81,9 +83,9 @@ struct PromotionSelectView: View {
                     .disabled(!hasSelection)
                 }
                 .padding()
-//                .navigationDestination(item: $pushPromotion) { promo in
-//                    PromotionMethodSelectView(promotion: promo, currentUserID: $currentUserID)
-//                }
+                .navigationDestination(item: $pushPromotion) { promo in
+                    PromotionMethodSelectView(promotion: promo, appUser: appUser, selectedMarketID: $selectedMarketID)
+                }
             }
             
         }
