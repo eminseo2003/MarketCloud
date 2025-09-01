@@ -58,7 +58,7 @@ struct MainView: View {
                         .font(.caption)
                         .foregroundColor(.black)
                     }
-
+                    
                 }
                 .padding(.horizontal)
                 
@@ -92,8 +92,8 @@ struct MainView: View {
                         let insertAfter = 1
                         LazyVStack(spacing: 12) {
                             ForEach(Array(filtered.enumerated()), id: \.element.id) { pair in
-                                            let pos = pair.offset
-                                            let f   = pair.element
+                                let pos = pair.offset
+                                let f   = pair.element
                                 FeedCardView(
                                     feed: f,
                                     pushStoreId: $pushStoreId,
@@ -132,9 +132,9 @@ struct MainView: View {
                 Spacer()
                 
             }
-            //            .navigationDestination(item: $pushStore) { store in
-            //                StoreProfileView(store: store)
-            //            }
+            .navigationDestination(item: $pushStoreId) { storeId in
+                StoreProfileView(storeId: storeId, appUser: appUser)
+            }
             .navigationDestination(item: $route) { route in
                 if route == .todayMarket {
                     //SelectKeywordView(selectedMarketID: $selectedMarketID)

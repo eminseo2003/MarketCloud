@@ -11,7 +11,7 @@ struct FeedCardView: View {
     let feed: FeedItem
     @State private var isCommentSheetPresented = false
     @Binding var pushStoreId: String?
-    @StateObject private var storeVm = StoreVM()
+    @StateObject private var storeVm = StoreHeaderVM()
     //@StateObject private var likeVM = FeedLikeVM()
     
     let appUser: AppUser?
