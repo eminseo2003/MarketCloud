@@ -10,6 +10,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 
+// 점포 생성(파이어스토어 + 스토리지 업로드) 뷰모델
 final class StoreCreateVM: ObservableObject {
     @Published var isLoading = false
     @Published var done = false
@@ -36,13 +37,16 @@ final class StoreCreateVM: ObservableObject {
         errorMessage = nil
         done = false
         
+        // 현재 로그인 세션(디버깅용 로그)
         let authUid = Auth.auth().currentUser?.uid
         print("[StoreCreateVM] createStore() auth.currentUser=\(authUid ?? "nil"), ownerId=\(ownerId), userDocId=\(userDocId)")
         
         do {
+            // 2) 파이어스토어 핸들 & 새 점포 문서 ID 생성
             let db = Firestore.firestore()
             let storeId = UUID().uuidString
             
+            // 3) 선택된 이미지가 있으면 Firebase Storage에 업로드
             var profileImageURL: String?
             if let image, let data = image.jpegData(compressionQuality: 0.85) {
                 let ref = Storage.storage().reference()
@@ -53,6 +57,7 @@ final class StoreCreateVM: ObservableObject {
                 profileImageURL = try await ref.downloadURL().absoluteString
             }
             
+            //파이어스토어에 저장할 payload 구성
             var payload: [String: Any] = [
                 "id": storeId,
                 "storeName": storeName,
@@ -73,12 +78,12 @@ final class StoreCreateVM: ObservableObject {
             if let weekendEnd { payload["weekendEnd"] = Timestamp(date: weekendEnd) }
             if let profileImageURL { payload["profileImageURL"] = profileImageURL }
             
-            
+            //stores/{storeId} 문서 생성
             let storeRef = db.collection("stores").document(storeId)
             try await storeRef.setData(payload)
             
-            let userDocIdToUse = userDocId ?? ownerId
-            let userRef = db.collection("users").document(userDocIdToUse)
+            //users/{userDocId} 문서의 storeIds 배열에 이번 storeId 추가(merge)
+            let userRef = db.collection("users").document(userDocId)
             try await userRef.setData([
                 "storeIds": FieldValue.arrayUnion([storeId]),
                 "updatedAt": FieldValue.serverTimestamp()
