@@ -203,12 +203,7 @@ struct CreateStoreView: View {
             .navigationDestination(item: $createRoute) { route in
                 Group {
                     if case let .createStoreComplete(dto) = route {
-                        if let img = selectedImage {
                             StoreCreateDoneView(dto: dto, method: method)
-                        } else {
-                            Text("필수 값이 없습니다. (이미지/점포 ID)")
-                        }
-                        
                     } else {
                         EmptyView()
                     }
