@@ -6,18 +6,18 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Review: Identifiable, Codable, Hashable {
-    var id: String = UUID().uuidString
-    var userId: String
-    var feedId: String
+    let userId: String
+    let feedId: String
+
+    @ServerTimestamp var createdAt: Date?
+
+    var id: String { "\(feedId)-\(userId)" }
 
     var content: String
     var imageURL: URL?
     var rating: Double
-    var createdAt: Date
 
-    var serverId: Int64?                    // reviewid
-    var serverUserId: Int64?                // userid
-    var serverFeedId: Int64?                // feedid
 }

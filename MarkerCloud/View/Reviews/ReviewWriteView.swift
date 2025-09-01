@@ -9,8 +9,8 @@ import SwiftUI
 import PhotosUI
 
 struct ReviewWriteView: View {
-    let feedId: Int
-    @StateObject private var vm = ReviewPostVM()
+    let feedId: String
+    @StateObject private var reviewVM = ReviewWriteVM()
     
     @Environment(\.dismiss) var dismiss
     
@@ -23,6 +23,7 @@ struct ReviewWriteView: View {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         return !trimmed.isEmpty && rating > 0
     }
+    let appUser: AppUser?
     var body: some View {
         NavigationStack {
             Form {
@@ -139,23 +140,33 @@ struct ReviewWriteView: View {
                     .tint(Color("Main"))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("게시") {
+                    Button {
                         Task {
-                            await vm.submitReview(
-                                feedId: feedId,
-                                userId: 1,
-                                reviewContent: content,
-                                reviewScore: rating,
-                                reviewImage: selectedImage
-                            )
-                            if vm.done { /* 완료 처리 */ }
-                            dismiss()
+                            Task {
+                                guard let uid = appUser?.id else {
+                                    reviewVM.errorMessage = "로그인이 필요합니다."
+                                    return
+                                }
+                                await reviewVM.submit(feedId: feedId,
+                                                userId: uid,
+                                                content: content,
+                                                rating: Double(rating),
+                                                image: selectedImage)
+                                if reviewVM.done { dismiss() }
+                            }
                         }
                         
+                    } label: {
+                        Text(reviewVM.isSubmitting ? "등록 중…" : "등록")
                     }
                     .tint(canPost ? Color("Main") : Color.gray)
                     .disabled(!canPost)
                 }
+            }
+            .alert("오류", isPresented: .constant(reviewVM.errorMessage != nil)) {
+                Button("확인") { reviewVM.errorMessage = nil }
+            } message: {
+                Text(reviewVM.errorMessage ?? "")
             }
         }
     }

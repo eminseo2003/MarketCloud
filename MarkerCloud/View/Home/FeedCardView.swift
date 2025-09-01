@@ -13,6 +13,7 @@ struct FeedCardView: View {
     @Binding var pushStoreId: String?
     @StateObject private var storeVm = StoreHeaderVM()
     @StateObject private var likeVM = FeedLikeVM()
+    @StateObject private var reviewVM = ReviewListVM()
     
     let appUser: AppUser?
     var body: some View {
@@ -66,8 +67,7 @@ struct FeedCardView: View {
                             .font(.title3)
                             .foregroundColor(.primary)
                     }
-                    Text("0")
-                    //Text("\(feed.reviewCount)")
+                    Text("\(reviewVM.reviewsCount)")
                         .font(.footnote)
                         .foregroundColor(.primary)
                         .bold()
@@ -105,17 +105,25 @@ struct FeedCardView: View {
             .padding(.horizontal)
         }
         .padding(.bottom, 8)
-        .task { await storeVm.load(storeId: feed.storeId) }
+        .task {
+            await storeVm.load(storeId: feed.storeId)
+            await reviewVM.load(feedId: feed.id)
+        }
         .task {
             if let uid = appUser?.id {
                 await likeVM.start(feedId: feed.id, userId: uid)
             }
         }
         .onDisappear { likeVM.stop() }
-        //        .sheet(isPresented: $isCommentSheetPresented) {
-        //            CommentSheetView(feedId: feed.id)
-        //                .presentationDetents([.medium])
-        //        }
+        .sheet(isPresented: $isCommentSheetPresented, onDismiss: {
+            Task {
+                await storeVm.load(storeId: feed.storeId)
+                await reviewVM.load(feedId: feed.id)
+            }
+        }) {
+            CommentSheetView(feedId: feed.id, appUser: appUser)
+                .presentationDetents([.medium])
+        }
     }
 }
 

@@ -39,10 +39,5 @@ struct Feed: Identifiable, Codable, Hashable {
     var product: ProductFeedPayload?
     
     var reviews: [Review] = []
-    
-    var averageRating: Double {
-        guard !reviews.isEmpty else { return 0 }
-        return Double(reviews.reduce(0) { $0 + $1.rating }) / Double(reviews.count)
-    }
 }
 

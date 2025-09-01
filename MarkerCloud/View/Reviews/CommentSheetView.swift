@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct CommentSheetView: View {
-    let feedId: Int
-    @StateObject private var reviewVM = ReviewVM()
+    let feedId: String
+    @StateObject private var reviewVM = ReviewListVM()
     
     @State private var isWritingReview = false
-
+    let appUser: AppUser?
     var body: some View {
         NavigationStack {
             VStack {
@@ -26,7 +26,7 @@ struct CommentSheetView: View {
                 .padding(.horizontal)
                 
                 Divider()
-                List(reviewVM.reviews) { review in
+                List(reviewVM.reviews, id: \.id) { review in
                     HStack(spacing: 10) {
                         if let imageName = review.imageURL {
                             ReviewImage(url: imageName)
@@ -45,7 +45,7 @@ struct CommentSheetView: View {
                         }
                         
                         Spacer()
-                        StarRatingView(rating: review.score)
+                        StarRatingView(rating: review.rating)
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
@@ -61,14 +61,18 @@ struct CommentSheetView: View {
                 }
                 .buttonStyle(FilledCTA())
                 .padding()
-                .sheet(isPresented: $isWritingReview) {
-                    ReviewWriteView(feedId: feedId)
+                .sheet(isPresented: $isWritingReview, onDismiss: {
+                    Task {
+                        await reviewVM.load(feedId: feedId)
+                    }
+                }) {
+                    ReviewWriteView(feedId: feedId, appUser: appUser)
                 }
             }
             .navigationTitle("리뷰")
             .navigationBarTitleDisplayMode(.inline)
             .task {
-                await reviewVM.fetch(feedId: feedId)
+                await reviewVM.load(feedId: feedId)
             }
         }
     }
