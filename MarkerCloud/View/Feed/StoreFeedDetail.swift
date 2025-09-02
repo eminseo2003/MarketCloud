@@ -64,15 +64,15 @@ struct StoreFeedDetail: View {
                                 Button(action: {
                                     feedRoute = .feedNameRoute
                                 }) {
-                                    RowButton(title: "상품 이름",
+                                    RowButton(title: "점포 이름",
                                               value: feedVm.title ?? " ",
                                               icon: "chevron.right")
                                 }
                                 Button { feedRoute = .feedMemoRoute } label: {
-                                        RowButton(title: "상품 내용",
-                                                  value: clean(feedVm.body ?? ""),
-                                                  icon: "chevron.right")
-                                    }
+                                    RowButton(title: "점포 내용",
+                                              value: clean(feedVm.body ?? ""),
+                                              icon: "chevron.right")
+                                }
                             }
                         }
                         .padding(16)
@@ -97,7 +97,7 @@ struct StoreFeedDetail: View {
                                     Button {
                                         withAnimation(.easeInOut) { isScriptExpanded.toggle() }
                                     } label: {
-                                        RowButton(title: "상품 설명",
+                                        RowButton(title: "점포 설명",
                                                   value: isScriptExpanded ? " " : clean(feedVm.storeInfo?.description ?? ""),
                                                   icon: isScriptExpanded ? "chevron.down" : "chevron.right")
                                     }

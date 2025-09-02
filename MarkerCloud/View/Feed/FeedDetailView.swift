@@ -19,9 +19,9 @@ struct FeedDetailView: View {
             if vm.promoKind == "store" {
                 StoreFeedDetail(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else if vm.promoKind == "product" {
-                Text("농담공상품")
+                ProductFeedDetail(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else {
-                Text("농담공이벤트")
+                EventDetailView(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)
             }
         }
         

@@ -170,16 +170,48 @@ enum FeedService {
     }
     private static func parseEvent(from any: Any?) -> EventFeedPayload? {
         guard let dict = any as? [String: Any] else { return nil }
-        let name = dict["eventName"] as? String ?? ""          // 필수면 guard 로 바꿔도 됨
+
+        // eventName을 필수로 본다면 guard로 체크
+        let name = (dict["eventName"] as? String) ?? ""
+
         let desc = dict["description"] as? String
-        let img  = dict["imgUrl"] as? String
-        let start = dict["startAt"] as? Date
-        let end = dict["endAt"] as? Date
-        return EventFeedPayload(eventName: name,
-                                description: desc,
-                                imgUrl: img,
-                                startAt: start,
-                                endAt: end)
+
+        let img = dict["imgUrl"] as? String
+
+        let start: Date? = dateFromFirestoreValue(dict["startAt"])
+        let end:   Date? = dateFromFirestoreValue(dict["endAt"])
+
+        return EventFeedPayload(
+            eventName: name,
+            description: desc,
+            imgUrl: img,
+            startAt: start,
+            endAt: end
+        )
+    }
+
+    private static func dateFromFirestoreValue(_ value: Any?) -> Date? {
+        switch value {
+        case let ts as Timestamp:
+            return ts.dateValue()
+        case let d as Date:
+            return d
+        case let s as String:
+            let iso = ISO8601DateFormatter()
+            if let d = iso.date(from: s) { return d }
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.timeZone = TimeZone(secondsFromGMT: 0)
+            for format in ["yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+                           "yyyy-MM-dd'T'HH:mm:ssXXXXX",
+                           "yyyy-MM-dd"] {
+                f.dateFormat = format
+                if let d = f.date(from: s) { return d }
+            }
+            return nil
+        default:
+            return nil
+        }
     }
     
     private static func parseStoreInfo(from any: Any?) -> StoreFeedPayload? {
