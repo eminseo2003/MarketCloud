@@ -12,8 +12,10 @@ struct MyStoreView: View {
     @StateObject private var vm = StoreMembershipVM()
     @StateObject private var myStoresVM = MyStoresVM()
     var ismypage: Bool = true
+    
     @Binding var selectedMarketID: Int
     let appUser: AppUser?
+    
     private var ownerId: String? {
         appUser?.id ?? Auth.auth().currentUser?.uid
     }
@@ -59,12 +61,6 @@ struct MyStoreView: View {
         .onDisappear { vm.stop() }
         // 값 변화를 자연스럽게
         .animation(.default, value: vm.hasStore)
-        // Alert 본문
-        .alert("알림", isPresented: $showCreatedAlert) {
-            Button("확인", role: .cancel) { }
-        } message: {
-            Text("점포 등록이 완료되었습니다.")
-        }
         .task {
             guard let ownerId else { return }
             await myStoresVM.load(ownerId: ownerId, marketId: selectedMarketID)

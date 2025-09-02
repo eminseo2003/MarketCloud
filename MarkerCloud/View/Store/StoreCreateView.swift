@@ -49,38 +49,6 @@ struct StoreCreateView: View {
             Section(header: Text("점포명")) {
                 TextField("점포명", text: $storeName)
                     .padding(.trailing, 36)
-                //                    .overlay(alignment: .trailing) {
-                //                        Button {
-                //                            Task {
-                //                                await lookUpVm.fetch(by: storeName)
-                //
-                //                                if let dto = lookUpVm.store {
-                //                                    if let display = StoreCategory(rawValue: dto.categoryId)?.displayName {
-                //                                        selectedCategory = display
-                //                                    }
-                //                                    storeDetail.phoneNumber = dto.phoneNumber
-                //                                    storeDetail.weekdayOpen  = fromZTimeString(dto.weekdayStart)
-                //                                    storeDetail.weekdayClose = fromZTimeString(dto.weekdayEnd)
-                //                                    storeDetail.weekendOpen  = fromZTimeString(dto.weekendStart)
-                //                                    storeDetail.weekendClose = fromZTimeString(dto.weekendEnd)
-                //                                    storeDetail.roadAddress = dto.address
-                //                                    storeDetail.usesVouchers = dto.paymentMethods
-                //
-                //                                    lookupAlertMessage = "조회한 정보로 폼을 채웠어요. 확인 후 수정/저장하세요."
-                //                                    showLookupAlert = true
-                //                                } else {
-                //                                    lookupAlertMessage = lookUpVm.errorMessage ?? "해당 점포 정보를 찾지 못했어요."
-                //                                    showLookupAlert = true
-                //                                }
-                //                            }
-                //                        } label: {
-                //                            Image(systemName: "magnifyingglass")
-                //                                .imageScale(.medium)
-                //                                .padding(.horizontal, 8)
-                //                                .padding(.vertical, 6)
-                //                        }
-                //                        .buttonStyle(.plain)
-                //                    }
                     .focused($isTextFieldFocused)
             }
             
@@ -241,7 +209,7 @@ struct StoreCreateView: View {
                         )
                         
                         if createVm.done {
-                            
+                            dismiss()
                         } else if let msg = createVm.errorMessage {
                             lookupAlertMessage = msg
                             showLookupAlert = true
