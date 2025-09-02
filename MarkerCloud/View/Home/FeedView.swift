@@ -11,6 +11,7 @@ struct FeedView: View {
     let feedId: String
     let appUser: AppUser?
     let storeId: String
+    @Binding var selectedMarketID: Int
 
     @StateObject private var vm = FeedVM()
     @StateObject private var storeVm = StoreHeaderVM()
@@ -124,6 +125,9 @@ struct FeedView: View {
         .navigationTitle(vm.title ?? "제목 없음")
         .navigationDestination(item: $pushStoreId) { storeId in
             StoreProfileView(storeId: storeId, appUser: appUser)
+        }
+        .navigationDestination(item: $pushFeedId) { feedId in
+            FeedDetailView(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)
         }
         .task {
             await vm.load(feedId: feedId)

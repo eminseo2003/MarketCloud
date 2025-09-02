@@ -155,12 +155,7 @@ struct MainView: View {
                 StoreProfileView(storeId: storeId, appUser: appUser)
             }
             .navigationDestination(item: $pushFeedId) { feedId in
-                if let storeId = vm.storeId {
-                    FeedView(feedId: feedId, appUser: appUser, storeId: storeId)
-                        .onAppear {
-                            print("[Nav] -> FeedView feedId=\(feedId), storeId=\(storeId)")
-                        }
-                }
+                FeedDetailView(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)
             }
             .navigationDestination(item: $route) { route in
                 if route == .todayMarket {

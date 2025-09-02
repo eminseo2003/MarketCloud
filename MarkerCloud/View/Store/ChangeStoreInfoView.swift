@@ -5,8 +5,8 @@
 ////  Created by 이민서 on 8/17/25.
 ////
 //
-//import SwiftUI
-//import PhotosUI
+import SwiftUI
+import PhotosUI
 //
 //enum StoreRoute: Hashable, Identifiable {
 //    case nameroute
@@ -287,33 +287,33 @@
 //    }
 //}
 //
-//struct RemoteThumb: View {
-//    let url: URL
-//    
-//    var body: some View {
-//        AsyncImage(url: url) { phase in
-//            switch phase {
-//            case .success(let image):
-//                image
-//                    .resizable()
-//                    .scaledToFill()
-//                    .frame(width: 110, height: 110)
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    .clipped()
-//            case .failure(_):
-//                Image(systemName: "photo")
-//                    .resizable().scaledToFit().padding(24)
-//                    .frame(width: 110, height: 110)
-//                    .foregroundStyle(.secondary)
-//                    .background(Color(uiColor: .systemGray5))
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//            default:
-//                ProgressView()
-//                    .frame(width: 110, height: 110)
-//                    .frame(maxWidth: .infinity)
-//                    .background(Color(uiColor: .systemGray5))
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//            }
-//        }
-//    }
-//}
+struct RemoteThumb: View {
+    let url: String
+    
+    var body: some View {
+        AsyncImage(url: URL(string: url)) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 110, height: 110)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipped()
+            case .failure(_):
+                Image(systemName: "photo")
+                    .resizable().scaledToFit().padding(24)
+                    .frame(width: 110, height: 110)
+                    .foregroundStyle(.secondary)
+                    .background(Color(uiColor: .systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            default:
+                ProgressView()
+                    .frame(width: 110, height: 110)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(uiColor: .systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+        }
+    }
+}

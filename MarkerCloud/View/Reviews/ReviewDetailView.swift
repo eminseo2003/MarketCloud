@@ -5,7 +5,7 @@
 ////  Created by 이민서 on 8/19/25.
 ////
 //
-//import SwiftUI
+import SwiftUI
 //
 //struct ReviewDetailView: View {
 //    let feed: Feed
@@ -96,36 +96,36 @@
 //        return f.string(from: date)
 //    }
 //}
-//struct LargeReviewImage: View {
-//    let url: URL
-//    
-//    var body: some View {
-//        AsyncImage(url: url) { phase in
-//            switch phase {
-//            case .success(let image):
-//                image
-//                    .resizable()
-//                    .scaledToFill()
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 300)
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    .clipped()
-//            case .failure(_):
-//                Image(systemName: "photo")
-//                    .resizable().scaledToFit().padding(24)
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 300)
-//                    .foregroundStyle(.secondary)
-//                    .background(Color(uiColor: .systemGray5))
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//            default:
-//                ProgressView()
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 300)
-//                    .frame(maxWidth: .infinity)
-//                    .background(Color(uiColor: .systemGray5))
-//                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//            }
-//        }
-//    }
-//}
+struct LargeReviewImage: View {
+    let url: String
+    
+    var body: some View {
+        AsyncImage(url: URL(string: url)) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .clipped()
+            case .failure(_):
+                Image(systemName: "photo")
+                    .resizable().scaledToFit().padding(24)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .foregroundStyle(.secondary)
+                    .background(Color(uiColor: .systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            default:
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .frame(maxWidth: .infinity)
+                    .background(Color(uiColor: .systemGray5))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+        }
+    }
+}

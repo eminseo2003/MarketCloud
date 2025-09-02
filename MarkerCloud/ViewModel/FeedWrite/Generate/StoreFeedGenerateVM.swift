@@ -96,15 +96,15 @@ final class StoreFeedGenerateVM: ObservableObject {
                 "mediaType": mediaKind,
                 "title": title,
                 "prompt": prompt,
-                "mediaUrl": inputImageURL.absoluteString,
+                "mediaUrl": aiImageURL.absoluteString,
                 "body": aiBody,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp(),
                 "marketId": marketId,
                 "userId": userId,
                 "storeInfo": [
-                    "description": aiBody,
-                    "imgUrl": aiImageURL.absoluteString
+                    "description": storeDescription,
+                    "imgUrl": inputImageURL.absoluteString
                 ]
             ]
             batch.setData(feedPayload, forDocument: feedRef)
@@ -118,15 +118,15 @@ final class StoreFeedGenerateVM: ObservableObject {
                 "mediaType": mediaKind,
                 "title": title,
                 "prompt": prompt,
-                "mediaUrl": inputImageURL.absoluteString,
+                "mediaUrl": aiImageURL.absoluteString,
                 "body": aiBody,
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp(),
                 "marketId": marketId,
                 "userId": userId,
                 "storeInfo": [
-                    "description": aiBody,
-                    "imgUrl": aiImageURL.absoluteString
+                    "description": storeDescription,
+                    "imgUrl": inputImageURL.absoluteString
                 ]
             ]
             batch.setData(storeFeedPayload, forDocument: storeFeedRef)
