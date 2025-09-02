@@ -241,10 +241,10 @@ import FirebaseAuth
 //}
 //
 struct FeedCard: View {
-    let feed: ProductFeedLite
+    let feed: FeedLite
     let appUser: AppUser?
     @Binding var selectedMarketID: Int
-    @Binding var selectedFeed: ProductFeedLite?
+    @Binding var selectedFeed: FeedLite?
     @StateObject private var likeVM = FeedLikeVM()
     @StateObject private var vm = MyProductVM()
     

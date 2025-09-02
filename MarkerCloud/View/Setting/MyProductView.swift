@@ -13,7 +13,7 @@ struct MyProductView: View {
     @Binding var selectedMarketID: Int
     let appUser: AppUser?
     var hasProduct: Bool = false
-    //내 피드들 중에 promoKind가 product인 애들만 가져와서 보여줄거야. 그 전에 하나라도 있으면 hasProduct가 true가 되게 하는 뷰모델도 부탁해
+
     var body: some View {
         VStack(spacing: 0) {
             if vm.isLoading {

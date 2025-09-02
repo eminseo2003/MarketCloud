@@ -1,5 +1,5 @@
 //
-//  MyProductVM.swift
+//  MyEventVM.swift
 //  MarkerCloud
 //
 //  Created by 이민서 on 9/3/25.
@@ -8,12 +8,21 @@
 import Foundation
 import FirebaseFirestore
 
+struct FeedLite: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let body: String
+    let mediaUrl: URL?
+    let updatedAt: Date?
+    let storeId: String
+}
+
 @MainActor
-final class MyProductVM: ObservableObject {
+final class MyEventVM: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var hasProduct = false
-    @Published var products: [FeedLite] = []
+    @Published var events: [FeedLite] = []
 
     private var listener: ListenerRegistration?
 
@@ -30,7 +39,7 @@ final class MyProductVM: ObservableObject {
 
         var q: Query = Firestore.firestore().collection("feeds")
             .whereField("userId", isEqualTo: userId)
-            .whereField("promoKind", isEqualTo: "product")
+            .whereField("promoKind", isEqualTo: "event")
             .order(by: "updatedAt", descending: true)
             .limit(to: limit)
 
@@ -50,7 +59,7 @@ final class MyProductVM: ObservableObject {
                     return
                 }
                 guard let docs = snap?.documents else {
-                    self.products = []
+                    self.events = []
                     self.hasProduct = false
                     self.isLoading = false
                     return
@@ -74,7 +83,7 @@ final class MyProductVM: ObservableObject {
                     )
                 }
 
-                self.products = items
+                self.events = items
                 self.hasProduct = !items.isEmpty
                 self.isLoading = false
             }

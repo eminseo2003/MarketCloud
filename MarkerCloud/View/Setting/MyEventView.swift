@@ -1,28 +1,43 @@
-////
-////  MyEventView.swift
-////  MarkerCloud
-////
-////  Created by 이민서 on 8/20/25.
-////
 //
-//import SwiftUI
+//  MyEventView.swift
+//  MarkerCloud
 //
-//struct MyEventView: View {
-//    var hasEvent: Bool = true
-//    var filteredEvents: [Feed] {
-//        dummyFeed
-//            .filter { $0.promoKind == .event }
-//    }
-//    var body: some View {
-//        VStack(spacing: 0) {
-//            if hasEvent {
-//                MyeventListView(eventList: filteredEvents)
-//            } else {
-//                NoEventView()
-//                    .background(Color(uiColor: .systemGray6).ignoresSafeArea())
-//            }
-//        }
-//        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//        .navigationTitle("내 이벤트")
-//    }
-//}
+//  Created by 이민서 on 8/20/25.
+//
+
+import SwiftUI
+import FirebaseAuth
+
+struct MyEventView: View {
+    @StateObject private var vm = MyEventVM()
+    @Binding var selectedMarketID: Int
+    let appUser: AppUser?
+    var hasProduct: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            if vm.isLoading {
+                ProgressView("불러오는 중…")
+            } else if vm.hasProduct {
+                MyeventListView(eventList: vm.events, appUser: appUser, selectedMarketID: $selectedMarketID)
+            } else {
+                NoEventView(selectedMarketID: $selectedMarketID, appUser: appUser)
+                    .background(Color(uiColor: .systemGray6).ignoresSafeArea())
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("내 이벤트")
+        .onAppear {
+            guard let uid = appUser?.id ?? Auth.auth().currentUser?.uid else { return }
+            // 시장별 필터를 쓰고 싶으면 marketId: selectedMarketID 전달
+            vm.start(userId: uid, marketId: selectedMarketID, includeDrafts: false)
+        }
+        .onChange(of: selectedMarketID) { _, new in
+            guard let uid = appUser?.id ?? Auth.auth().currentUser?.uid else { return }
+            vm.start(userId: uid, marketId: new, includeDrafts: false)
+        }
+        .onDisappear {
+            vm.stop()
+        }
+    }
+}

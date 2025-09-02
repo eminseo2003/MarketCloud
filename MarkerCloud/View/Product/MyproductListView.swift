@@ -15,15 +15,15 @@ private extension String {
 }
 struct MyproductListView: View {
     @StateObject private var vm = MyProductVM()
-    let productList: [ProductFeedLite]
-    @State private var selectedFeed: ProductFeedLite? = nil
+    let productList: [FeedLite]
+    @State private var selectedFeed: FeedLite? = nil
     
     @FocusState private var isTextFieldFocused: Bool
     @State private var searchText: String = ""
     private let productPromotion = Promotion(name: "상품", imageName: "loginBackground")
     @State private var pushPromotion: Promotion? = nil
     
-    private var filteredProducts: [ProductFeedLite] {
+    private var filteredProducts: [FeedLite] {
         let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return productList }
         let nq = q.normalizedForSearch
