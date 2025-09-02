@@ -19,6 +19,7 @@ struct StoreFeedDetail: View {
     let appUser: AppUser?
     @Binding var selectedMarketID: Int
     @StateObject private var feedVm = FeedVM()
+    @StateObject private var ownFeedVM = FeedOwnershipVM()
     
     @State private var feedRoute: StoreFeedRoute? = nil
     private let productPromotion = Promotion(name: "점포", imageName: "loginBackground")
@@ -174,12 +175,17 @@ struct StoreFeedDetail: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(role: .destructive) {
-                    
-                } label: {
-                    Image(systemName: "trash")
+                if ownFeedVM.isOwner {
+                    Button(role: .destructive) {
+                        
+                    } label: {
+                         
+                            Image(systemName: "trash")
+                        
+                    }
+                    .tint(.red)
                 }
-                .tint(.red)
+                
             }
         }
         .navigationDestination(item: $feedRoute) { r in
@@ -196,6 +202,7 @@ struct StoreFeedDetail: View {
         }
         .task {
             await feedVm.load(feedId: feedId)
+            await ownFeedVM.load(feedId: feedId, ownerId: appUser?.id ?? "")
         }
     }
     private func clean(_ s: String?) -> String {
