@@ -12,7 +12,6 @@ import FirebaseStorage
 
 struct StoreCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = StoreFeedUpLoadVM()
     
     let dto: GenerateDTO
     let method: MediaType
@@ -21,6 +20,8 @@ struct StoreCreateDoneView: View {
     @State private var showPostAlert = false
     @State private var contentText: String
     
+    @State private var isPublishing = false
+        @State private var publishError: String?
     @FocusState private var isTextFieldFocused: Bool
     
     init(dto: GenerateDTO, method: MediaType) {
@@ -152,20 +153,20 @@ struct StoreCreateDoneView: View {
                 }
             }
             .overlay {
-                if vm.isUploading {
-                    ZStack {
-                        Color.black.opacity(0.25).ignoresSafeArea()
-                        ProgressView("업로드 중…")
-                            .padding().background(.ultraThinMaterial)
-                            .cornerRadius(12)
-                    }
-                }
-            }
-            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
-                Button("확인") { vm.errorMessage = nil }
-            } message: {
-                Text(vm.errorMessage ?? "")
-            }
+                            if isPublishing {
+                                ZStack {
+                                    Color.black.opacity(0.25).ignoresSafeArea()
+                                    ProgressView("업로드 중…")
+                                        .padding().background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                }
+                            }
+                        }
+                        .alert("오류", isPresented: .constant(publishError != nil)) {
+                            Button("확인") { publishError = nil }
+                        } message: {
+                            Text(publishError ?? "")
+                        }
         }
     }
 }

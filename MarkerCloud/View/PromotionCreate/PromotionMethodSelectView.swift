@@ -79,14 +79,16 @@ struct PromotionMethodSelectView: View {
                             CreateStoreView(
                                 feedType: mapFeedType(from: promotion.name),
                                 method: pushMethod?.mediaType ?? .image,
-                                appUser: appUser, selectedMarketID: selectedMarketID
+                                appUser: appUser,
+                                selectedMarketID: selectedMarketID
                             )
-//                        } else if promotion.name == "상품"{
-//                            CreateProductView(
-//                                feedType: mapFeedType(from: promotion.name),
-//                                method: pushMethod?.mediaType ?? .image,
-//                                appUser: appUser
-//                            )
+                        } else if promotion.name == "상품"{
+                            CreateProductView(
+                                feedType: mapFeedType(from: promotion.name),
+                                method: pushMethod?.mediaType ?? .image,
+                                appUser: appUser,
+                                selectedMarketID: selectedMarketID
+                            )
 //                        } else {
 //                            CreateEventView(
 //                                feedType: mapFeedType(from: promotion.name),

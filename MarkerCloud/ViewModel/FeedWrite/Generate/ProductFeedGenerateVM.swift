@@ -1,142 +1,201 @@
-////
-////  ProductFeedUploadVM.swift
-////  MarkerCloud
-////
-////  Created by 이민서 on 8/27/25.
-////
 //
-//import Foundation
-//import UIKit
+//  ProductFeedUploadVM.swift
+//  MarkerCloud
 //
-//@MainActor
-//final class ProductFeedGenerateVM: ObservableObject {
-//    @Published var isUploading = false
-//    @Published var errorMessage: String?
-//    @Published var done = false
-//    @Published var generated: GenerateDTO?
-//    
-//    // 토글: 필요 시 로그 끄기
-//    private let enableLog = true
-//    private func log(_ items: Any...) {
-//        guard enableLog else { return }
-//        let msg = items.map { "\($0)" }.joined(separator: " ")
-//        print("[FeedUploadVM]", msg)
-//    }
-//    private func prettyJSON(_ data: Data) -> String? {
-//        guard let obj = try? JSONSerialization.jsonObject(with: data),
-//              let pretty = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
-//              let str = String(data: pretty, encoding: .utf8) else { return nil }
-//        return str
-//    }
-//    
-//    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-//    private var generateURL: URL {
-//        base.appendingPathComponent("api")
-//            .appendingPathComponent("feed")
-//            .appendingPathComponent("generate")
-//    }
-//    
-//    func uploadProductFeed(
-//        feedType: String,          // "product"
-//        mediaType: String,         // "image" | "video"
-//        userId: Int,
-//        productName: String,
-//        categoryId: Int,
-//        productDescription: String,
-//        image: UIImage
-//    ) async {
-//        let t0 = CFAbsoluteTimeGetCurrent()
-//        log("▶️ uploadProductFeed called | feedType:", feedType, "| mediaType:", mediaType,
-//            "| userId:", userId, "| name:", productName, "| categoryId:", categoryId,
-//            "| descLen:", productDescription.count)
+//  Created by 이민서 on 8/27/25.
 //
-//        guard let data = image.jpegData(compressionQuality: 0.9) else {
-//            errorMessage = "이미지 인코딩 실패"; log("이미지 인코딩 실패"); return
-//        }
-//        log("image data size:", data.count, "bytes")
-//
-//        var req = URLRequest(url: generateURL)
-//        req.httpMethod = "POST"
-//        let boundary = "Boundary-\(UUID().uuidString)"
-//        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-//        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
-//
-//        var body = Data()
-//        func addField(_ name: String, _ value: String) {
-//            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
-//            body.append("\(value)\r\n".data(using: .utf8)!)
-//        }
-//        func addFieldNumber(_ name: String, _ value: Int) {
-//            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n".data(using: .utf8)!)
-//            body.append("Content-Type: application/json\r\n\r\n".data(using: .utf8)!)
-//            body.append("\(value)\r\n".data(using: .utf8)!)
-//        }
-//
-//        // 필드
-//        let ft = feedType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-//        let mt = mediaType.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-//        addField("feedType", ft)                           // "product"
-//        addField("mediaType", mt)                          // "image" | "video"
-//        addFieldNumber("userId", userId)
-//        addField("productName", productName)
-//        addField("productDescription", productDescription)
-//        addField("categoryId", String(categoryId))         // 서버 스펙에 맞춰 전송
-//
-//        // 파일: productImage
-//        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-//        body.append("Content-Disposition: form-data; name=\"productImage\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
-//        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-//        body.append(data)
-//        body.append("\r\n".data(using: .utf8)!)
-//        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-//
-//        req.httpBody = body
-//        log("POST \(generateURL.absoluteString)")
-//        log("payload size:", body.count, "bytes")
-//
-//        isUploading = true
-//        defer {
-//            isUploading = false
-//            log("elapsed:", String(format: "%.3f s", CFAbsoluteTimeGetCurrent() - t0))
-//        }
-//
-//        do {
-//            let (data, resp) = try await URLSession.shared.data(for: req)
-//            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-//            log("status:", code)
-//
-//            if let pretty = prettyJSON(data) {
-//                log("↩︎ JSON response:\n\(pretty)")
-//            } else {
-//                log("↩︎ raw response:", String(data: data, encoding: .utf8) ?? "<binary \(data.count) bytes>")
-//            }
-//
-//            guard (200..<300).contains(code) else {
-//                errorMessage = "업로드 실패 (status \(code))"
-//                log("업로드 실패:", errorMessage ?? ""); return
-//            }
-//
-//            // GenerateResponse 디코딩 (이미 VM에 타입/프로퍼티(generated) 있어야 함)
-//            do {
-//                let res = try JSONDecoder().decode(GenerateResponse.self, from: data)
-//                if res.success {
-//                    self.generated = res.responseDto
-//                    self.done = true
-//                    log("업로드 성공 | mediaUrl:", res.responseDto.feedMediaUrl)
-//                } else {
-//                    self.errorMessage = res.error ?? "응답 파싱 실패"
-//                    log("서버 실패:", self.errorMessage ?? "")
-//                }
-//            } catch {
-//                self.errorMessage = "응답 파싱 실패: \(error.localizedDescription)"
-//                log("디코딩 실패:", self.errorMessage ?? "")
-//            }
-//        } catch {
-//            errorMessage = error.localizedDescription
-//            log("네트워크 에러:", error.localizedDescription)
-//        }
-//    }
-//
-//}
+
+import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
+import FirebaseStorage
+import FirebaseFunctions
+import FirebaseCore
+
+@MainActor
+final class ProductFeedGenerateVM: ObservableObject {
+    @Published var isUploading = false
+    @Published var errorMessage: String?
+    @Published var generated: GenerateDTO?
+    
+    let functions = Functions.functions(region: "asia-northeast3")
+    
+    func uploadProductFeed(
+        feedType: FeedType,
+        mediaType: MediaType,
+        userId: String,
+        storeId: String,
+        marketId: Int,
+        title: String,
+        categoryId: Int,
+        productDescription: String,
+        image: UIImage
+    ) async {
+        guard !isUploading else { return }
+        isUploading = true
+        errorMessage = nil
+        generated = nil
+        
+        do {
+            let db = Firestore.firestore()
+            let storage = Storage.storage()
+            let feedId = UUID().uuidString
+            let promoKind = Self.toPromoKind(feedType).rawValue
+            let mediaKind = mediaType.rawValue
+            
+            // 1) 이미지 업로드
+            guard let data = image.jpegData(compressionQuality: 0.9) else {
+                throw NSError(domain: "ProductFeedGenerateVM", code: -10,
+                              userInfo: [NSLocalizedDescriptionKey: "이미지 인코딩 실패"])
+            }
+            let inputRef = storage.reference().child("feeds/\(feedId)/input.jpg")
+            let meta = StorageMetadata(); meta.contentType = "image/jpeg"
+            _ = try await inputRef.putDataAsync(data, metadata: meta)
+            let inputImageURL = try await downloadURLWithRetry(ref: inputRef)
+            
+            // 2) 프롬프트
+            let prompt = """
+            다음 점포 소개 글과 이미지를 바탕으로 매력적인 상품 홍보 피드를 생성해 주세요.
+            - 상품명: \(title)
+            - 상품설명(사용자 입력): \(productDescription)
+            - 참고 이미지: \(inputImageURL.absoluteString)
+            산뜻하고 간결한 톤으로 2~4문장으로 작성해 주세요.
+            """
+            
+            // 3) AI 호출 (Cloud Functions)
+            let ai = try await generateWithAI(
+                title: title,
+                description: productDescription,
+                inputImageURL: inputImageURL,
+                mediaType: mediaType,
+                marketId: marketId,
+                userId: userId,
+                storeId: storeId
+            )
+            let aiBody = ai.body
+            let aiImageURL = ai.imageURL
+            
+            // 4) 배치 쓰기: /feeds, /stores/{storeId}/feeds, /stores.feedIds
+            let batch = db.batch()
+            
+            let feedRef = db.collection("feeds").document(feedId)
+            let storeRef = db.collection("stores").document(storeId)
+            let storeFeedRef = storeRef.collection("feeds").document(feedId)
+            
+            // /feeds/{feedId} 전체 문서
+            let feedPayload: [String: Any] = [
+                "id": feedId,
+                "storeId": storeId,
+                "isPublished": false,
+                "promoKind": promoKind,
+                "mediaType": mediaKind,
+                "title": title,
+                "prompt": prompt,
+                "mediaUrl": aiImageURL.absoluteString,
+                "body": aiBody,
+                "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
+                "marketId": marketId,
+                "userId": userId,
+                "product": [
+                    "productName": title,
+                    "description": productDescription,
+                    "imgUrl": inputImageURL.absoluteString,
+                    "productCategoryId": categoryId
+                ]
+            ]
+            batch.setData(feedPayload, forDocument: feedRef)
+            
+            // /stores/{storeId}/feeds/{feedId} 서브컬렉션(요약본)
+            let storeFeedPayload: [String: Any] = [
+                "id": feedId,
+                "storeId": storeId,
+                "isPublished": false,
+                "promoKind": promoKind,
+                "mediaType": mediaKind,
+                "title": title,
+                "prompt": prompt,
+                "mediaUrl": aiImageURL.absoluteString,
+                "body": aiBody,
+                "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
+                "marketId": marketId,
+                "userId": userId,
+                "product": [
+                    "productName": title,
+                    "description": productDescription,
+                    "imgUrl": inputImageURL.absoluteString,
+                    "productCategoryId": categoryId
+                ]
+            ]
+            batch.setData(storeFeedPayload, forDocument: storeFeedRef)
+            
+            // 5) 커밋
+            try await batch.commit()
+            
+            // 6) UI용 DTO
+            generated = GenerateDTO(
+                id: feedId,
+                feedMediaUrl: inputImageURL.absoluteString,
+                feedBody: aiBody
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        
+        isUploading = false
+    }
+    
+    private func downloadURLWithRetry(ref: StorageReference) async throws -> URL {
+        for attempt in 1...5 {
+            do {
+                return try await ref.downloadURL()
+            } catch {
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
+            }
+        }
+        throw NSError(domain: "ProductFeedGenerateVM", code: -30,
+                      userInfo: [NSLocalizedDescriptionKey: "다운로드 URL을 가져오지 못했습니다."])
+    }
+    
+    private func generateWithAI(
+        title: String,
+        description: String,
+        inputImageURL: URL,
+        mediaType: MediaType,
+        marketId: Int,
+        userId: String,
+        storeId: String
+    ) async throws -> (body: String, imageURL: URL) {
+        let params: [String: Any] = [
+            "title": title,
+            "description": description,
+            "inputImageUrl": inputImageURL.absoluteString,
+            "mediaType": mediaType.rawValue,
+            "marketId": marketId,
+            "userId": userId,
+            "storeId": storeId
+        ]
+        let result = try await functions.httpsCallable("generateStoreFeed").call(params)
+        guard
+            let dict = result.data as? [String: Any],
+            let ok = dict["ok"] as? Bool, ok,
+            let body = dict["body"] as? String,
+            let imageUrlStr = dict["imageUrl"] as? String,
+            let imageURL = URL(string: imageUrlStr)
+        else {
+            throw NSError(domain: "ProductFeedGenerateVM", code: -20,
+                          userInfo: [NSLocalizedDescriptionKey: "AI 응답 파싱 실패"])
+        }
+        return (body, imageURL)
+    }
+    
+    private static func toPromoKind(_ t: FeedType) -> PromoKind {
+        switch "\(t)".lowercased() {
+        case "store":   return .store
+        case "product": return .product
+        case "event":   return .event
+        default:        return .store
+        }
+    }
+}

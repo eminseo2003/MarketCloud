@@ -7,42 +7,34 @@
 
 import SwiftUI
 import AVKit
+import FirebaseFirestore
+import FirebaseStorage
 
 struct ProductCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = ProductFeedUpLoadVM()
     
-    let mediaUrl: String
+    let dto: GenerateDTO
+    let method: MediaType
     
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    let method: MediaType
-    let feedType: String
-    let mediaType: String
-    let productName: String
-    let categoryId: Int
-    let productDescription: String
-    let productImage: UIImage
-    let currentUserID: Int
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, productName: String, categoryId: Int, productDescription: String, productImage: UIImage, currentUserID: Int) {
-        self.mediaUrl = mediaUrl
-        self.method = method
-        self.feedType = feedType
-        self.mediaType = mediaType
-        self.productName = productName
-        self.categoryId = categoryId
-        self.productDescription = productDescription
-        self.productImage = productImage
-        self.currentUserID = currentUserID
-        _contentText = State(initialValue: body)
-    }
+    
+    @State private var isPublishing = false
+        @State private var publishError: String?
     @FocusState private var isTextFieldFocused: Bool
+    
+    init(dto: GenerateDTO, method: MediaType) {
+        self.dto = dto
+        self.method = method
+        _contentText = State(initialValue: dto.feedBody)
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
                 if method == .image {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         AsyncImage(url: url) { img in
                             img.resizable().scaledToFit()
                         } placeholder: { ProgressView() }
@@ -55,7 +47,7 @@ struct ProductCreateDoneView: View {
                         Text("잘못된 이미지 URL")
                     }
                 } else {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         VideoPlayer(player: AVPlayer(url: url))
                             .frame(minHeight: 220)
                             .padding()
@@ -94,19 +86,18 @@ struct ProductCreateDoneView: View {
                     
                     Button(action: {
                         Task {
-                            
-                            await vm.uploadProductFeed(
-                                feedType: feedType,
-                                mediaType: mediaType,
-                                userId: currentUserID,
-                                productName: productName,
-                                categoryId: categoryId,
-                                productDescription: productDescription,
-                                productImage: productImage,
-                                feedMediaUrl: mediaUrl,
-                                feedBody: contentText
-                            )
-                            showPostAlert = true
+                            do {
+                                try await Firestore.firestore()
+                                    .collection("feeds").document(dto.id)
+                                    .setData([
+                                        "body": contentText,
+                                        "isPublished": true,
+                                        "updatedAt": FieldValue.serverTimestamp()
+                                    ], merge: true)
+                                showPostAlert = true
+                            } catch {
+                                print("publish error:", error.localizedDescription)
+                            }
                         }
                     }) {
                         Text("게시하기")
@@ -154,20 +145,20 @@ struct ProductCreateDoneView: View {
                 }
             }
             .overlay {
-                if vm.isUploading {
-                    ZStack {
-                        Color.black.opacity(0.25).ignoresSafeArea()
-                        ProgressView("업로드 중…")
-                            .padding().background(.ultraThinMaterial)
-                            .cornerRadius(12)
-                    }
-                }
-            }
-            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
-                Button("확인") { vm.errorMessage = nil }
-            } message: {
-                Text(vm.errorMessage ?? "")
-            }
+                            if isPublishing {
+                                ZStack {
+                                    Color.black.opacity(0.25).ignoresSafeArea()
+                                    ProgressView("업로드 중…")
+                                        .padding().background(.ultraThinMaterial)
+                                        .cornerRadius(12)
+                                }
+                            }
+                        }
+                        .alert("오류", isPresented: .constant(publishError != nil)) {
+                            Button("확인") { publishError = nil }
+                        } message: {
+                            Text(publishError ?? "")
+                        }
         }
     }
 }
