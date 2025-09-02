@@ -164,23 +164,17 @@ struct StoreProfileView: View {
                                             HStack(alignment: .firstTextBaseline, spacing: 8) {
                                                 Text("평일 운영 시간")
                                                     .font(.subheadline).bold().foregroundColor(.primary)
-                                                if let weekdayStart = storeVm.weekdayStart, let weekdayEnd = storeVm.weekdayEnd {
-                                                    Text("\(weekdayStart) ~ \(weekdayEnd)")
+                                                Text(timeRangeText(storeVm.weekdayStart, storeVm.weekdayEnd))
+                                                
                                                         .font(.subheadline).foregroundColor(.secondary)
-                                                } else {
-                                                    Text("정보없음")
-                                                }
                                                 
                                             }
                                             HStack(alignment: .firstTextBaseline, spacing: 8) {
                                                 Text("주말 운영 시간")
                                                     .font(.subheadline).bold().foregroundColor(.primary)
-                                                if let weekendStart = storeVm.weekendStart, let weekendEnd = storeVm.weekendEnd {
-                                                    Text("\(weekendStart) ~ \(weekendEnd)")
-                                                        .font(.subheadline).foregroundColor(.secondary)
-                                                } else {
-                                                    Text("정보없음")
-                                                }
+                                                Text(
+                                                    timeRangeText(storeVm.weekendStart, storeVm.weekendEnd))
+                                                    .font(.subheadline).foregroundColor(.secondary)
                                             }
                                         }
                                     }
@@ -207,11 +201,11 @@ struct StoreProfileView: View {
                                 .fill(Color.white)
                         )
                         .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
-                        //                        .navigationDestination(item: $route) { route in
-                        //                            if route == .changeStoreInfo {
-                        //                                ChangeStoreInfoView(store: store)
-                        //                            }
-                        //                        }
+                        .navigationDestination(item: $route) { route in
+                            if route == .changeStoreInfo {
+                                ChangeStoreInfoView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
+                            }
+                        }
                         VStack(alignment: .leading, spacing: 12) {
                             Picker("필터 선택", selection: $selectedTab) {
                                 ForEach(StoreTab.allCases) { tab in
@@ -248,7 +242,7 @@ struct StoreProfileView: View {
             await ownVM.refresh(storeId: storeId, userDocId: appUser?.id)
             await storeVm.load(storeId: storeId)
             await statsVM.refresh(storeId: storeId)
-            await subVM.start(storeId: storeId, userId: appUser?.id ?? Auth.auth().currentUser?.uid)
+            subVM.start(storeId: storeId, userId: appUser?.id ?? Auth.auth().currentUser?.uid)
 
         }
 //        .task { await vm.fetch(storeId: storeId, userId: currentUserID) }
@@ -276,16 +270,32 @@ struct StoreProfileView: View {
     }
     
     //24시간제 "09:00" 형태 (원하면 "h:mm a"로 바꿔 AM/PM 표기 가능)
-    private func timeString(_ t: LocalTime, ampm: Bool = false) -> String {
-        var comps = DateComponents()
-        comps.hour = t.hour
-        comps.minute = t.minute
-        let date = Calendar.current.date(from: comps) ?? Date()
+//    private func timeString(_ t: LocalTime, ampm: Bool = false) -> String {
+//        var comps = DateComponents()
+//        comps.hour = t.hour
+//        comps.minute = t.minute
+//        let date = Calendar.current.date(from: comps) ?? Date()
+//        let f = DateFormatter()
+//        f.locale = Locale(identifier: "ko_KR")
+//        f.dateFormat = ampm ? "h:mm a" : "HH:mm"   // "12:48PM" 원하면 ampm: true
+//        return f.string(from: date)
+//    }
+    
+    private func timeRangeText(_ start: Date?, _ end: Date?) -> String {
+        switch (start, end) {
+        case (nil, nil): return "미등록"
+        case (let s?, nil): return "\(hhmmFormatter.string(from: s)) ~"
+        case (nil, let e?): return "~ \(hhmmFormatter.string(from: e))"
+        case (let s?, let e?): return "\(hhmmFormatter.string(from: s)) ~ \(hhmmFormatter.string(from: e))"
+        }
+    }
+    private let hhmmFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
-        f.dateFormat = ampm ? "h:mm a" : "HH:mm"   // "12:48PM" 원하면 ampm: true
-        return f.string(from: date)
-    }
+        f.calendar = Calendar(identifier: .gregorian)
+        f.dateFormat = "HH:mm"
+        return f
+    }()
 }
 private struct SmallFeedCardView: View {
     let feed: Feed

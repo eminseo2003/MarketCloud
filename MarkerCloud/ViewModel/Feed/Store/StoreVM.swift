@@ -38,6 +38,7 @@ final class StoreVM: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
+    
     func load(storeId: String) async {
         isLoading = true
         errorMessage = nil
@@ -59,6 +60,15 @@ final class StoreVM: ObservableObject {
         self.feeds = store.feeds
     }
 }
+extension StoreVM {
+    var paymentSummary: String {
+        if paymentMethods.isEmpty { return "미등록" }
+        return paymentMethods.map { $0.displayName }
+            .sorted()
+            .joined(separator: ", ")
+    }
+}
+
 @MainActor
 final class StoreStatsVM: ObservableObject {
     @Published var totalLikes = 0

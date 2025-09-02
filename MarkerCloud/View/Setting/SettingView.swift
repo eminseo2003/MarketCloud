@@ -27,10 +27,22 @@ struct SettingsView: View {
                             }) {
                             
                                 HStack {
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: 60, height: 60)
-                                        .foregroundColor(.gray)
+                                    if let url = appUser?.profileURL {
+                                        AsyncImage(url: url) { img in
+                                            img
+                                                .resizable()
+                                                .frame(width: 60, height: 60)
+                                                .clipShape(Circle())
+                                        } placeholder: {
+                                            ProgressView()
+                                        }
+                                    } else {
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 60, height: 60)
+                                            .foregroundColor(.gray)
+                                    }
+                                    
                                     VStack(alignment: .leading) {
                                         Text(appUser?.userName ?? "사용자 이름")
                                             .font(.headline)
