@@ -122,7 +122,6 @@ struct ReviewImage: View {
             default:
                 ProgressView()
                     .frame(width: 50, height: 50)
-                    .frame(maxWidth: .infinity)
                     .background(Color(uiColor: .systemGray5))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }

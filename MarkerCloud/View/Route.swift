@@ -19,9 +19,7 @@ enum Route: Hashable, Identifiable {
     case moreProduct //상품 더보기
     case moreEvent //이벤트 더보기
     case storeDetail //점포 상세(인스타페이지)
-    case storepostDetail //점포 게시물 상세
-    case productDetail //상품 상세
-    case eventDetail //이벤트 상세
+    case feedDetail //피드 상세
     case changeProfile
     case myStore
     case myProduct

@@ -11,18 +11,18 @@ import FirebaseFirestore
 @MainActor
 final class StoreHeaderVM: ObservableObject {
     @Published var name: String = ""
-    @Published var profileURL: URL?
+    @Published var profileURL: String?
     
     func load(storeId: String) async {
         let basics = await StoreService.fetchStoreBasics(storeId: storeId)
         self.name = basics.name ?? ""
-        self.profileURL = basics.profileURL
+        self.profileURL = basics.profileURL?.absoluteString
     }
 }
 @MainActor
 final class StoreVM: ObservableObject {
     @Published var storeName: String = ""
-    @Published var profileImageURL: URL?
+    @Published var profileImageURL: String?
     @Published var marketId: String?
     @Published var categoryId: Int?
     @Published var phoneNumber: String?
@@ -45,7 +45,7 @@ final class StoreVM: ObservableObject {
         
         let store = await StoreService.fetchStore(storeId: storeId)
         self.storeName = store.storeName ?? ""
-        self.profileImageURL = store.profileImageURL
+        self.profileImageURL = store.profileImageURL?.absoluteString
         self.marketId = store.marketId
         self.categoryId = store.categoryId
         self.phoneNumber = store.phoneNumber

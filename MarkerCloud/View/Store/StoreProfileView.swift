@@ -47,7 +47,7 @@ struct StoreProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         VStack {
                             HStack(alignment: .center, spacing: 16) {
-                                AsyncImage(url: storeVm.profileImageURL) { phase in
+                                AsyncImage(url: URL(string: storeVm.profileImageURL ?? "")) { phase in
                                     switch phase {
                                     case .success(let img):
                                         img.resizable().scaledToFill()

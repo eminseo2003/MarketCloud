@@ -28,6 +28,12 @@ private struct StoreDoc: Decodable {
 enum StoreService {
     static let db = Firestore.firestore()
     
+    private static func isValidId(_ id: String?) -> Bool {
+            guard let raw = id?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !raw.isEmpty, !raw.contains("/") else { return false }
+            return true
+        }
+    
     // storeId로 점포명만 가져오기
     static func fetchStoreName(storeId: String) async -> String? {
         do {
@@ -44,18 +50,38 @@ enum StoreService {
     // 1) 문서의 profileImageURL 사용
     // 2) 없으면 Storage 경로 stores/{storeId}/profile.jpg 시도 (폴백)
     static func fetchStoreProfileURL(storeId: String) async -> URL? {
-        do {
-            let snap = try await db.collection("stores").document(storeId).getDocument()
-            guard let dict = snap.data(),
-                  let urlStr = dict["profileImageURL"] as? String,
-                  !urlStr.isEmpty,
-                  let url = URL(string: urlStr) else {
-                return nil
-            }
-            return url
-        } catch {
-            return nil
-        }
+        guard isValidId(storeId) else {
+                    print("[StoreService][fetchStoreProfileURL] ❌ empty storeId=\(storeId)")
+                    return nil
+                }
+                do {
+                    let ref = db.collection("stores").document(storeId)
+                    print("[StoreService][fetchStoreProfileURL] path=\(ref.path)")
+                    let snap = try await ref.getDocument()
+                    guard let dict = snap.data() else {
+                        print("[StoreService][fetchStoreProfileURL] no doc")
+                        return nil
+                    }
+                    if let urlStr = dict["profileImageURL"] as? String,
+                       !urlStr.isEmpty, let url = URL(string: urlStr) {
+                        print("[StoreService][fetchStoreProfileURL] from field")
+                        return url
+                    }
+                    // (옵션) 필드 없으면 Storage 폴백
+                    let storageRef = Storage.storage().reference()
+                        .child("stores/\(storeId)/profile.jpg")
+                    do {
+                        let url = try await storageRef.downloadURL()
+                        print("[StoreService][fetchStoreProfileURL] from storage")
+                        return url
+                    } catch {
+                        print("[StoreService][fetchStoreProfileURL] storage fallback failed:", error)
+                        return nil
+                    }
+                } catch {
+                    print("[StoreService][fetchStoreProfileURL] error:", error)
+                    return nil
+                }
     }
     
     static func fetchStoreBasics(storeId: String) async -> (name: String?, profileURL: URL?) {
@@ -254,7 +280,7 @@ enum StoreService {
         var storeInfo: StoreFeedPayload?
         if let si = dict["storeInfo"] as? [String: Any] {
             let desc = si["description"] as? String
-            let imgU = (si["imgUrl"] as? String).flatMap(URL.init(string:))
+            let imgU = (si["imgUrl"] as? String)
             storeInfo = StoreFeedPayload(description: desc, imgUrl: imgU)
         }
 

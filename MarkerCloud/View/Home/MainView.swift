@@ -17,6 +17,7 @@ enum StoreTab: String, CaseIterable, Identifiable {
 struct MainView: View {
     @StateObject private var feedVM = FeedViewModel()
     @StateObject private var marketVm = MarketListVM()
+    @StateObject private var vm = FeedVM()
     
     @State private var route: Route? = nil
     @Binding var selectedMarketID: Int
@@ -24,6 +25,7 @@ struct MainView: View {
     
     @State private var selectedTab: StoreTab = .all
     @State private var pushStoreId: String? = nil
+    @State private var pushFeedId: String? = nil
     let columns = [
         GridItem(.flexible())
     ]
@@ -97,7 +99,9 @@ struct MainView: View {
                                 FeedCardView(
                                     feed: f,
                                     pushStoreId: $pushStoreId,
-                                    appUser: appUser
+                                    pushFeedId: $pushFeedId,
+                                    appUser: appUser,
+                                    route: $route
                                 )
                                 
                                 if pos == insertAfter {
@@ -122,7 +126,22 @@ struct MainView: View {
                         }
                     }
                 }
-                .onAppear { marketVm.load() }
+                .onAppear {
+                    marketVm.load()
+                }
+                .task {
+                    if let pushFeedId = pushFeedId {
+                        await vm.load(feedId: pushFeedId)
+                        
+                    }
+                    
+                }
+                .onChange(of: pushFeedId) { _, newValue in
+                    guard let id = newValue else { return }
+                    Task {
+                        await vm.load(feedId: id)
+                    }
+                }
                 .onAppear {
                     feedVM.start(marketId: selectedMarketID)
                 }
@@ -135,18 +154,19 @@ struct MainView: View {
             .navigationDestination(item: $pushStoreId) { storeId in
                 StoreProfileView(storeId: storeId, appUser: appUser)
             }
+            .navigationDestination(item: $pushFeedId) { feedId in
+                if let storeId = vm.storeId {
+                    FeedView(feedId: feedId, appUser: appUser, storeId: storeId)
+                        .onAppear {
+                            print("[Nav] -> FeedView feedId=\(feedId), storeId=\(storeId)")
+                        }
+                }
+            }
             .navigationDestination(item: $route) { route in
                 if route == .todayMarket {
                     //SelectKeywordView(selectedMarketID: $selectedMarketID)
                 }
             }
-            //            .navigationDestination(item: $pushStore) { id in
-            //                if let storeId = pushStore {
-            //                    StoreProfileView(storeId: id, currentUserID: currentUserID)
-            //                } else {
-            //                    Text("잘못된 점포입니다.")
-            //                }
-            //            }
         }
         
     }

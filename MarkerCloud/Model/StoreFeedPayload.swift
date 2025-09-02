@@ -9,5 +9,5 @@ import Foundation
 
 struct StoreFeedPayload: Codable, Hashable {
     var description: String?       // AI가 생성한 점포설명
-    var imgUrl: URL?               // AI가 생성한 점포이미지
+    var imgUrl: String?               // AI가 생성한 점포이미지
 }

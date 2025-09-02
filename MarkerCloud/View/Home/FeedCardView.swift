@@ -11,18 +11,20 @@ struct FeedCardView: View {
     let feed: FeedItem
     @State private var isCommentSheetPresented = false
     @Binding var pushStoreId: String?
+    @Binding var pushFeedId: String?
+    let appUser: AppUser?
+    @Binding var route: Route?
     @StateObject private var storeVm = StoreHeaderVM()
     @StateObject private var likeVM = FeedLikeVM()
     @StateObject private var reviewVM = ReviewListVM()
     
-    let appUser: AppUser?
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
                 pushStoreId = feed.storeId
             } label: {
                 HStack {
-                    StoreAvatarView(url: storeVm.profileURL, size: 30)
+                    StoreAvatarView(url: URL(string: storeVm.profileURL ?? ""), size: 30)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(storeVm.name)
                             .font(.headline)
@@ -74,7 +76,10 @@ struct FeedCardView: View {
                 }
                 Spacer()
                 Button {
-                    
+                    pushFeedId = feed.id
+                    print("pushFeedId : \(pushFeedId ?? "없음")")
+//                    pushStoreId = feed.storeId
+//                    print("pushStoreId : \(pushStoreId ?? "없음")")
                 } label: {
                     HStack(spacing: 6) {
                         Text("더보기")
@@ -108,8 +113,6 @@ struct FeedCardView: View {
         .task {
             await storeVm.load(storeId: feed.storeId)
             await reviewVM.load(feedId: feed.id)
-        }
-        .task {
             if let uid = appUser?.id {
                 await likeVM.start(feedId: feed.id, userId: uid)
             }
