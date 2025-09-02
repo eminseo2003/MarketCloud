@@ -152,7 +152,7 @@ struct MainView: View {
                 
             }
             .navigationDestination(item: $pushStoreId) { storeId in
-                StoreProfileView(storeId: storeId, appUser: appUser)
+                StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
             }
             .navigationDestination(item: $pushFeedId) { feedId in
                 FeedDetailView(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)

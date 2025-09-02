@@ -56,16 +56,15 @@ struct FeedView: View {
                                 Spacer()
                             }
                         }.padding(.horizontal)
+                        
                         AsyncImage(url: URL(string: vm.mediaUrl ?? "")) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
-                                .aspectRatio(1, contentMode: .fill)
                                 .clipped()
                         } placeholder: {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.2))
-                                .aspectRatio(1, contentMode: .fill)
                         }
                         
                         HStack(spacing: 12) {
@@ -124,7 +123,7 @@ struct FeedView: View {
         }
         .navigationTitle(vm.title ?? "제목 없음")
         .navigationDestination(item: $pushStoreId) { storeId in
-            StoreProfileView(storeId: storeId, appUser: appUser)
+            StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
         }
         .navigationDestination(item: $pushFeedId) { feedId in
             FeedDetailView(feedId: feedId, appUser: appUser, selectedMarketID: $selectedMarketID)

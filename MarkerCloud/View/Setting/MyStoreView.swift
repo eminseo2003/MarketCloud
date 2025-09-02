@@ -26,7 +26,7 @@ struct MyStoreView: View {
                 ProgressView("확인 중…")
             } else if vm.hasStore {
                 if let s = myStoresVM.store {
-                    StoreProfileView(storeId: s.id, appUser: appUser)
+                    StoreProfileView(storeId: s.id, appUser: appUser, selectedMarketID: $selectedMarketID)
                 }
             } else {
                 NoStoreView(ismypage: true, appUser: appUser, selectedMarketID: $selectedMarketID)

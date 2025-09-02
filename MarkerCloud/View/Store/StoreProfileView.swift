@@ -15,6 +15,7 @@ struct StoreProfileView: View {
     
     let storeId: String
     let appUser: AppUser?
+    @Binding var selectedMarketID: Int
     @State private var selectedTab: StoreTab = .all
     private let grid = Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .top), count: 3)
     @State private var isInfoExpanded = false
@@ -30,6 +31,7 @@ struct StoreProfileView: View {
         }
     }
     @State private var selectedFeed: Feed? = nil
+    
     
     var body: some View {
         ScrollView {
@@ -243,15 +245,11 @@ struct StoreProfileView: View {
             await storeVm.load(storeId: storeId)
             await statsVM.refresh(storeId: storeId)
         }
-        //.task { await vm.fetch(storeId: storeId, userId: currentUserID) }
-        //        .navigationDestination(item: $selectedFeed) { feed in
-        //            if feed.promoKind == .product {
-        //                FeedView(feed: feed)
-        //            } else if feed.promoKind == .event {
-        //                FeedView(feed: feed)
-        //            }
-        //
-        //        }
+//        .task { await vm.fetch(storeId: storeId, userId: currentUserID) }
+                .navigationDestination(item: $selectedFeed) { feed in
+                    FeedView(feedId: feed.id.uuidString, appUser: appUser, storeId: storeId, selectedMarketID: $selectedMarketID)
+        
+                }
     }
     
     
