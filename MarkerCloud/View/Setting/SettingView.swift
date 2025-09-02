@@ -151,7 +151,7 @@ struct SettingsView: View {
                 } else if route == .myStore {
                     MyStoreView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myProduct {
-                    //MyProductView()
+                    MyProductView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myEvent {
                     //MyEventView()
                 } else if route == .followingStore {

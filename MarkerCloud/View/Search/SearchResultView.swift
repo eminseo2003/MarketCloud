@@ -1,11 +1,12 @@
-////
-////  SearchResultView.swift
-////  MarkerCloud
-////
-////  Created by 이민서 on 8/15/25.
-////
 //
-//import SwiftUI
+//  SearchResultView.swift
+//  MarkerCloud
+//
+//  Created by 이민서 on 8/15/25.
+//
+
+import SwiftUI
+import FirebaseAuth
 //
 //struct SearchResultView: View {
 //    let keyword: String
@@ -239,60 +240,78 @@
 //    }
 //}
 //
-//struct FeedCard: View {
-//    let title: String
-//    let url: URL?
-//    let likeCount: Int?
-//    @Binding var selectedFeed: Feed?
-//    
-//    var body: some View {
-//        VStack(alignment: .leading, spacing: 8) {
-//            Button {
-//                //selectedFeed = title
-//            } label: {
-//                AsyncImage(url: url) { phase in
-//                    switch phase {
-//                    case .success(let image):
-//                        image
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 180, height: 180)
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                            .clipped()
-//                    case .failure(_):
-//                        Image(systemName: "photo")
-//                            .resizable().scaledToFit().padding(24)
-//                            .frame(width: 180, height: 180)
-//                            .foregroundStyle(.secondary)
-//                            .background(Color(uiColor: .systemGray5))
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    default:
-//                        ProgressView()
-//                            .frame(width: 180, height: 180)
-//                            .frame(maxWidth: .infinity)
-//                            .background(Color(uiColor: .systemGray5))
-//                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-//                    }
-//                }
-//            }
-//            
-//            
-//            HStack {
-//                Image(systemName: "heart")
-//                    .foregroundColor(.primary)
-//                if let likeCount = likeCount {
-//                    Text("\(likeCount)")
-//                        .font(.caption)
-//                } else {
-//                    Text("0")
-//                        .font(.caption)
-//                }
-//                Spacer()
-//                Text(title)
-//                    .font(.caption)
-//                    .lineLimit(1)
-//            }
-//        }
-//    }
-//}
-//
+struct FeedCard: View {
+    let feed: ProductFeedLite
+    let appUser: AppUser?
+    @Binding var selectedMarketID: Int
+    @Binding var selectedFeed: ProductFeedLite?
+    @StateObject private var likeVM = FeedLikeVM()
+    @StateObject private var vm = MyProductVM()
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                selectedFeed = feed
+            } label: {
+                AsyncImage(url: feed.mediaUrl) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 180, height: 180)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .clipped()
+                    case .failure(_):
+                        Image(systemName: "photo")
+                            .resizable().scaledToFit().padding(24)
+                            .frame(width: 180, height: 180)
+                            .foregroundStyle(.secondary)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    default:
+                        ProgressView()
+                            .frame(width: 180, height: 180)
+                            .frame(maxWidth: .infinity)
+                            .background(Color(uiColor: .systemGray5))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+            
+            
+            HStack {
+                Image(systemName: likeVM.isLiked ? "heart.fill" : "heart")
+                    .font(.caption)
+                    .foregroundColor(likeVM.isLiked ? Color("Main") :.primary)
+                Text("\(likeVM.likesCount)")
+                    .font(.caption)
+                    .foregroundColor(.primary)
+                    .bold()
+                Spacer()
+                Text(feed.title)
+                    .font(.caption)
+                    .lineLimit(1)
+            }
+        }
+        .task {
+            if let uid = appUser?.id {
+                await likeVM.start(feedId: feed.id, userId: uid)
+            }
+        }
+        .onDisappear { likeVM.stop() }
+        .onAppear {
+            guard let uid = appUser?.id ?? Auth.auth().currentUser?.uid else { return }
+            // 시장별 필터를 쓰고 싶으면 marketId: selectedMarketID 전달
+            vm.start(userId: uid, marketId: selectedMarketID, includeDrafts: false)
+        }
+        .onChange(of: selectedMarketID) { _, new in
+            guard let uid = appUser?.id ?? Auth.auth().currentUser?.uid else { return }
+            vm.start(userId: uid, marketId: new, includeDrafts: false)
+        }
+        .onDisappear {
+            vm.stop()
+        }
+    }
+}
+
