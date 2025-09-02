@@ -239,7 +239,7 @@ struct StoreProfileView: View {
         
         .background(Color(uiColor: .systemGray6).ignoresSafeArea())
         .task(id: storeId) {
-            await ownVM.refresh(storeId: storeId)
+            await ownVM.refresh(storeId: storeId, userDocId: appUser?.id)
             await storeVm.load(storeId: storeId)
             await statsVM.refresh(storeId: storeId)
         }

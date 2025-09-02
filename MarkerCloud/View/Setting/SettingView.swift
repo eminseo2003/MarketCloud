@@ -11,17 +11,6 @@ struct SettingsView: View {
     @Binding var selectedMarketID: Int
     let appUser: AppUser?
     @StateObject private var session = SessionStore()
-    
-//    var currentUser: User? {
-//            dummyUsers.first { $0.id == currentUserID }
-//        }
-//    var videoFeeds: [Feed] {
-//        dummyFeed.filter { $0.mediaType == .video }
-//    }
-//
-//    var imageFeeds: [Feed] {
-//        dummyFeed.filter { $0.mediaType == .image }
-//    }
 
     @State private var route: Route? = nil
     @State private var showLogoutAlert = false
@@ -148,7 +137,7 @@ struct SettingsView: View {
                 if route == .changeProfile {
                     
                 } else if route == .myStore {
-                    //MyStoreView()
+                    MyStoreView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myProduct {
                     //MyProductView()
                 } else if route == .myEvent {
