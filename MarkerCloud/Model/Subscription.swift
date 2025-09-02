@@ -6,11 +6,41 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Subscription: Codable, Hashable, Identifiable {
-    var userid: Int64
-    var storeid: Int64
-    var createdAt: Date
+    var userId: String
+    var storeId: String
 
-    var id: String { "\(userid)-\(storeid)" }
+    @ServerTimestamp var createdAt: Date?
+
+    var id: String { "\(storeId)-\(userId)" }
+
+    enum CodingKeys: String, CodingKey {
+        case userId, storeId, createdAt
+    }
+
+    init(userId: String, storeId: String, createdAt: Date? = nil) {
+        self.userId = userId
+        self.storeId = storeId
+        self.createdAt = createdAt
+    }
 }
+extension Subscription {
+    static var collection: CollectionReference {
+        Firestore.firestore().collection("subscription")
+    }
+
+    var docRef: DocumentReference {
+        Self.collection.document(id)
+    }
+
+    func toCreateDict() -> [String: Any] {
+        [
+            "userId": userId,
+            "storeId": storeId,
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+    }
+}
+

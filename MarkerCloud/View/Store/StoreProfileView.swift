@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct StoreProfileView: View {
     @StateObject private var storeVm = StoreVM()
     @StateObject private var ownVM = StoreOwnershipVM()
     @StateObject private var statsVM = StoreStatsVM()
-    //@StateObject private var subVM = StoreSubscribeVM()
-    
+    @StateObject private var subVM = SubscriptionVM()
+
     let storeId: String
     let appUser: AppUser?
     @Binding var selectedMarketID: Int
@@ -63,8 +64,7 @@ struct StoreProfileView: View {
                                 VStack(spacing: 12) {
                                     HStack(spacing: 30) {
                                         VStack(spacing: 4) {
-                                            Text("123")
-                                            // Text("\(p.followerCount)")
+                                            Text("\(subVM.subscriptionCount)")
                                                 .font(.subheadline).bold()
                                             Text("구독")
                                                 .font(.subheadline).foregroundColor(.secondary)
@@ -96,23 +96,27 @@ struct StoreProfileView: View {
                                         .frame(maxWidth: .infinity)
                                     } else {
                                         Button {
-                                            
+                                            Task {
+                                                if let uid = appUser?.id ?? Auth.auth().currentUser?.uid {
+                                                    await subVM.toggle(storeId: storeId, userId: uid)
+                                                }
+                                            }
                                         } label: {
-                                            Text("구독")
+                                            Text(subVM.isSubscribe ? "구독중" : "구독")
                                                 .font(.callout).bold()
-                                                .foregroundColor(.white)
+                                                .foregroundColor(subVM.isSubscribe ? Color("Main") : .white)
                                                 .frame(maxWidth: .infinity)
                                                 .padding(.vertical, 10)
                                                 .background(
                                                     RoundedRectangle(cornerRadius: 12)
-                                                        .fill(Color("Main"))
+                                                        .fill(subVM.isSubscribe ? .white : Color("Main"))
                                                 )
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                                                         .stroke(Color("Main"), lineWidth: 1.2)
                                                 )
                                         }
-                                        //.disabled(subVM.isLoading(storeId: storeId))
+                                        .disabled(subVM.isBusy)
                                         .buttonStyle(.plain)
                                         
                                     }
@@ -244,6 +248,8 @@ struct StoreProfileView: View {
             await ownVM.refresh(storeId: storeId, userDocId: appUser?.id)
             await storeVm.load(storeId: storeId)
             await statsVM.refresh(storeId: storeId)
+            await subVM.start(storeId: storeId, userId: appUser?.id ?? Auth.auth().currentUser?.uid)
+
         }
 //        .task { await vm.fetch(storeId: storeId, userId: currentUserID) }
                 .navigationDestination(item: $selectedFeed) { feed in
