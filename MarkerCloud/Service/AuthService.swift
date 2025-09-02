@@ -97,11 +97,11 @@ final class AuthService: ObservableObject {
                             "email": fbUser.email ?? result.user.profile?.email ?? "",
                             "userName": fbUser.displayName ?? result.user.profile?.name ?? "",
                             "provider": "google",
-                            "storeIds": [],
                             "updatedAt": FieldValue.serverTimestamp()
                         ]
                         //문서가 없으면 최초 생성
                         if !snap.exists {
+                            data["storeIds"] = []
                             data["createdAt"] = FieldValue.serverTimestamp()
                         }
 
