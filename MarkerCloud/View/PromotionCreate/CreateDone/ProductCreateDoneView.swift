@@ -21,7 +21,7 @@ struct ProductCreateDoneView: View {
     @State private var contentText: String
     
     @State private var isPublishing = false
-        @State private var publishError: String?
+    @State private var publishError: String?
     @FocusState private var isTextFieldFocused: Bool
     
     init(dto: GenerateDTO, method: MediaType) {
@@ -132,7 +132,7 @@ struct ProductCreateDoneView: View {
                     }
                 }
             }
-
+            
             .alert("정말 삭제하시겠습니까?", isPresented: $showDeleteAlert) {
                 Button("삭제", role: .destructive) {
                     dismiss()
@@ -145,20 +145,20 @@ struct ProductCreateDoneView: View {
                 }
             }
             .overlay {
-                            if isPublishing {
-                                ZStack {
-                                    Color.black.opacity(0.25).ignoresSafeArea()
-                                    ProgressView("업로드 중…")
-                                        .padding().background(.ultraThinMaterial)
-                                        .cornerRadius(12)
-                                }
-                            }
-                        }
-                        .alert("오류", isPresented: .constant(publishError != nil)) {
-                            Button("확인") { publishError = nil }
-                        } message: {
-                            Text(publishError ?? "")
-                        }
+                if isPublishing {
+                    ZStack {
+                        Color.black.opacity(0.25).ignoresSafeArea()
+                        ProgressView("업로드 중…")
+                            .padding().background(.ultraThinMaterial)
+                            .cornerRadius(12)
+                    }
+                }
+            }
+            .alert("오류", isPresented: .constant(publishError != nil)) {
+                Button("확인") { publishError = nil }
+            } message: {
+                Text(publishError ?? "")
+            }
         }
     }
 }

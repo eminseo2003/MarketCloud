@@ -89,12 +89,13 @@ struct PromotionMethodSelectView: View {
                                 appUser: appUser,
                                 selectedMarketID: selectedMarketID
                             )
-//                        } else {
-//                            CreateEventView(
-//                                feedType: mapFeedType(from: promotion.name),
-//                                method: pushMethod?.mediaType ?? .image,
-//                                appUser: appUser
-//                            )
+                        } else {
+                            CreateEventView(
+                                feedType: mapFeedType(from: promotion.name),
+                                method: pushMethod?.mediaType ?? .image,
+                                appUser: appUser,
+                                selectedMarketID: selectedMarketID
+                            )
                         }
                     }
                 }

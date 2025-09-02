@@ -7,45 +7,34 @@
 
 import SwiftUI
 import AVKit
+import FirebaseFirestore
+import FirebaseStorage
 
 struct EventCreateDoneView: View {
     @Environment(\.dismiss) var dismiss
-    @StateObject private var vm = EventFeedUpLoadVM()
     
-    let mediaUrl: String
+    let dto: GenerateDTO
+    let method: MediaType
     
     @State private var showDeleteAlert = false
     @State private var showPostAlert = false
     @State private var contentText: String
-    let method: MediaType
-    let feedType: String
-    let mediaType: String
-    let eventName: String
-    let eventDescription: String
-    let eventStartAt: Date
-    let eventEndAt: Date
-    let eventImage: UIImage
-    let currentUserID: Int
-    init(mediaUrl: String, body: String, method: MediaType, feedType: String, mediaType: String, eventName: String, eventDescription: String, eventStartAt: Date, eventEndAt: Date, eventImage: UIImage, currentUserID: Int) {
-        self.mediaUrl = mediaUrl
-        self.method = method
-        self.feedType = feedType
-        self.mediaType = mediaType
-        self.eventName = eventName
-        self.eventDescription = eventDescription
-        self.eventStartAt = eventStartAt
-        self.eventEndAt = eventEndAt
-        self.eventImage = eventImage
-        self.currentUserID = currentUserID
-        _contentText = State(initialValue: body)
-    }
+    
+    @State private var isPublishing = false
+    @State private var publishError: String?
     @FocusState private var isTextFieldFocused: Bool
+    
+    init(dto: GenerateDTO, method: MediaType) {
+        self.dto = dto
+        self.method = method
+        _contentText = State(initialValue: dto.feedBody)
+    }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
                 if method == .image {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         AsyncImage(url: url) { img in
                             img.resizable().scaledToFit()
                         } placeholder: { ProgressView() }
@@ -58,7 +47,7 @@ struct EventCreateDoneView: View {
                         Text("잘못된 이미지 URL")
                     }
                 } else {
-                    if let url = URL(string: mediaUrl) {
+                    if let url = URL(string: dto.feedMediaUrl) {
                         VideoPlayer(player: AVPlayer(url: url))
                             .frame(minHeight: 220)
                             .padding()
@@ -97,19 +86,18 @@ struct EventCreateDoneView: View {
                     
                     Button(action: {
                         Task {
-                            await vm.uploadEventFeed(
-                                feedType: feedType,
-                                mediaType: mediaType,
-                                userId: currentUserID,
-                                eventName: eventName,
-                                eventDescription: eventDescription,
-                                eventStartAt: eventStartAt,
-                                eventEndAt: eventEndAt,
-                                eventImage: eventImage,
-                                feedMediaUrl: mediaUrl,
-                                feedBody: contentText
-                            )
-                            showPostAlert = true
+                            do {
+                                try await Firestore.firestore()
+                                    .collection("feeds").document(dto.id)
+                                    .setData([
+                                        "body": contentText,
+                                        "isPublished": true,
+                                        "updatedAt": FieldValue.serverTimestamp()
+                                    ], merge: true)
+                                showPostAlert = true
+                            } catch {
+                                print("publish error:", error.localizedDescription)
+                            }
                         }
                     }) {
                         Text("게시하기")
@@ -163,7 +151,7 @@ struct EventCreateDoneView: View {
                 }
             }
             .overlay {
-                if vm.isUploading {
+                if isPublishing {
                     ZStack {
                         Color.black.opacity(0.25).ignoresSafeArea()
                         ProgressView("업로드 중…")
@@ -172,10 +160,10 @@ struct EventCreateDoneView: View {
                     }
                 }
             }
-            .alert("오류", isPresented: .constant(vm.errorMessage != nil)) {
-                Button("확인") { vm.errorMessage = nil }
+            .alert("오류", isPresented: .constant(publishError != nil)) {
+                Button("확인") { publishError = nil }
             } message: {
-                Text(vm.errorMessage ?? "")
+                Text(publishError ?? "")
             }
         }
     }
