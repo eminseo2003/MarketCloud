@@ -7,61 +7,19 @@
 
 import Foundation
 
-private struct SearchRankItemDTO: Decodable {
-    let rank: Int
-    let keyword: String
-}
-
-private struct SearchRankListDTO: Decodable {
-    let rankings: [SearchRankItemDTO]
-}
-
 @MainActor
 final class SearchRankVM: ObservableObject {
     @Published var rankings: [String] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
 
-    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-    private var apiURL: URL { base.appendingPathComponent("api/trend/") }
+    func fetchTop5() async {
+        let top = await PopularSearchService.fetchTop5()
+        let arr = top.map { $0.keyword }
+        print("[SearchRankVM] fetchTop5 ->", arr)
+        self.rankings = arr
+    }
 
-    func fetch(limit: Int = 5) async {
-        errorMessage = nil
-        isLoading = true
-        defer { isLoading = false }
-
-        var req = URLRequest(url: apiURL)
-        req.httpMethod = "GET"
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
-
-        do {
-            rlog("SearchRankVM", "GET", apiURL.absoluteString)
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            rlog("SearchRankVM", "status:", code)
-            if let p = prettyJSON(data) { rlog("SearchRankVM", "JSON\n\(p)") }
-
-            guard (200...299).contains(code) else {
-                errorMessage = "HTTP \(code)"
-                return
-            }
-
-            let decoded = try JSONDecoder().decode(RankResponse<SearchRankListDTO>.self, from: data)
-            guard decoded.success else {
-                errorMessage = decoded.error ?? "서버 오류"
-                return
-            }
-
-            self.rankings = decoded.responseDto.rankings
-                .sorted { $0.rank < $1.rank }
-                .prefix(limit)
-                .map { $0.keyword }
-
-            rlog("SearchRankVM", "loaded:", rankings.count, "|", rankings.joined(separator: ", "))
-        } catch {
-            errorMessage = error.localizedDescription
-            rlog("SearchRankVM", "error:", error.localizedDescription)
-        }
+    func bumpAndRefresh(keyword: String) async {
+        try? await PopularSearchService.increment(keyword: keyword)
+        await fetchTop5()
     }
 }

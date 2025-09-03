@@ -25,7 +25,7 @@ struct SearchView: View {
     @StateObject private var storeRankVM = StoreRankVM()
     @StateObject private var productRankVM = ProductRankVM()
     @StateObject private var eventRankVM  = EventRankVM()
-    //@StateObject private var searchRankVM  = SearchRankVM()
+    @StateObject private var searchRankVM  = SearchRankVM()
     
     @State private var pushStoreId: String? = nil
     @State private var selectedFeedId: String? = nil
@@ -150,26 +150,17 @@ struct SearchView: View {
                     
                 } else {
                     ScrollView {
-//                        VStack {
-//                            if searchRankVM.isLoading {
-//                                HStack { Spacer(); ProgressView(); Spacer() }
-//                                    .padding(.vertical, 8)
-//                            } else if let err = searchRankVM.errorMessage {
-//                                VStack(spacing: 8) {
-//                                    Text("인기 검색어 불러오기 실패").font(.subheadline).bold()
-//                                    Text(err).font(.caption).foregroundColor(.secondary)
-//                                    Button("다시 시도") { Task { await searchRankVM.fetch() } }
-//                                }
-//                                .padding(.horizontal)
-//                            } else {
-//                                TrendingKeywordsView(keywords: searchRankVM.rankings, searchText: $searchText, route: $route)
-//                            }
-//                            Spacer()
-//                        }
+                        VStack {
+                            TrendingKeywordsView(keywords: searchRankVM.rankings, searchText: $searchText, route: $route)
+                            Spacer()
+                        }
                     }
                     
                     Button(action: {
-                        route = .searchResult
+                        Task {
+                                await searchRankVM.bumpAndRefresh(keyword: searchText)
+                                route = .searchResult
+                            }
                     }) {
                         Text("검색")
                             .fontWeight(.bold)
@@ -185,8 +176,14 @@ struct SearchView: View {
                 await storeRankVM.loadTopStores(marketId: selectedMarketID, limit: 10)
                 await productRankVM.loadTopProducts(marketId: selectedMarketID, candidateLimit: 100, topN: 10)
                 await eventRankVM.loadTopEvents(marketId: selectedMarketID, candidateLimit: 100, topN: 10)
-                //await searchRankVM.fetch()
+                await searchRankVM.fetchTop5()
             }
+            .onChange(of: searchText) { _, new in
+                if new.isEmpty {
+                    Task { await searchRankVM.fetchTop5() }
+                }
+            }
+
             .navigationDestination(item: $route) { route in
                 if route == .storeDetail {
                     if let storeId = pushStoreId {
