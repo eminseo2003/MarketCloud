@@ -6,77 +6,118 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-private struct ProductRankItemDTO: Decodable {
-    let feedId: Int
-    let rank: Int
-    let mediaUrl: String
-    let productName: String
-    let like_count: Int
-}
-private struct ProductRankListDTO: Decodable {
-    let rankings: [ProductRankItemDTO]
-}
-
-struct PopularProduct: Identifiable, Hashable {
-    let id = UUID()
-    let feedId: Int
-    let rank: Int
-    let productName: String
-    let imageURL: URL?
+struct RankedProduct: Identifiable, Hashable {
+    let id: String              // feedId
+    let title: String
+    let mediaURL: URL?
+    let storeId: String
     let likeCount: Int
+    let createdAt: Date?
 }
 
 @MainActor
 final class ProductRankVM: ObservableObject {
-    @Published var products: [PopularProduct] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var products: [RankedProduct] = []
 
-    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-    private var url: URL { base.appendingPathComponent("api/trend/product") }
+    private let db = Firestore.firestore()
 
-    func fetch() async {
-        errorMessage = nil
+    func loadTopProducts(
+        marketId: Int? = nil,
+        storeId: String? = nil,
+        candidateLimit: Int = 100,
+        topN: Int = 20,
+        includeZero: Bool = true
+    ) async {
         isLoading = true
-        defer { isLoading = false }
-
-        var req = URLRequest(url: url)
-        req.httpMethod = "GET"
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
+        errorMessage = nil
+        products = []
 
         do {
-            print("[ProductRankVM] GET \(url.absoluteString)")
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            print("[ProductRankVM] status:", code)
-            if let p = prettyJSON(data) { print("[ProductRankVM] ↩︎ JSON\n\(p)") }
+            // 1) product + 공개된 피드 후보 가져오기
+            var q: Query = db.collection("feeds")
+                .whereField("promoKind", isEqualTo: "product")
+                .whereField("isPublished", isEqualTo: true)
 
-            guard (200...299).contains(code) else {
-                errorMessage = "HTTP \(code)"
-                return
+            if let marketId { q = q.whereField("marketId", isEqualTo: marketId) }
+            if let storeId  { q = q.whereField("storeId",  isEqualTo: storeId) }
+
+            // 후보는 최근 업데이트 순으로 제한
+            q = q.order(by: "updatedAt", descending: true).limit(to: candidateLimit)
+
+            let snap = try await q.getDocuments()
+
+            struct Base: Hashable {
+                let id: String
+                let title: String
+                let mediaURL: URL?
+                let storeId: String
+                let createdAt: Date?
+                let updatedAt: Date?
             }
 
-            let decoded = try JSONDecoder().decode(RankResponse<ProductRankListDTO>.self, from: data)
-            guard decoded.success else {
-                errorMessage = decoded.error ?? "서버 오류"
-                return
+            let bases: [Base] = snap.documents.map { d in
+                let data = d.data()
+                let id  = (data["id"] as? String) ?? d.documentID
+                let title = (data["title"] as? String) ?? ""
+                let mediaURL = (data["mediaUrl"] as? String).flatMap(URL.init(string:))
+                let storeId = (data["storeId"] as? String) ?? ""
+                let createdAt = (data["createdAt"] as? Timestamp)?.dateValue()
+                let updatedAt = (data["updatedAt"] as? Timestamp)?.dateValue()
+                return Base(id: id, title: title, mediaURL: mediaURL, storeId: storeId, createdAt: createdAt, updatedAt: updatedAt)
             }
 
-            products = decoded.responseDto.rankings.map {
-                PopularProduct(
-                    feedId: $0.feedId,
-                    rank: $0.rank,
-                    productName: $0.productName,
-                    imageURL: safeURL(from: $0.mediaUrl),
-                    likeCount: $0.like_count
-                )
+            // 2) 각 후보의 좋아요 수 집계 (Aggregation Count 사용, 실패 시 문서 수 폴백)
+            func likeCount(for feedId: String) async throws -> Int {
+                let lq = db.collection("feedLikes").whereField("feedId", isEqualTo: feedId)
+                if let agg = try? await lq.count.getAggregation(source: .server) {
+                    return Int(truncating: agg.count)
+                } else {
+                    let docs = try await lq.getDocuments()
+                    return docs.documents.count
+                }
             }
-            print("[ProductRankVM] loaded:", products.count)
+
+            var ranked: [RankedProduct] = []
+            ranked.reserveCapacity(bases.count)
+
+            try await withThrowingTaskGroup(of: RankedProduct?.self) { group in
+                for b in bases {
+                    group.addTask {
+                        let c = try await likeCount(for: b.id)
+                        if c == 0 && !includeZero { return nil }
+                        return RankedProduct(
+                            id: b.id,
+                            title: b.title,
+                            mediaURL: b.mediaURL,
+                            storeId: b.storeId,
+                            likeCount: c,
+                            createdAt: b.createdAt
+                        )
+                    }
+                }
+                for try await item in group {
+                    if let item { ranked.append(item) }
+                }
+            }
+
+            // 3) 좋아요 수 내림차순, 동률이면 최근 생성순(또는 updatedAt로 바꿔도 됨)
+            ranked.sort {
+                if $0.likeCount != $1.likeCount { return $0.likeCount > $1.likeCount }
+                let l = $0.createdAt ?? .distantPast
+                let r = $1.createdAt ?? .distantPast
+                return l > r
+            }
+
+            // 4) 상위 N개
+            self.products = Array(ranked.prefix(topN))
+            self.isLoading = false
         } catch {
-            errorMessage = error.localizedDescription
-            print("[ProductRankVM] 에러:", error.localizedDescription)
+            self.errorMessage = error.localizedDescription
+            self.isLoading = false
         }
     }
 }

@@ -19,8 +19,8 @@ struct ContentView: View {
                 .tabItem { Label("홈", systemImage: "house") }
                 .tag(0)
             
-            Text("Text 5")
-            //SearchView(selectedMarketID: $selectedMarketID, appUser: appUser)
+            //Text("Text 5")
+            SearchView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 .tabItem { Label("검색", systemImage: "magnifyingglass") }
                 .tag(1)
             
