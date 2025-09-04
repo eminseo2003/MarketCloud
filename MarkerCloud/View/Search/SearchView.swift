@@ -190,14 +190,13 @@ struct SearchView: View {
                         StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
                     }
                 } else if route == .searchResult {
-                    SearchResultView(keyword: searchText, appUser: appUser)
-                } else if route == .feedDetail {
-                    if let feedId = selectedFeedId {
-                        if let storeId = selectedStoreId {
-                            FeedView(feedId: feedId, appUser: appUser, storeId: storeId, selectedMarketID: $selectedMarketID)
-                            
-                        }
-                    }
+                    SearchResultView(keyword: searchText, appUser: appUser, selectedMarketID: $selectedMarketID)
+                }
+            }
+            .navigationDestination(item: $selectedFeedId) { feedId in
+                if let storeId = selectedStoreId {
+                    FeedView(feedId: feedId, appUser: appUser, storeId: storeId, selectedMarketID: $selectedMarketID)
+                    
                 }
             }
         }

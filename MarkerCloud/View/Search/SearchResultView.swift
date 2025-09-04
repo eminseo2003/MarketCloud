@@ -12,6 +12,7 @@ struct SearchResultView: View {
     let keyword: String
     let appUser: AppUser?
     @StateObject private var vm = SearchResultVM()
+    @Binding var selectedMarketID: Int
     
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
     @State private var route: Route? = nil
@@ -115,19 +116,17 @@ struct SearchResultView: View {
                 MoreProductView(searchResultProduct: vm.products, appUser: appUser)
             } else if route == .moreEvent {
                 MoreEventView(searchResultEvent: vm.events, appUser: appUser)
-                //            } else if route == .storeDetail {
-                //                if let store = selectedStore {
-                //                    StoreProfileView(store: store)
-                //                }
-                //            }
+            } else if route == .storeDetail {
+                if let storeId = pushStoreId {
+                    StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
+                }
             }
-            //        .navigationDestination(item: $selectedProduct) { product in
-            //            FeedView(feed: product)
-            //        }
-            //        .navigationDestination(item: $selectedEvent) { event in
-            //            FeedView(feed: event)
-            //        }
-            
+        }
+        .navigationDestination(item: $selectedFeedId) { feedId in
+            if let storeId = selectedStoreId {
+                FeedView(feedId: feedId, appUser: appUser, storeId: storeId, selectedMarketID: $selectedMarketID)
+                
+            }
         }
     }
 }
