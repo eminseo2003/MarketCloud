@@ -190,7 +190,7 @@ struct SearchView: View {
                         StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
                     }
                 } else if route == .searchResult {
-                    //SearchResultView(keyword: searchText)
+                    SearchResultView(keyword: searchText, appUser: appUser)
                 } else if route == .feedDetail {
                     if let feedId = selectedFeedId {
                         if let storeId = selectedStoreId {
@@ -228,7 +228,7 @@ private struct RankSectionHorizontal<Content: View>: View {
     }
 }
 
-private struct StoreBubbleView: View {
+struct StoreBubbleView: View {
     let name: String
     let url: URL?
     

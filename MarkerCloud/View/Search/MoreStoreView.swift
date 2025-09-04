@@ -8,23 +8,25 @@
 import SwiftUI
 
 struct MoreStoreView: View {
-    let searchResultStore: [StoreRow]
+    let searchResultStore: [SearchResultStore]
+    let appUser: AppUser?
     
     var body: some View {
-        if searchResultStore.isEmpty {
-            HStack {
-                Spacer()
-                Text("검색 결과가 없습니다.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .navigationTitle(Text("점포 더보기"))
-        } else {
-            Form {
-                Section(header: Text("점포 목록")) {
-                    ForEach(searchResultStore) { store in
-                        //NavigationLink(destination: StoreProfileView(store: dummyStores[0])) {
+        NavigationStack {
+            if searchResultStore.isEmpty {
+                HStack {
+                    Spacer()
+                    Text("검색 결과가 없습니다.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .navigationTitle(Text("점포 더보기"))
+            } else {
+                Form {
+                    Section(header: Text("점포 목록")) {
+                        ForEach(searchResultStore) { store in
+                            //NavigationLink(destination: StoreProfileView(store: dummyStores[0])) {
                             HStack(spacing: 16) {
                                 if let url = store.imgURL {
                                     
@@ -39,18 +41,20 @@ struct MoreStoreView: View {
                                             .fill(Color(.systemGray5))
                                             .frame(width: 40, height: 40)
                                     }
+                                } else {
+                                    Circle().fill(Color(.systemGray5))
+                                        .overlay(Image(systemName: "photo"))
+                                        .frame(width: 40, height: 40)
                                 }
                                 Text(store.name)
                                     .font(.body)
                             }
                             .padding(.vertical, 4)
-                        //}
+                        }
                         
                     }
                 }
             }
-            .navigationTitle("점포 더보기")
-        }
-        
+        }.navigationTitle("점포 더보기")
     }
 }

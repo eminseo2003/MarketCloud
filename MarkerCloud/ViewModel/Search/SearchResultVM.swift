@@ -6,167 +6,144 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-struct StoreRow: Identifiable, Hashable {
-    let id = UUID()
+struct SearchResultStore: Identifiable, Hashable {
+    let id: String
     let name: String
     let imgURL: URL?
 }
-struct ProductRow: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
+
+struct SearchResultFeed: Identifiable, Hashable {
+    let id: String
+    let name: String        // = title
     let mediaURL: URL?
-    let likeCount: Int?
-}
-struct EventRow: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-    let mediaURL: URL?
-    let likeCount: Int?
-}
-
-private struct StoreItemDTO: Decodable {
-    let storeName: String
-    let imgUrl: String?
-}
-private struct ProductItemDTO: Decodable {
-    let productName: String
-    let mediaUrl: String?
-    let like_count: Int?
-}
-private struct EventItemDTO: Decodable {
-    let eventName: String
-    let mediaUrl: String?
-    let like_count: Int?
-}
-
-private struct CombinedContainerDTO: Decodable {
-    let stores: [StoreItemDTO]?
-    let products: [ProductItemDTO]?
-    let events: [EventItemDTO]?
-}
-private struct CombinedResponse: Decodable {
-    let responseDto: CombinedContainerDTO
-    let error: String?
-    let success: Bool
-}
-
-private struct StoreSearchContainerDTO: Decodable { let searchResult: [StoreItemDTO] }
-private struct StoreSearchResponse: Decodable {
-    let responseDto: StoreSearchContainerDTO
-    let error: String?
-    let success: Bool
-}
-private struct ProductSearchContainerDTO: Decodable { let searchResult: [ProductItemDTO] }
-private struct ProductSearchResponse: Decodable {
-    let responseDto: ProductSearchContainerDTO
-    let error: String?
-    let success: Bool
-}
-private struct EventSearchContainerDTO: Decodable { let searchResult: [EventItemDTO] }
-private struct EventSearchResponse: Decodable {
-    let responseDto: EventSearchContainerDTO
-    let error: String?
-    let success: Bool
+    let likeCount: Int
+    let promoKind: String   // "product" | "event" | ...
+    let storeId: String
 }
 
 @MainActor
 final class SearchResultVM: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var stores: [SearchResultStore] = []
+    @Published var products: [SearchResultFeed] = []
+    @Published var events: [SearchResultFeed] = []
 
-    @Published var stores: [StoreRow] = []
-    @Published var products: [ProductRow] = []
-    @Published var events: [EventRow] = []
+    private let db = Firestore.firestore()
 
-    private let base = URL(string: "https://famous-blowfish-plainly.ngrok-free.app")!
-
-    private func prettyJSON(_ data: Data) -> String? {
-        guard let obj = try? JSONSerialization.jsonObject(with: data),
-              let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]),
-              let s = String(data: d, encoding: .utf8) else { return nil }
-        return s
-    }
-    private func log(_ items: Any...) {
-        print("[SearchResultVM]", items.map { "\($0)" }.joined(separator: " "))
+    // 좋아요 수 집계 (Aggregation Count → 실패 시 문서수 폴백)
+    private func likeCount(for feedId: String) async -> Int {
+        do {
+            let q = db.collection("feedLikes").whereField("feedId", isEqualTo: feedId)
+            if let agg = try? await q.count.getAggregation(source: .server) {
+                return Int(truncating: agg.count)
+            } else {
+                let docs = try await q.getDocuments()
+                return docs.documents.count
+            }
+        } catch {
+            // 에러 시 0으로 폴백
+            return 0
+        }
     }
 
     func fetch(keyword: String) async {
-        errorMessage = nil
+        let kw = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+        if kw.isEmpty {
+            self.stores = []; self.products = []; self.events = []
+            return
+        }
+
         isLoading = true
-        defer { isLoading = false }
-
-        let encoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? keyword
-        let url = base.appendingPathComponent("api")
-            .appendingPathComponent("search")
-            .appendingPathComponent(encoded)
-
-        var req = URLRequest(url: url)
-        req.httpMethod = "GET"
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        req.setValue("1", forHTTPHeaderField: "ngrok-skip-browser-warning")
+        errorMessage = nil
 
         do {
-            log("GET", url.absoluteString)
-            let (data, resp) = try await URLSession.shared.data(for: req)
-            let code = (resp as? HTTPURLResponse)?.statusCode ?? 0
-            log("status:", code)
-            if let pretty = prettyJSON(data) { log("↩︎ JSON\n\(pretty)") }
+            // 1) 점포/피드 최신 일부만 가져오기
+            async let storeSnapTask = db.collection("stores")
+                .order(by: "updatedAt", descending: true)
+                .limit(to: 120)
+                .getDocuments()
 
-            guard (200...299).contains(code) else {
-                errorMessage = "HTTP \(code)"
-                return
+            async let feedSnapTask = db.collection("feeds")
+                .order(by: "updatedAt", descending: true)
+                .limit(to: 200)
+                .getDocuments()
+
+            let (storeSnap, feedSnap) = try await (storeSnapTask, feedSnapTask)
+            let lower = kw.lowercased()
+
+            // --- Stores (로컬 contains 필터) ---
+            let foundStores: [SearchResultStore] = storeSnap.documents.compactMap { d in
+                let data = d.data()
+                let id   = (data["id"] as? String) ?? d.documentID
+                let name = (data["storeName"] as? String) ?? ""
+                guard name.lowercased().contains(lower) else { return nil }
+                let url  = (data["profileImageURL"] as? String).flatMap(URL.init(string:))
+                return SearchResultStore(id: id, name: name, imgURL: url)
             }
 
-            if let combined = try? JSONDecoder().decode(CombinedResponse.self, from: data), combined.success {
-                if let s = combined.responseDto.stores {
-                    self.stores = s.map { StoreRow(name: $0.storeName, imgURL: URL(string: $0.imgUrl ?? "")) }
-                } else { self.stores = [] }
+            // --- Feeds 기본형(좋아요 수 제외) ---
+            struct Basic: Hashable {
+                let id: String
+                let title: String
+                let mediaURL: URL?
+                let promoKind: String
+                let storeId: String
+            }
 
-                if let p = combined.responseDto.products {
-                    self.products = p.map {
-                        ProductRow(name: $0.productName, mediaURL: URL(string: $0.mediaUrl ?? ""), likeCount: $0.like_count)
+            let basicsAll: [Basic] = feedSnap.documents.compactMap { d in
+                let data = d.data()
+                let id    = (data["id"] as? String) ?? d.documentID
+                let title = (data["title"] as? String) ?? ""
+                let isPublished = (data["isPublished"] as? Bool) ?? false
+                guard isPublished, title.lowercased().contains(lower) else { return nil }
+                let mediaURL = (data["mediaUrl"] as? String).flatMap(URL.init(string:))
+                let promo    = (data["promoKind"] as? String) ?? ""
+                let storeId  = (data["storeId"] as? String) ?? ""
+                return Basic(id: id, title: title, mediaURL: mediaURL, promoKind: promo, storeId: storeId)
+            }
+
+            let prodBasics = basicsAll.filter { $0.promoKind == "product" }
+            let eventBasics = basicsAll.filter { $0.promoKind == "event" }
+
+            // --- 좋아요 수 동시 집계 후 SearchResultFeed 생성 ---
+            func enrich(_ basics: [Basic]) async -> [SearchResultFeed] {
+                var result: [SearchResultFeed] = []
+                result.reserveCapacity(basics.count)
+
+                await withTaskGroup(of: SearchResultFeed?.self) { group in
+                    for b in basics {
+                        group.addTask { [weak self] in
+                            guard let self else { return nil }
+                            let count = await self.likeCount(for: b.id)
+                            return SearchResultFeed(
+                                id: b.id,
+                                name: b.title,
+                                mediaURL: b.mediaURL,
+                                likeCount: count,
+                                promoKind: b.promoKind,
+                                storeId: b.storeId
+                            )
+                        }
                     }
-                } else { self.products = [] }
-
-                if let e = combined.responseDto.events {
-                    self.events = e.map {
-                        EventRow(name: $0.eventName, mediaURL: URL(string: $0.mediaUrl ?? ""), likeCount: $0.like_count)
+                    for await item in group {
+                        if let item { result.append(item) }
                     }
-                } else { self.events = [] }
-
-                log("parsed (combined) -> stores:", stores.count, "products:", products.count, "events:", events.count)
-                return
-            }
-
-            var parsed = false
-
-            if let s = try? JSONDecoder().decode(StoreSearchResponse.self, from: data), s.success {
-                self.stores = s.responseDto.searchResult.map { StoreRow(name: $0.storeName, imgURL: URL(string: $0.imgUrl ?? "")) }
-                parsed = true
-            }
-            if let p = try? JSONDecoder().decode(ProductSearchResponse.self, from: data), p.success {
-                self.products = p.responseDto.searchResult.map {
-                    ProductRow(name: $0.productName, mediaURL: URL(string: $0.mediaUrl ?? ""), likeCount: $0.like_count)
                 }
-                parsed = true
-            }
-            if let e = try? JSONDecoder().decode(EventSearchResponse.self, from: data), e.success {
-                self.events = e.responseDto.searchResult.map {
-                    EventRow(name: $0.eventName, mediaURL: URL(string: $0.mediaUrl ?? ""), likeCount: $0.like_count)
-                }
-                parsed = true
+                return result
             }
 
-            if parsed {
-                log("parsed (single) -> stores:", stores.count, "products:", products.count, "events:", events.count)
-            } else {
-                errorMessage = "응답 파싱 실패"
-                log("parse error: unknown schema")
-            }
+            // 3) 결과 반영
+            self.stores   = foundStores
+            self.products = await enrich(prodBasics)
+            self.events   = await enrich(eventBasics)
+            self.isLoading = false
+
         } catch {
-            errorMessage = error.localizedDescription
-            log("network error:", error.localizedDescription)
+            self.errorMessage = error.localizedDescription
+            self.isLoading = false
         }
     }
 }
