@@ -25,10 +25,10 @@ struct Feed: Identifiable, Codable, Hashable {
     
     var promoKind: PromoKind
     var mediaType: MediaType
-    var title: String //점포명/상품명/이벤트명
+    var title: String
     var prompt: String //AI에 넣을 프롬프트
-    var mediaUrl: URL //사용자가 입력한 사진
-    var body: String //사용자가 입력한 줄글
+    var mediaUrl: URL
+    var body: String
     var createdAt: Date
     
     var isVideo: Bool { mediaType == .video }
