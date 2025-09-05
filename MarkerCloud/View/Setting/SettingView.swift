@@ -159,9 +159,7 @@ struct SettingsView: View {
                 } else if route == .myLiked {
                     MyLikedView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myReview {
-//                    MyReviewListView(
-//                        reviews: sampleReviews
-//                    )
+                    MyReviewListView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 }
             }
         }

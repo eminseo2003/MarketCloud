@@ -1,19 +1,19 @@
-////
-////  ReviewDetailView.swift
-////  MarkerCloud
-////
-////  Created by 이민서 on 8/19/25.
-////
 //
+//  ReviewDetailView.swift
+//  MarkerCloud
+//
+//  Created by 이민서 on 8/19/25.
+//
+
 import SwiftUI
-//
-//struct ReviewDetailView: View {
-//    let feed: Feed
-//    let review: Review
-//    @State private var selectedFeed: Feed? = nil
-//    
-//    var body: some View {
-//        ScrollView {
+
+struct ReviewDetailView: View {
+    let feedId: String
+    let review: Review
+    @State private var selectedFeedId: String? = nil
+    
+    var body: some View {
+        ScrollView {
 //            VStack(spacing: 16) {
 //                Button {
 //                    selectedFeed = feed
@@ -79,23 +79,23 @@ import SwiftUI
 //                )
 //            }
 //            .padding(16)
-//        }
-//        .background(Color(uiColor: .systemGray6).ignoresSafeArea())
-//        .navigationTitle("리뷰 상세")
-//        .navigationBarTitleDisplayMode(.inline)
-//        .navigationDestination(item: $selectedFeed) { feed in
-//            FeedView(feed: feed)
-//                .navigationTitle(feed.title)
-//        }
-//    }
-//    
-//    private func formatDate(_ date: Date) -> String {
-//        let f = DateFormatter()
-//        f.locale = Locale(identifier: "ko_KR")
-//        f.dateFormat = "yyyy년 M월 d일"
-//        return f.string(from: date)
-//    }
-//}
+        }
+        .background(Color(uiColor: .systemGray6).ignoresSafeArea())
+        .navigationTitle("리뷰 상세")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $selectedFeedId) { feedId in
+            //FeedView(feed: feed)
+              //  .navigationTitle(feed.title)
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.dateFormat = "yyyy년 M월 d일"
+        return f.string(from: date)
+    }
+}
 struct LargeReviewImage: View {
     let url: String
     
