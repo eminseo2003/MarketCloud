@@ -10,6 +10,7 @@ import SwiftUI
 struct MoreStoreView: View {
     let searchResultStore: [SearchResultStore]
     let appUser: AppUser?
+    @Binding var selectedMarketID: Int
     
     var body: some View {
         NavigationStack {
@@ -26,32 +27,38 @@ struct MoreStoreView: View {
                 Form {
                     Section(header: Text("점포 목록")) {
                         ForEach(searchResultStore) { store in
-                            //NavigationLink(destination: StoreProfileView(store: dummyStores[0])) {
-                            HStack(spacing: 16) {
-                                if let url = store.imgURL {
-                                    
-                                    AsyncImage(url: url) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 40, height: 40)
-                                            .clipShape(Circle())
-                                    } placeholder: {
-                                        Circle()
-                                            .fill(Color(.systemGray5))
+                            NavigationLink(
+                                destination: StoreProfileView(
+                                    storeId: store.id,
+                                    appUser: appUser,
+                                    selectedMarketID: $selectedMarketID
+                                )
+                            ) {
+                                HStack(spacing: 16) {
+                                    if let url = store.imgURL {
+                                        
+                                        AsyncImage(url: url) { image in
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 40, height: 40)
+                                                .clipShape(Circle())
+                                        } placeholder: {
+                                            Circle()
+                                                .fill(Color(.systemGray5))
+                                                .frame(width: 40, height: 40)
+                                        }
+                                    } else {
+                                        Circle().fill(Color(.systemGray5))
+                                            .overlay(Image(systemName: "photo"))
                                             .frame(width: 40, height: 40)
                                     }
-                                } else {
-                                    Circle().fill(Color(.systemGray5))
-                                        .overlay(Image(systemName: "photo"))
-                                        .frame(width: 40, height: 40)
+                                    Text(store.name)
+                                        .font(.body)
                                 }
-                                Text(store.name)
-                                    .font(.body)
+                                .padding(.vertical, 4)
                             }
-                            .padding(.vertical, 4)
                         }
-                        
                     }
                 }
             }

@@ -111,7 +111,7 @@ struct SearchResultView: View {
         .task { await vm.fetch(keyword: keyword) }
         .navigationDestination(item: $route) { route in
             if route == .moreStore {
-                MoreStoreView(searchResultStore: vm.stores, appUser: appUser)
+                MoreStoreView(searchResultStore: vm.stores, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else if route == .moreProduct {
                 MoreProductView(searchResultProduct: vm.products, appUser: appUser)
             } else if route == .moreEvent {
