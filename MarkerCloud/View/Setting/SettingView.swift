@@ -155,7 +155,7 @@ struct SettingsView: View {
                 } else if route == .myEvent {
                     MyEventView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .followingStore {
-                    //MyFollowingView()
+                    MyFollowingView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myLiked {
                     //MyLikedView(feedList: dummyFeed)
                 } else if route == .myReview {

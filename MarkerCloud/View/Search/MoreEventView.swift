@@ -46,9 +46,6 @@ struct MoreEventView: View {
                     }
                     .padding(.horizontal)
                 }
-    //            .navigationDestination(item: $selectedEvent) { event in
-    //                FeedView(feed: event)
-    //            }
                 .navigationTitle(Text("이벤트 더보기"))
             }
             
