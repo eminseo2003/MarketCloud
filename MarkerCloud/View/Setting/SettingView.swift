@@ -147,8 +147,12 @@ struct SettingsView: View {
             }
             .navigationDestination(item: $route) { route in
                 if route == .changeProfile {
-                    
-                } else if route == .myStore {
+                        if let uid = appUser?.id ?? appUser?.id {
+                            ChangeProfileView(userId: uid)
+                        } else {
+                            Text("로그인이 필요합니다.")
+                        }
+                    } else if route == .myStore {
                     MyStoreView(selectedMarketID: $selectedMarketID, appUser: appUser)
                 } else if route == .myProduct {
                     MyProductView(selectedMarketID: $selectedMarketID, appUser: appUser)
