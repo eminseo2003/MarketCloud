@@ -113,9 +113,9 @@ struct SearchResultView: View {
             if route == .moreStore {
                 MoreStoreView(searchResultStore: vm.stores, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else if route == .moreProduct {
-                MoreProductView(searchResultProduct: vm.products, appUser: appUser)
+                MoreProductView(searchResultProduct: vm.products, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else if route == .moreEvent {
-                MoreEventView(searchResultEvent: vm.events, appUser: appUser)
+                MoreEventView(searchResultEvent: vm.events, appUser: appUser, selectedMarketID: $selectedMarketID)
             } else if route == .storeDetail {
                 if let storeId = pushStoreId {
                     StoreProfileView(storeId: storeId, appUser: appUser, selectedMarketID: $selectedMarketID)
