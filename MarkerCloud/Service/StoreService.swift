@@ -124,46 +124,49 @@ enum StoreService {
         }
     }
     // storeId로 weekdayStart만 가져오기
-    static func fetchweekdayStart(storeId: String) async -> Date? {
+    static func fetchWeekdayStart(storeId: String) async -> Date? {
         do {
             let snap = try await db.collection("stores").document(storeId).getDocument()
-            guard let data = snap.data() else { return nil }
-            return data["weekdayStart"] as? Date
+            return (snap.get("weekdayStart") as? Timestamp)?.dateValue()
+                ?? (snap.get("weekdayStart") as? Date) // 혹시 Date로 저장된 경우 대비
         } catch {
-            print("[StoreService] fetchweekdayStart error:", error)
+            print("[StoreService] fetchWeekdayStart error:", error)
             return nil
         }
     }
+
     // storeId로 weekdayEnd만 가져오기
-    static func fetchweekdayEnd(storeId: String) async -> Date? {
+    static func fetchWeekdayEnd(storeId: String) async -> Date? {
         do {
             let snap = try await db.collection("stores").document(storeId).getDocument()
-            guard let data = snap.data() else { return nil }
-            return data["weekdayEnd"] as? Date
+            return (snap.get("weekdayEnd") as? Timestamp)?.dateValue()
+                ?? (snap.get("weekdayEnd") as? Date)
         } catch {
-            print("[StoreService] fetchweekdayEnd error:", error)
+            print("[StoreService] fetchWeekdayEnd error:", error)
             return nil
         }
     }
+
     // storeId로 weekendStart만 가져오기
-    static func fetchweekendStart(storeId: String) async -> Date? {
+    static func fetchWeekendStart(storeId: String) async -> Date? {
         do {
             let snap = try await db.collection("stores").document(storeId).getDocument()
-            guard let data = snap.data() else { return nil }
-            return data["weekendStart"] as? Date
+            return (snap.get("weekendStart") as? Timestamp)?.dateValue()
+                ?? (snap.get("weekendStart") as? Date)
         } catch {
-            print("[StoreService] fetchweekendStart error:", error)
+            print("[StoreService] fetchWeekendStart error:", error)
             return nil
         }
     }
+
     // storeId로 weekendEnd만 가져오기
-    static func fetchwweekendEnd(storeId: String) async -> Date? {
+    static func fetchWeekendEnd(storeId: String) async -> Date? {
         do {
             let snap = try await db.collection("stores").document(storeId).getDocument()
-            guard let data = snap.data() else { return nil }
-            return data["weekendEnd"] as? Date
+            return (snap.get("weekendEnd") as? Timestamp)?.dateValue()
+                ?? (snap.get("weekendEnd") as? Date)
         } catch {
-            print("[StoreService] fetchweekendEnd error:", error)
+            print("[StoreService] fetchWeekendEnd error:", error)
             return nil
         }
     }
@@ -308,10 +311,10 @@ enum StoreService {
         async let marketId  = fetchMarketId(storeId: storeId)
         async let categoryId  = fetchCategoryId(storeId: storeId)
         async let phoneNumber  = fetchPhoneNumber(storeId: storeId)
-        async let weekdayStart  = fetchweekdayStart(storeId: storeId)
-        async let weekdayEnd  = fetchweekdayEnd(storeId: storeId)
-        async let weekendStart  = fetchweekendStart(storeId: storeId)
-        async let weekendEnd  = fetchwweekendEnd(storeId: storeId)
+        async let weekdayStart  = fetchWeekdayStart(storeId: storeId)
+        async let weekdayEnd  = fetchWeekdayEnd(storeId: storeId)
+        async let weekendStart  = fetchWeekendStart(storeId: storeId)
+        async let weekendEnd  = fetchWeekendEnd(storeId: storeId)
         async let address  = fetchaddress(storeId: storeId)
         async let storeDescript  = fetchstoreDescript(storeId: storeId)
         async let paymentMethods  = fetchPaymentMethods(storeId: storeId)

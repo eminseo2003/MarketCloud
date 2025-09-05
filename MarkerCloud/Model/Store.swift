@@ -7,8 +7,6 @@
 
 import Foundation
 
-import Foundation
-
 enum StoreCategory: Int, Codable, CaseIterable, Identifiable, Hashable {
     case restaurant = 1
     case sideDishes = 2

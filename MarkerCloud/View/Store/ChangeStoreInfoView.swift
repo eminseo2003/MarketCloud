@@ -198,28 +198,67 @@ struct ChangeStoreInfoView: View {
         .task(id: storeId) {
             await storeVm.load(storeId: storeId)
         }
-//        .navigationDestination(item: $stoereroute) { r in
-//            if stoereroute == .nameroute {
-//                ChangeName(name: store.storeName)
-//            } else if stoereroute == .categoryroute {
-//                ChangeCategory(category: store.category?.rawValue)
-//            } else if stoereroute == .phoneNumberroute {
-//                ChangePhoneNumber(phoneNumber: store.tel)
-//            } else if stoereroute == .weekdayHoursroute {
-//                ChangeWeekdayHour(start: store.dayOpenTime, end: store.dayCloseTime)
-//            } else if stoereroute == .weekendHoursroute {
-//                ChangeWeekendHour(start: store.weekendOpenTime, end: store.weekendCloseTime)
-//            } else if stoereroute == .addressroute {
-//                ChangeRoadAddress(road: store.address)
-//            } else if stoereroute == .paymentMethodroute {
-//                ChangePaymentMethod(paymentOptions: store.paymentMethods)
-//            } else if stoereroute == .aboutroute {
-//                ChangeAbout(about: store.description)
-//            }
-//        }.background(Color(.systemGray6))
-        .navigationDestination(item: $pushPromotion) { promo in
-            PromotionMethodSelectView(promotion: promo, appUser: appUser, selectedMarketID: $selectedMarketID)
-        }
+        .navigationDestination(item: $stoereroute) { r in
+            if stoereroute == .nameroute {
+                ChangeName(name: storeVm.storeName) { newName in
+                    Task { await storeVm.updateName(storeId: storeId, newName: newName) }
+                }
+            } else if stoereroute == .categoryroute {
+                ChangeCategory(
+                    current: storeVm.categoryId.flatMap(StoreCategory.init(rawValue:))
+                ) { selected in
+                    Task {
+                        await storeVm.updateCategory(
+                            storeId: storeId,
+                            categoryId: selected.rawValue
+                        )
+                    }
+                }
+            } else if stoereroute == .phoneNumberroute {
+                ChangePhoneNumber(current: storeVm.phoneNumber) { newPhone in
+                    Task {
+                        await storeVm.updatePhoneNumber(
+                            storeId: storeId,
+                            phone: newPhone)
+                    }
+                }
+            } else if stoereroute == .weekdayHoursroute {
+                ChangeWeekdayHour(
+                        start: Binding(get: { storeVm.weekdayStart }, set: { storeVm.weekdayStart = $0 }),
+                        end:   Binding(get: { storeVm.weekdayEnd   }, set: { storeVm.weekdayEnd   = $0 })
+                    ) {
+                        Task {
+                            await storeVm.updateWeekdayHours(
+                                storeId: storeId,
+                                start: storeVm.weekdayStart,
+                                end:   storeVm.weekdayEnd
+                            )
+                        }
+                    }
+            } else if stoereroute == .weekendHoursroute {
+                ChangeWeekendHour(
+                        start: Binding(get: { storeVm.weekendStart }, set: { storeVm.weekendStart = $0 }),
+                        end:   Binding(get: { storeVm.weekendEnd   }, set: { storeVm.weekendEnd   = $0 })
+                    ) {
+                        Task {
+                            await storeVm.updateWeekEndHours(
+                                storeId: storeId,
+                                start: storeVm.weekendStart,
+                                end:   storeVm.weekendEnd
+                            )
+                        }
+                    }
+            } else if stoereroute == .addressroute {
+                //ChangeRoadAddress(road: store.address)
+            } else if stoereroute == .paymentMethodroute {
+                //ChangePaymentMethod(paymentOptions: store.paymentMethods)
+            } else if stoereroute == .aboutroute {
+                //ChangeAbout(about: store.description)
+            }
+        }.background(Color(.systemGray6))
+            .navigationDestination(item: $pushPromotion) { promo in
+                PromotionMethodSelectView(promotion: promo, appUser: appUser, selectedMarketID: $selectedMarketID)
+            }
     }
     private func clean(_ s: String?) -> String {
         let t = s?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -232,7 +271,7 @@ struct ChangeStoreInfoView: View {
         f.dateFormat = "HH:mm"
         return f
     }()
-
+    
     private func timeRangeText(_ start: Date?, _ end: Date?) -> String {
         switch (start, end) {
         case (nil, nil): return "미등록"
@@ -241,7 +280,7 @@ struct ChangeStoreInfoView: View {
         case (let s?, let e?): return "\(hhmmFormatter.string(from: s)) ~ \(hhmmFormatter.string(from: e))"
         }
     }
-
+    
 }
 
 private struct RowButton: View {
