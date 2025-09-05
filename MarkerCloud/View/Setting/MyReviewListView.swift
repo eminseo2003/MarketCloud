@@ -82,7 +82,7 @@ struct MyReviewListView: View {
         .background(Color(uiColor: .systemGray6).ignoresSafeArea())
         
         .navigationDestination(item: $selectedReview) { review in
-            ReviewDetailView(feedId: review.feedId, review: review)
+            ReviewDetailView(feedId: review.feedId, review: review, selectedMarketID: $selectedMarketID, appUser: appUser)
         }
         .task {
             if let uid = appUser?.id ?? appUser?.id { vm.start(userId: uid) }
@@ -90,7 +90,10 @@ struct MyReviewListView: View {
         .onDisappear { vm.stop() }
     }
     private func formatDate(_ date: Date?) -> String {
-            guard let date else { return "" }
-            return date.formatted(date: .abbreviated, time: .shortened)
-        }
+        guard let date else { return "" }
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.dateFormat = "yyyy년 M월 d일"
+        return f.string(from: date)
+    }
 }
